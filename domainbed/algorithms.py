@@ -73,7 +73,8 @@ ALGORITHMS = [
     'IB_IRM',
     'CAD',
     'CondCAD',
-    'Testing'
+    'Testing',
+    'RandConv'
 ]
 
 
@@ -124,6 +125,7 @@ class ERM(Algorithm):
         for p in self.classifier.parameters():
             print(p)
         self.network = nn.Sequential(self.featurizer, self.classifier)
+        
         self.optimizer = torch.optim.Adam(
             self.network.parameters(),
             lr=self.hparams["lr"],
@@ -638,6 +640,45 @@ class VREx(ERM):
         self.update_count += 1
         return {'loss': loss.item(), 'nll': nll.item(),
                 'penalty': penalty.item()}
+
+class RandConv(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(Mixup, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        k = torch.randint(0, 4, (1,)).item()
+        self.ks = 2*k +1
+        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+
+    def randomize_kernel(self,input_shape):
+        k = torch.randint(0, 4, (1,)).item()
+        self.ks = 2*k +1
+        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)    
+
+    def randomize(self):
+        new_weight = torch.zeros_like(self.rand_conv.weight)
+        with torch.no_grad():
+            nn.init.kaiming_normal_(new_weight, nonlinearity='conv2d')
+        self.rand_conv.weight = nn.Parameter(new_weight.detach()) 
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+        self.randomize()
+        all_x_out = self.rand_conv(all_x)
+        
+        loss = F.cross_entropy(self.predict(all_x), all_y)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return {'loss': loss.item()}    
+
+
+        
+
+
 
 class Mixup(ERM):
     """

@@ -11,8 +11,8 @@ import uuid
 import json
 import os
 
-from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
-from wilds.datasets.fmow_dataset import FMoWDataset
+# from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
+# from wilds.datasets.fmow_dataset import FMoWDataset
 
 
 # utils #######################################################################
@@ -27,7 +27,7 @@ def stage_path(data_dir, name):
 
 
 def download_and_extract(url, dst, remove=True):
-    gdown.download(url, dst, quiet=False)
+    gdown.download(url, dst, quiet=False, resume=True)
 
     if dst.endswith(".tar.gz"):
         tar = tarfile.open(dst, "r:gz")
@@ -161,6 +161,29 @@ def download_domain_net(data_dir):
             except OSError:
                 pass
 
+# ImageNet-C ###################################################################
+
+def download_imagenet_C(data_dir):
+    
+    full_path = stage_path(data_dir, "imagenet_C")
+
+    urls = [
+        "https://zenodo.org/record/2235448/files/blur.tar?download=1",
+        "https://zenodo.org/record/2235448/files/digital.tar?download=1",
+        "https://zenodo.org/record/2235448/files/noise.tar?download=1",
+        "https://zenodo.org/record/2235448/files/weather.tar?download=1",
+    ]
+    dest = ["blur.tar", "digital.tar","noise.tar","weather.tar"]
+
+    for url,dest in zip(urls,dest):
+        download_and_extract(url, os.path.join(full_path, dest))
+
+    # with open("domainbed/misc/domain_net_duplicates.txt", "r") as f:
+    #     for line in f.readlines():
+    #         try:
+    #             os.remove(os.path.join(full_path, line.strip()))
+    #         except OSError:
+    #             pass
 
 # TerraIncognita ##############################################################
 
@@ -266,7 +289,8 @@ if __name__ == "__main__":
     # download_mnist(args.data_dir)
     # download_pacs(args.data_dir)
     # download_office_home(args.data_dir)
-    download_domain_net(args.data_dir)
+    #download_domain_net(args.data_dir)
+    download_imagenet_C(args.data_dir)
     # download_vlcs(args.data_dir)
     # download_terra_incognita(args.data_dir)
     # download_sviro(args.data_dir)
