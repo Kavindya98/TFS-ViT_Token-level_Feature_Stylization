@@ -109,7 +109,7 @@ def all_test_env_sinlge_source(n):
         yield [j for j in rng_list if j!=i]
 
 def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparams, steps, checkpoint_freq,
-    data_dir, task, holdout_fraction, single_test_envs, hparams, which_envs):
+    data_dir, task, holdout_fraction, single_test_envs,single_domain_gen, hparams, which_envs):
     args_list = []
     for trial_seed in range(n_trials):
         for dataset in dataset_names:
@@ -120,7 +120,12 @@ def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparam
                     else:
                         all_test_envs = [
                             [i] for i in range(datasets.num_environments(dataset))]
-
+                elif single_domain_gen:
+                    all_test_envs=[]
+                    for i in range(datasets.num_environments(dataset)):
+                        k = list(range(datasets.num_environments(dataset)))
+                        k.remove(i)
+                        all_test_envs.append(k)
                 else:
                     # all_test_envs = all_test_env_combinations(datasets.num_environments(dataset))
                     # print("++ performing single source domain generalization...")
@@ -178,6 +183,7 @@ if __name__ == "__main__":
     parser.add_argument('--checkpoint_freq', type=int, default=None)
     parser.add_argument('--holdout_fraction', type=float, default=0.2)
     parser.add_argument('--skip_confirmation', action='store_true')
+    parser.add_argument('--single_domain_gen', action='store_true')
     parser.add_argument('--which_envs', nargs='+', type=int, default=None)
     args = parser.parse_args()
 
@@ -195,6 +201,7 @@ if __name__ == "__main__":
         task=args.task,
         holdout_fraction=args.holdout_fraction,
         single_test_envs=args.single_test_envs,
+        single_domain_gen=args.single_domain_gen,
         hparams=args.hparams,
         which_envs=args.which_envs,
     )
