@@ -108,6 +108,28 @@ def all_test_env_sinlge_source(n):
     for i in rng_list:
         yield [j for j in rng_list if j!=i]
 
+
+def single_domain_gen_train_env(dataset):
+    all_test_envs=[]
+    test_envs = list(range(datasets.num_environments(dataset)))
+    if dataset == "PACS":
+        test_envs.remove(2)
+        all_test_envs.append(test_envs)
+    elif dataset == "DomainNet":
+        test_envs.remove(4)
+        all_test_envs.append(test_envs)
+    elif dataset == "DIGITS":
+        test_envs.remove(0)
+        all_test_envs.append(test_envs)
+    else:
+        for i in range(datasets.num_environments(dataset)):
+            k = list(range(datasets.num_environments(dataset)))
+            k.remove(i)
+            all_test_envs.append(k)
+
+    return all_test_envs    
+
+
 def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparams, steps, checkpoint_freq,
     data_dir, task, holdout_fraction, single_test_envs,single_domain_gen, hparams, which_envs):
     args_list = []
@@ -118,14 +140,10 @@ def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparam
                     if which_envs:
                         all_test_envs = [[int(i)] for i in which_envs]
                     else:
-                        all_test_envs = [
-                            [i] for i in range(datasets.num_environments(dataset))]
+                        all_test_envs = [[0]]
+                            # [i] for i in range(datasets.num_environments(dataset))]
                 elif single_domain_gen:
-                    all_test_envs=[]
-                    for i in range(datasets.num_environments(dataset)):
-                        k = list(range(datasets.num_environments(dataset)))
-                        k.remove(i)
-                        all_test_envs.append(k)
+                    all_test_envs = single_domain_gen_train_env(dataset)
                 else:
                     # all_test_envs = all_test_env_combinations(datasets.num_environments(dataset))
                     # print("++ performing single source domain generalization...")

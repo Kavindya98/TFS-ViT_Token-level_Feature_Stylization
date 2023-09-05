@@ -118,6 +118,7 @@ class ERM(Algorithm):
         super(ERM, self).__init__(input_shape, num_classes, num_domains,
                                   hparams)
         self.featurizer = networks.Featurizer(input_shape, self.hparams)
+        print("moving to the classifier")
         self.classifier = networks.Classifier(
             self.featurizer.n_outputs,
             num_classes,
@@ -451,6 +452,7 @@ class AbstractDANN(Algorithm):
 
         # Algorithms
         self.featurizer = networks.Featurizer(input_shape, self.hparams)
+        
         self.classifier = networks.Classifier(
             self.featurizer.n_outputs,
             num_classes,
@@ -644,41 +646,90 @@ class VREx(ERM):
 class RandConv(ERM):
 
     def __init__(self, input_shape, num_classes, num_domains, hparams):
-        super(Mixup, self).__init__(input_shape, num_classes, num_domains,
+        super(RandConv, self).__init__(input_shape, num_classes, num_domains,
                                     hparams)
-        k = torch.randint(0, 4, (1,)).item()
-        self.ks = 2*k +1
+        
+        self.ks = 3
+        self.input_shape = input_shape
+        self.identity_prob = self.hparams["identity_prob"]
         self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        
 
-    def randomize_kernel(self,input_shape):
+    def randomize_kernel(self):
         k = torch.randint(0, 4, (1,)).item()
         self.ks = 2*k +1
-        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)    
+        self.rand_conv =  nn.Conv2d(in_channels=self.input_shape[0], out_channels=self.input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        #self.rand_conv.to('cuda')
+        #print("randomized kernel with size: ",self.ks)    
 
     def randomize(self):
         new_weight = torch.zeros_like(self.rand_conv.weight)
         with torch.no_grad():
             nn.init.kaiming_normal_(new_weight, nonlinearity='conv2d')
-        self.rand_conv.weight = nn.Parameter(new_weight.detach()) 
+        self.rand_conv.weight = nn.Parameter(new_weight.detach())
+        # print("randomized weights")
+
+    def mixing(self,all_x,all_x_out):
+        alpha= random.random()  
+        all_x_out = alpha*all_x_out + (1-alpha)*all_x
+        # print("mixed with alpha: ",alpha)
+        return all_x_out   
+    
+    def randConv_Op(self, all_x):
+        if not (self.identity_prob > 0 and torch.rand(1) < self.identity_prob):
+            output = self.rand_conv(all_x)
+            # print("applied random conv")
+            if self.hparams["mixing"]:
+                output = self.mixing(all_x,output)
+
+        else:
+            output=all_x
+        return output 
+
+    def rand_conv_module_cuda(self):
+        self.rand_conv.to('cuda')       
+
+    def invariant_loss(self, all_x, out):
+        self.randomize()
+        output1 = self.predict(self.randConv_Op(all_x))
+        self.randomize()
+        output2 = self.predict(self.randConv_Op(all_x))
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+                                out, dim=1), F.softmax(
+                                output1, dim=1), F.softmax(
+                                output2, dim=1)
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        #print("calculate inv_loss: ",inv_loss)
+        return inv_loss
 
     def update(self, minibatches, unlabeled=None):
         all_x = torch.cat([x for x, y in minibatches])
         all_y = torch.cat([y for x, y in minibatches])
-        self.randomize()
-        all_x_out = self.rand_conv(all_x)
         
-        loss = F.cross_entropy(self.predict(all_x), all_y)
+        if self.hparams["randomize_kernel"]:
+            self.randomize_kernel()
+        self.randomize()
+        self.rand_conv_module_cuda()
+        all_x = self.randConv_Op(all_x)
+        out = self.predict(all_x)
+        loss = F.cross_entropy(out, all_y)
+
+        if self.hparams["invariant_loss"]:
+            inv_loss = self.invariant_loss(all_x,out)
+        else:
+            inv_loss=0
+
+        loss += inv_loss*self.hparams["consistency_loss_w"]    
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
         return {'loss': loss.item()}    
-
-
-        
-
-
 
 class Mixup(ERM):
     """

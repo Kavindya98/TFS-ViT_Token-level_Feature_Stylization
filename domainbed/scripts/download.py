@@ -26,18 +26,20 @@ def stage_path(data_dir, name):
     return full_path
 
 
-def download_and_extract(url, dst, remove=True):
-    gdown.download(url, dst, quiet=False, resume=True)
+def download_and_extract(url, dst, remove=False):
+    gdown.download(url, dst, quiet=False, resume=False)
+
+    print("Finished downloading")
 
     if dst.endswith(".tar.gz"):
         tar = tarfile.open(dst, "r:gz")
         tar.extractall(os.path.dirname(dst))
         tar.close()
 
-    if dst.endswith(".tar"):
-        tar = tarfile.open(dst, "r:")
-        tar.extractall(os.path.dirname(dst))
-        tar.close()
+    # if dst.endswith(".tar"):
+    #     tar = tarfile.open(dst, "r:")
+    #     tar.extractall(os.path.dirname(dst))
+    #     tar.close()
 
     if dst.endswith(".zip"):
         zf = ZipFile(dst, "r")
@@ -175,15 +177,11 @@ def download_imagenet_C(data_dir):
     ]
     dest = ["blur.tar", "digital.tar","noise.tar","weather.tar"]
 
-    for url,dest in zip(urls,dest):
-        download_and_extract(url, os.path.join(full_path, dest))
-
-    # with open("domainbed/misc/domain_net_duplicates.txt", "r") as f:
-    #     for line in f.readlines():
-    #         try:
-    #             os.remove(os.path.join(full_path, line.strip()))
-    #         except OSError:
-    #             pass
+    # for url,dest in zip(urls,dest):
+    #     download_and_extract(url, os.path.join(full_path, dest))
+    # download_and_extract(urls[2], os.path.join(full_path, dest[2]))
+    download_and_extract(urls[3], os.path.join(full_path, dest[3]))
+    
 
 # TerraIncognita ##############################################################
 

@@ -197,6 +197,9 @@ if __name__ == "__main__":
 
     algorithm.to(device)
 
+    # if args.algorithm == 'RandConv':
+    #     algorithm.rand_conv_module_cuda()
+
     train_minibatches_iterator = zip(*train_loaders)
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])
@@ -253,7 +256,7 @@ if __name__ == "__main__":
 
         for key, val in step_vals.items():
             checkpoint_vals[key].append(val)
-
+        # print("Training done")
         if (step % checkpoint_freq == 0) or (step == n_steps - 1):
             results = {
                 'step': step,
@@ -273,6 +276,7 @@ if __name__ == "__main__":
                         temp_acc += acc
                         temp_count += 1
                 results[name + '_acc'] = acc
+            # print("Validation done")    
             if args.save_best_model:
                 val_acc = temp_acc / (temp_count * 1.0)
                 if val_acc >= best_val_acc:
@@ -317,6 +321,7 @@ if __name__ == "__main__":
 
             if args.save_model_every_checkpoint:
                 save_checkpoint(f'model_step{step}.pkl')
+        # print("One iteration done")
 
     save_checkpoint('model.pkl')
     # if (args.save_best_model):

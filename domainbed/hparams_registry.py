@@ -28,13 +28,14 @@ def _hparams(algorithm, dataset, random_seed):
     # Unconditional hparam definitions.
 
     _hparam('data_augmentation', True, lambda r: True)
-    _hparam('resnet18', False, lambda r: False)
+    _hparam('resnet18', True, lambda r: False)
     _hparam('resnet_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
     _hparam('class_balanced', False, lambda r: False)
     _hparam('backbone',"DeitSmall",lambda r:"DeitSmall")
     # TODO: nonlinear classifiers disabled
     _hparam('nonlinear_classifier', False,
             lambda r: bool(r.choice([False, False])))
+    _hparam('digits', True, lambda r: True)
 
     # Algorithm-specific hparam definitions. Each block of code below
     # corresponds to exactly one algorithm.
@@ -48,8 +49,6 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('mlp_width', 256, lambda r: int(2 ** r.uniform(6, 10)))
         _hparam('mlp_depth', 3, lambda r: int(r.choice([3, 4, 5])))
         _hparam('mlp_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
-
-
 
     elif algorithm == 'SDViT':
         _hparam('RB_loss_weight', 0.5, lambda r: r.choice([0.5, 0.1, 0.2]))
@@ -107,6 +106,13 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('lambda', 1000., lambda r: 10 ** r.uniform(1., 4.))
         _hparam('penalty_anneal_iters', 1500, lambda r: int(r.uniform(0., 5000.)))
         _hparam('ema', 0.95, lambda r: r.uniform(0.90, 0.99))
+
+    elif algorithm == 'RandConv':
+        _hparam('identity_prob', 0.0, lambda r: r.choice([0.0, 0.5]))
+        _hparam('randomize_kernel', True, lambda r: True)
+        _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
+        _hparam('invariant_loss', True, lambda r: True)
+        _hparam('consistency_loss_w', 10.0, lambda r: r.choice([10.0, 5.0]))
 
     # Dataset-and-algorithm-specific hparam definitions. Each block of code
     # below corresponds to exactly one hparam. Avoid nested conditionals.

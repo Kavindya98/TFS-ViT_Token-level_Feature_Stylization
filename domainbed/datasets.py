@@ -6,7 +6,7 @@ from PIL import Image, ImageFile
 from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
-from torchvision.datasets import MNIST, ImageFolder
+from torchvision.datasets import MNIST, ImageFolder, MNISTM, SYN, USPS, SVHN
 from torchvision.transforms.functional import rotate
 
 # from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
@@ -21,6 +21,7 @@ DATASETS = [
     # Small images
     "ColoredMNIST",
     "RotatedMNIST",
+    "DIGITS",
     # Big images
     "VLCS",
     "PACS",
@@ -42,6 +43,27 @@ def get_dataset_class(dataset_name):
 #me# return the number of available domains
 def num_environments(dataset_name):
     return len(get_dataset_class(dataset_name).ENVIRONMENTS)
+
+class GreyToColor(object):
+    """Convert Grey Image label to binary
+    """
+
+    def __call__(self, image):
+        if len(image.size()) == 3 and image.size(0) == 1:
+            return image.repeat([3, 1, 1])
+        elif len(image.size())== 2:
+            return
+        else:
+            return image
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
+    
+class IdentityTransform():
+    """do nothing"""
+
+    def __call__(self, image):
+        return image    
 
 
 class MultipleDomainDataset:
@@ -96,6 +118,7 @@ class MultipleEnvironmentMNIST(MultipleDomainDataset):
 
         original_labels = torch.cat((original_dataset_tr.targets,
                                      original_dataset_te.targets))
+        
 
         shuffle = torch.randperm(len(original_images))
 
@@ -115,7 +138,7 @@ class MultipleEnvironmentMNIST(MultipleDomainDataset):
 
 class ColoredMNIST(MultipleEnvironmentMNIST):
     ENVIRONMENTS = ['+90%', '+80%', '-90%']
-
+   
     def __init__(self, root, test_envs, hparams):
         super(ColoredMNIST, self).__init__(root, [0.1, 0.2, 0.9],
                                          self.color_dataset, (2, 28, 28,), 2)
@@ -174,7 +197,58 @@ class RotatedMNIST(MultipleEnvironmentMNIST):
         y = labels.view(-1)
 
         return TensorDataset(x, y)
+    
+class DIGITS(MultipleDomainDataset):
+    ENVIRONMENTS = ['MNIST', 'MNIST-M', 'SVHN','USPS','SYN']
+    INPUT_SHAPE = (3, 32, 32)
+    N_STEPS = 10000           
+    CHECKPOINT_FREQ = 250
+    def __init__(self, root, test_envs, hparams):
+        root = os.path.join(root, "digits/")
+        super().__init__()
+        self.datasets = []
 
+        transform = transforms.Compose([
+            transforms.Resize((32,32)),
+            transforms.ToTensor(),
+            GreyToColor(),
+            transforms.Normalize(
+                mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        ])
+
+        #loading MNIST DATASET
+        original_dataset_tr = MNIST(root, train=True, transform=transform, download=True)
+        original_dataset_te = MNIST(root, train=False, transform=transform, download=True)
+
+        original_dataset_tr.data = torch.cat((original_dataset_te.data,original_dataset_tr.data))
+        original_dataset_tr.targets = torch.cat((original_dataset_te.targets,original_dataset_tr.targets))
+        
+        self.datasets.append(original_dataset_tr)
+
+        #loading MNIST-M DATASET
+        original_dataset_te = MNISTM(root, train=False, transform=transform, download=True)
+
+        self.datasets.append(original_dataset_te)
+
+        #loading SVHN
+        original_dataset_te = SVHN(root, split="train", transform=transform, download=True)
+
+        self.datasets.append(original_dataset_te)
+
+        #loading USPS
+        original_dataset_te = USPS(root, train=False, transform=transform, download=True)
+
+        self.datasets.append(original_dataset_te)
+
+        #loading SYN
+        original_dataset_te = SYN(root, train=False, transform=transform, download=True)
+
+        self.datasets.append(original_dataset_te)
+
+        self.input_shape = self.INPUT_SHAPE
+        self.num_classes = 10
+
+        
 
 class MultipleEnvironmentImageFolder(MultipleDomainDataset):
     def __init__(self, root, test_envs, augment, hparams):
@@ -257,6 +331,7 @@ class PACS(MultipleEnvironmentImageFolder):
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class DomainNet(MultipleEnvironmentImageFolder):
+    N_STEPS = 8000
     CHECKPOINT_FREQ = 1000
     ENVIRONMENTS = ["clip", "info", "paint", "quick", "real", "sketch"]
     def __init__(self, root, test_envs, hparams):

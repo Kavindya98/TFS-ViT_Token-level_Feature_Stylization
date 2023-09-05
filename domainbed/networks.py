@@ -225,6 +225,29 @@ class ContextNet(nn.Module):
     def forward(self, x):
         return self.context_net(x)
 
+class LeNet(nn.Module):
+    def __init__(self, input_shape):
+        super(LeNet, self).__init__()
+        self.le_net = nn.Sequential(
+            nn.Conv2d(3, 64, 5),
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(64, 128, 5),
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),     
+        )
+        self.classifier_half = self.classifier = nn.Sequential(
+            nn.Linear(128 * 5 * 5, 1024),
+            nn.ReLU(True),
+            nn.Linear(1024, 1024),
+            nn.ReLU(True)
+        )
+        self.n_outputs = 1024
+
+    def forward(self, x):
+        x = self.le_net(x)
+        x = self.classifier_half(x.view(x.size(0), -1))
+        return x    
 
 def Featurizer(input_shape, hparams):
     """Auto-select an appropriate featurizer for the given input shape."""
@@ -232,7 +255,9 @@ def Featurizer(input_shape, hparams):
         return MLP(input_shape[0], hparams["mlp_width"], hparams)
     elif input_shape[1:3] == (28, 28):
         return MNIST_CNN(input_shape)
-    elif input_shape[1:3] == (32, 32):
+    elif input_shape[1:3] == (32, 32) and hparams["digits"]:
+        return LeNet(input_shape)
+    elif input_shape[1:3] == (32, 32) and not hparams["digits"]:
         return wide_resnet.Wide_ResNet(input_shape, 16, 2, 0.)
     elif input_shape[1:3] == (224, 224):
 

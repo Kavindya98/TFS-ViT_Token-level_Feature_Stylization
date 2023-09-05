@@ -65,6 +65,7 @@ def gpu_launcher_2(commands):
                 expoo="export"
                 new_proc = subprocess.Popen(
                     f'CUDA_VISIBLE_DEVICES={gpu_idx+2} {cmd}', shell=True)
+                print('CUDA_VISIBLE_DEVICES: ',gpu_idx+2)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
@@ -90,7 +91,8 @@ def gpu_launcher_1(commands):
                 cmd = commands.pop(0)
                 expoo="export"
                 new_proc = subprocess.Popen(
-                    f'CUDA_VISIBLE_DEVICES={gpu_idx} {cmd}', shell=True)
+                    f'CUDA_VISIBLE_DEVICES={gpu_idx+1} {cmd}', shell=True)
+                print('CUDA_VISIBLE_DEVICES: ',gpu_idx+1)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
