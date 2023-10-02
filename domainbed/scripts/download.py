@@ -181,7 +181,24 @@ def download_imagenet_C(data_dir):
     #     download_and_extract(url, os.path.join(full_path, dest))
     # download_and_extract(urls[2], os.path.join(full_path, dest[2]))
     download_and_extract(urls[3], os.path.join(full_path, dest[3]))
-    
+
+def download_imagenet_9(data_dir):
+    # Original URL: http://ai.bu.edu/M3SDA/
+    full_path = stage_path(data_dir, "ImageNet_9")
+
+    URL0 = "https://dl.dropboxusercontent.com/s/"
+    file = [
+        "4hnkbvxastpcgz2/mixed_next.tar.gz",
+        "cto15ceadgraur2/mixed_rand.tar.gz",
+        "f2525w5aqq67kk0/mixed_same.tar.gz",
+        "0v6w9k7q7i1ytvr/no_fg.tar.gz",
+        "alrf3jo8yyxzyrn/only_fg.tar.gz",
+        "0vv2qsc4ywb4z5v/original.tar.gz"
+    ]
+
+    for files in file:
+        url = URL0 + files
+        download_and_extract(url, os.path.join(full_path, url.split("/")[-1]))
 
 # TerraIncognita ##############################################################
 
@@ -285,10 +302,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # download_mnist(args.data_dir)
-    # download_pacs(args.data_dir)
+    download_imagenet_9(args.data_dir)
     # download_office_home(args.data_dir)
-    #download_domain_net(args.data_dir)
-    download_imagenet_C(args.data_dir)
+    #
+    # download_domain_net(args.data_dir)
+    #download_imagenet_C(args.data_dir)
     # download_vlcs(args.data_dir)
     # download_terra_incognita(args.data_dir)
     # download_sviro(args.data_dir)

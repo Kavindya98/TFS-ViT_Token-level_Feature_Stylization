@@ -6,9 +6,9 @@ from PIL import Image, ImageFile
 from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
-from torchvision.datasets import MNIST, ImageFolder, MNISTM, SYN, USPS, SVHN
+from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN
 from torchvision.transforms.functional import rotate
-
+# MNISTM, SYN,
 # from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
 # from wilds.datasets.fmow_dataset import FMoWDataset
 
@@ -29,6 +29,8 @@ DATASETS = [
     "TerraIncognita",
     "DomainNet",
     "SVIRO",
+    "ImageNet_9",
+    "ImageNet_C",
     # WILDS datasets
     "WILDSCamelyon",
     "WILDSFMoW"
@@ -335,9 +337,25 @@ class DomainNet(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 1000
     ENVIRONMENTS = ["clip", "info", "paint", "quick", "real", "sketch"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "domain_net/")
+        self.dir = os.path.join(root, "DomainNet/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
+class ImageNet_9(MultipleEnvironmentImageFolder):
+    N_STEPS = 10000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "ImageNet_9/")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
+class ImageNet_C(MultipleEnvironmentImageFolder):
+    N_STEPS = 10000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ["blur","digital","noise","real","weather"]
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "Tiny_ImageNet_C/Classified_3/")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+    
 class OfficeHome(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
     ENVIRONMENTS = ["A", "C", "P", "R"]

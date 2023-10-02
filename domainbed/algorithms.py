@@ -74,7 +74,8 @@ ALGORITHMS = [
     'CAD',
     'CondCAD',
     'Testing',
-    'RandConv'
+    'RandConv_ViT',
+    'RandConv_CNN',
 ]
 
 
@@ -126,12 +127,21 @@ class ERM(Algorithm):
         for p in self.classifier.parameters():
             print(p)
         self.network = nn.Sequential(self.featurizer, self.classifier)
-        
-        self.optimizer = torch.optim.Adam(
-            self.network.parameters(),
-            lr=self.hparams["lr"],
-            weight_decay=self.hparams['weight_decay']
-        )
+        if self.hparams['fixed_featurizer']:
+            print("fine_tuning_only")
+            self.featurizer.requires_grad_(requires_grad=False)
+            self.optimizer = torch.optim.Adam(
+                self.classifier.parameters(),
+                lr=self.hparams["lr"],
+                weight_decay=self.hparams['weight_decay']
+            )
+        else:
+            print("full_model_tuning_only")
+            self.optimizer = torch.optim.Adam(
+                self.network.parameters(),
+                lr=self.hparams["lr"],
+                weight_decay=self.hparams['weight_decay']
+            )
 
     def update(self, minibatches, unlabeled=None):
         all_x = torch.cat([x for x, y in minibatches])
@@ -156,20 +166,33 @@ class ERM_ViT(Algorithm):
         # create model
         backbone = self.hparams['backbone']
         self.network = return_backbone_network(backbone, num_classes, hparams)
-
-        self.optimizer = torch.optim.AdamW(
-            self.network.parameters(),
-            lr=self.hparams["lr"],
-            weight_decay=self.hparams['weight_decay']
+        self.network.head = nn.Linear(384, num_classes)
+        
+        if self.hparams['fixed_featurizer']:
+            print("fine_tuning_only")
+            for name, param in self.network.named_parameters():
+                if not "head" in name:
+                    param.requires_grad = False
+            self.optimizer = torch.optim.AdamW(
+                self.network.head.parameters(),
+                lr=self.hparams["lr"],
+                weight_decay=self.hparams['weight_decay']
         )
+        else:
+            print("full_model_tuning_only")
+            self.optimizer = torch.optim.AdamW(
+                self.network.parameters(),
+                lr=self.hparams["lr"],
+                weight_decay=self.hparams['weight_decay']
+            )
 
     def update(self, minibatches, unlabeled=None):
         all_x = torch.cat([x for x, y in minibatches])
         all_y = torch.cat([y for x, y in minibatches])
-
+        
         output = self.predict(all_x)
 
-        loss = F.cross_entropy(output, all_y)
+        loss = F.cross_entropy(output, all_y) 
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -643,10 +666,10 @@ class VREx(ERM):
         return {'loss': loss.item(), 'nll': nll.item(),
                 'penalty': penalty.item()}
 
-class RandConv(ERM):
+class RandConv_CNN(ERM):
 
     def __init__(self, input_shape, num_classes, num_domains, hparams):
-        super(RandConv, self).__init__(input_shape, num_classes, num_domains,
+        super(RandConv_CNN, self).__init__(input_shape, num_classes, num_domains,
                                     hparams)
         
         self.ks = 3
@@ -730,6 +753,94 @@ class RandConv(ERM):
         self.optimizer.step()
 
         return {'loss': loss.item()}    
+
+class RandConv_ViT(ERM_ViT):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(RandConv_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.ks = 3
+        self.input_shape = input_shape
+        self.identity_prob = self.hparams["identity_prob"]
+        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        
+
+    def randomize_kernel(self):
+        k = torch.randint(0, 4, (1,)).item()
+        self.ks = 2*k +1
+        self.rand_conv =  nn.Conv2d(in_channels=self.input_shape[0], out_channels=self.input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        #self.rand_conv.to('cuda')
+        #print("randomized kernel with size: ",self.ks)    
+
+    def randomize(self):
+        new_weight = torch.zeros_like(self.rand_conv.weight)
+        with torch.no_grad():
+            nn.init.kaiming_normal_(new_weight, nonlinearity='conv2d')
+        self.rand_conv.weight = nn.Parameter(new_weight.detach())
+        # print("randomized weights")
+
+    def mixing(self,all_x,all_x_out):
+        alpha= random.random()  
+        all_x_out = alpha*all_x_out + (1-alpha)*all_x
+        # print("mixed with alpha: ",alpha)
+        return all_x_out   
+    
+    def randConv_Op(self, all_x):
+        if not (self.identity_prob > 0 and torch.rand(1) < self.identity_prob):
+            output = self.rand_conv(all_x)
+            # print("applied random conv")
+            if self.hparams["mixing"]:
+                output = self.mixing(all_x,output)
+
+        else:
+            output=all_x
+        return output 
+
+    def rand_conv_module_cuda(self):
+        self.rand_conv.to('cuda')       
+
+    def invariant_loss(self, all_x, out):
+        self.randomize()
+        output1 = self.predict(self.randConv_Op(all_x))
+        self.randomize()
+        output2 = self.predict(self.randConv_Op(all_x))
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+                                out, dim=1), F.softmax(
+                                output1, dim=1), F.softmax(
+                                output2, dim=1)
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        #print("calculate inv_loss: ",inv_loss)
+        return inv_loss
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+        
+        if self.hparams["randomize_kernel"]:
+            self.randomize_kernel()
+        self.randomize()
+        self.rand_conv_module_cuda()
+        all_x = self.randConv_Op(all_x)
+        out = self.predict(all_x)
+        loss = F.cross_entropy(out, all_y)
+
+        if self.hparams["invariant_loss"]:
+            inv_loss = self.invariant_loss(all_x,out)
+        else:
+            inv_loss=0
+
+        loss += inv_loss*self.hparams["consistency_loss_w"]    
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return {'loss': loss.item()}
 
 class Mixup(ERM):
     """
@@ -2287,7 +2398,7 @@ def return_backbone_network(network_name, num_classes, hparams):
             os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pretrained_models', 'DeiT_models'),
             'deit_small_patch16_224',
             pretrained=True, source='local')
-        network.head = nn.Linear(384, num_classes)
+        #network.head = Identity()
         return network
     elif network_name == "T2T14":
         network = t2t_vit_t_14()
@@ -2295,5 +2406,14 @@ def return_backbone_network(network_name, num_classes, hparams):
         pretrained_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pretrained_models', 't2t',
                                        '81.7_T2T_ViTt_14.pth.tar')
         load_for_transfer_learning(network, pretrained_path, use_ema=True, strict=True, num_classes=1000)
-        network.head = nn.Linear(384, num_classes)
+        #network.head = Identity()
         return network
+
+class Identity(nn.Module):
+    """An identity layer"""
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
+

@@ -39,7 +39,7 @@ pip install wilds==2.0.0 seaborn==0.11.1
 PACS, VLCS, OfficeHome, TerraIncognita, or DomainNet datasets can be downloaded as follows:
 ```
 python3 -m domainbed.scripts.download \
-       --data_dir=/home/kavindya/data/Models/DATA
+       --data_dir=media/SSD2/Dataset/
 ```
 
 4- Train

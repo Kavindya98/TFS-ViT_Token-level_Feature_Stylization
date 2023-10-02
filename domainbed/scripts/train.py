@@ -106,6 +106,7 @@ if __name__ == "__main__":
         device = "cpu"
 
     print('device:', device)
+    print ('Current cuda device ', torch.cuda.current_device())
 
     if args.dataset in vars(datasets):
         dataset = vars(datasets)[args.dataset](args.data_dir,
@@ -132,13 +133,57 @@ if __name__ == "__main__":
     in_splits = []
     out_splits = []
     uda_splits = []
+    assigned = False
     for env_i, env in enumerate(dataset):  # env is a domain
         uda = []
-
-        out, in_ = misc.split_dataset(env,
+        if hparams['custom_train_val'] and not (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
+            out, in_ = misc.split_dataset(env,
                                       int(len(env) * args.holdout_fraction),
                                       misc.seed_hash(args.trial_seed, env_i))
+            
+        elif  hparams['custom_train_val'] and (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
+            if not assigned:
+                for env_j, env_ in enumerate(dataset):
+                
+                    if (not env_j in args.test_envs) and hparams['custom_val'] == env_j:
+                        out = env_
+                    elif (not env_j in args.test_envs) and hparams['custom_train'] == env_j:
+                        in_= env_
+                assigned = True
+                 
+            else:
+                continue  
+        else:
+            out, in_ = misc.split_dataset(env,
+                                      int(len(env) * args.holdout_fraction),
+                                      misc.seed_hash(args.trial_seed, env_i))
+            
 
+
+        # if not assigned and hparams['custom_train_val']:
+        #     for env_j, env_ in enumerate(dataset):
+        #         print("in loop env no",env_j,"len env",len(env_))
+        #         if (not env_j in args.test_envs) and hparams['custom_val'] == env_j:
+        #             out = env_
+        #         elif (not env_j in args.test_envs) and hparams['custom_train'] == env_j:
+        #             in_= env_
+        #     assigned = True
+        #     print("train val captured ",env_i)
+            
+        # elif assigned and hparams['custom_train_val']:
+        #     if not (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
+        #         print("test captured ",env_i)
+        #         out, in_ = misc.split_dataset(env,
+        #                               int(len(env) * args.holdout_fraction),
+        #                               misc.seed_hash(args.trial_seed, env_i))
+        #     else:
+        #         print("train val captured after assign",env_i)
+        #         continue    
+        # else:
+        #     out, in_ = misc.split_dataset(env,
+        #                               int(len(env) * args.holdout_fraction),
+        #                               misc.seed_hash(args.trial_seed, env_i))
+        # print("came out ",env_i)
         if env_i in args.test_envs:
             uda, in_ = misc.split_dataset(in_,
                                           int(len(in_) * args.uda_holdout_fraction),
@@ -151,6 +196,7 @@ if __name__ == "__main__":
                 uda_weights = misc.make_weights_for_balanced_classes(uda)
         else:
             in_weights, out_weights, uda_weights = None, None, None
+        
         in_splits.append((in_, in_weights))
         out_splits.append((out, out_weights))
         if len(uda):
@@ -158,6 +204,9 @@ if __name__ == "__main__":
 
     if args.task == "domain_adaptation" and len(uda_splits) == 0:
         raise ValueError("Not enough unlabeled samples for domain adaptation.")
+    envs_d = datasets.get_dataset_class(args.dataset).ENVIRONMENTS
+    for i in range(len(in_splits)):
+        print("env ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
 
     train_loaders = [InfiniteDataLoader(
         dataset=env,
