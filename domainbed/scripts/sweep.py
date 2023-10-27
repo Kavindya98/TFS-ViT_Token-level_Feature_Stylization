@@ -126,8 +126,10 @@ def single_domain_gen_train_env(dataset):
         all_test_envs.append(test_envs)  
     elif dataset == "ImageNet_C":
         test_envs.remove(3)
-        
-        all_test_envs.append(test_envs)  
+        all_test_envs.append(test_envs)
+    elif dataset == "ImageNet":
+        test_envs.remove(0)
+        all_test_envs.append(test_envs)             
     else:
         for i in range(datasets.num_environments(dataset)):
             k = list(range(datasets.num_environments(dataset)))

@@ -49,12 +49,13 @@ if __name__ == "__main__":
                         help='Checkpoint every N steps. Default is dataset-dependent.')
     parser.add_argument('--test_envs', type=int, nargs='+', default=[0])
     parser.add_argument('--output_dir', type=str, default="test_ViT_RB")
-    parser.add_argument('--holdout_fraction', type=float, default=0.2)
+    parser.add_argument('--holdout_fraction', type=float, default=0.001)
     parser.add_argument('--uda_holdout_fraction', type=float, default=0,
                         help="For domain adaptation, % of test to use unlabeled for training.")
     parser.add_argument('--skip_model_save', action='store_true')
     parser.add_argument('--save_model_every_checkpoint', action='store_true')
     parser.add_argument('--save_best_model', action='store_true')
+    
     args = parser.parse_args()
     args.save_best_model = True
 
@@ -145,12 +146,12 @@ if __name__ == "__main__":
             if not assigned:
                 for env_j, env_ in enumerate(dataset):
                 
-                    if (not env_j in args.test_envs) and hparams['custom_val'] == env_j:
+                    if  hparams['custom_val'] == env_j:
                         out = env_
-                    elif (not env_j in args.test_envs) and hparams['custom_train'] == env_j:
+                    elif  hparams['custom_train'] == env_j:
                         in_= env_
                 assigned = True
-                 
+                print(len(out)," length of val ",len(in_)," length of train") 
             else:
                 continue  
         else:

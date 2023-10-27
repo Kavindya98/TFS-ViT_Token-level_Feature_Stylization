@@ -15,6 +15,7 @@ from domainbed.lib.t2t_vit import t2t_vit_t_14
 # from domainbed.lib.t2t_vit import *
 from domainbed.lib.t2t_utils import load_for_transfer_learning
 import random
+import timm
 
 
 import copy
@@ -32,6 +33,7 @@ if torch.cuda.is_available():
 else:
     device = "cpu"
 from domainbed import networks
+from domainbed import visiontransformer
 from domainbed.lib.misc import (
     random_pairs_of_minibatches, ParamDict, MovingAverage, l2_between_dicts
 )
@@ -118,15 +120,15 @@ class ERM(Algorithm):
     def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(ERM, self).__init__(input_shape, num_classes, num_domains,
                                   hparams)
-        self.featurizer = networks.Featurizer(input_shape, self.hparams)
+        self.network = networks.Featurizer(input_shape, self.hparams)
         print("moving to the classifier")
-        self.classifier = networks.Classifier(
-            self.featurizer.n_outputs,
-            num_classes,
-            self.hparams['nonlinear_classifier'])
-        for p in self.classifier.parameters():
-            print(p)
-        self.network = nn.Sequential(self.featurizer, self.classifier)
+        # self.classifier = networks.Classifier(
+        #     self.featurizer.n_outputs,
+        #     num_classes,
+        #     self.hparams['nonlinear_classifier'])
+        # for p in self.classifier.parameters():
+        #     print(p)
+        # self.network = nn.Sequential(self.featurizer, self.classifier)
         if self.hparams['fixed_featurizer']:
             print("fine_tuning_only")
             self.featurizer.requires_grad_(requires_grad=False)
@@ -166,7 +168,7 @@ class ERM_ViT(Algorithm):
         # create model
         backbone = self.hparams['backbone']
         self.network = return_backbone_network(backbone, num_classes, hparams)
-        self.network.head = nn.Linear(384, num_classes)
+        
         
         if self.hparams['fixed_featurizer']:
             print("fine_tuning_only")
@@ -191,7 +193,6 @@ class ERM_ViT(Algorithm):
         all_y = torch.cat([y for x, y in minibatches])
         
         output = self.predict(all_x)
-
         loss = F.cross_entropy(output, all_y) 
 
         self.optimizer.zero_grad()
@@ -202,7 +203,13 @@ class ERM_ViT(Algorithm):
 
     def predict(self, x):
         out = self.network(x)
-        return out[-1]
+        if self.hparams['backbone'] ==  "DeiTBase":
+            return out
+        else: 
+            return out[-1]
+    
+   
+
 
 class TFSViT(Algorithm):
 
@@ -672,7 +679,7 @@ class RandConv_CNN(ERM):
         super(RandConv_CNN, self).__init__(input_shape, num_classes, num_domains,
                                     hparams)
         
-        self.ks = 3
+        self.ks = 1
         self.input_shape = input_shape
         self.identity_prob = self.hparams["identity_prob"]
         self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
@@ -2399,7 +2406,18 @@ def return_backbone_network(network_name, num_classes, hparams):
             'deit_small_patch16_224',
             pretrained=True, source='local')
         #network.head = Identity()
-        return network
+        network.head = nn.Linear(384, num_classes)
+        
+    elif network_name == "DeiTBase":
+        network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
+        print("DeiTBase Network")
+        network.head = nn.Linear(768, num_classes)
+
+    elif network_name == "ViTBase":
+        network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
+        print("ViTBase Network")
+        network.head = nn.Linear(768, num_classes)
+        
     elif network_name == "T2T14":
         network = t2t_vit_t_14()
         # load the pretrained weights
@@ -2407,7 +2425,7 @@ def return_backbone_network(network_name, num_classes, hparams):
                                        '81.7_T2T_ViTt_14.pth.tar')
         load_for_transfer_learning(network, pretrained_path, use_ema=True, strict=True, num_classes=1000)
         #network.head = Identity()
-        return network
+    return network
 
 class Identity(nn.Module):
     """An identity layer"""

@@ -8,6 +8,9 @@ import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
 from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN
 from torchvision.transforms.functional import rotate
+from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+from timm.data import create_transform
+
 # MNISTM, SYN,
 # from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
 # from wilds.datasets.fmow_dataset import FMoWDataset
@@ -265,21 +268,33 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
                 mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        augment_transform = transforms.Compose([
-            # transforms.Resize((224,224)),
-            transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
-            transforms.RandomHorizontalFlip(),
-            transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
-            transforms.RandomGrayscale(),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        # augment_transform = transforms.Compose([
+        #     # transforms.Resize((224,224)),
+        #     transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+        #     transforms.RandomGrayscale(),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(
+        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # ])
+
+        augment_transform = create_transform(
+            input_size=224,
+            is_training=True,
+            color_jitter=0.3,
+            auto_augment='rand-m9-mstd0.5-inc1',
+            interpolation='bicubic',
+            re_prob=0.25,
+            re_mode='pixel',
+            re_count=1,
+        )
 
         self.datasets = []
         for i, environment in enumerate(environments):
 
             if augment and (i not in test_envs):
+                print('[INFO] Doing Data Augmentation')
                 env_transform = augment_transform
             else:
                 env_transform = transform
@@ -327,6 +342,7 @@ class VLCS(MultipleEnvironmentImageFolder):
 
 class PACS(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
+
     ENVIRONMENTS = ["A", "C", "P", "S"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "PACS/")
@@ -343,7 +359,7 @@ class DomainNet(MultipleEnvironmentImageFolder):
 class ImageNet_9(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
+    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original','valid']
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "ImageNet_9/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
@@ -351,9 +367,38 @@ class ImageNet_9(MultipleEnvironmentImageFolder):
 class ImageNet_C(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ["blur","digital","noise","real","weather"]
+    ENVIRONMENTS = ['blur_1',
+                    'blur_2',
+                    'blur_3',
+                    'blur_4',
+                    'blur_5',
+                    'digital_1',
+                    'digital_2',
+                    'digital_3',
+                    'digital_4',
+                    'digital_5',
+                    'noise_1',
+                    'noise_2',
+                    'noise_3',
+                    'noise_4',
+                    'noise_5',
+                    'real',
+                    'weather_1',
+                    'weather_2',
+                    'weather_3',
+                    'weather_4',
+                    'weather_5']
+                
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "Tiny_ImageNet_C/Classified_3/")
+        self.dir = os.path.join(root, "Imagenet-C/processed/")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
+class ImageNet(MultipleEnvironmentImageFolder):
+    N_STEPS = 5000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ["train","val"]
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "ImageNet/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
     
 class OfficeHome(MultipleEnvironmentImageFolder):
