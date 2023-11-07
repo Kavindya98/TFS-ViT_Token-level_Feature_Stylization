@@ -91,7 +91,7 @@ def validation_accuracy(model, loader, weights, device, algorithm):
         for x, y in loader:
             x = x.to(device)
             y = y.to(device)
-	    p = model.predict(x)
+            p = model.predict(x)
             #if algorithm == None:
                 #p = model.predict(x)
             #else:    
