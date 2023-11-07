@@ -121,6 +121,7 @@ class ERM(Algorithm):
         super(ERM, self).__init__(input_shape, num_classes, num_domains,
                                   hparams)
         if not self.hparams['empty_fc']:
+            print("taken the whole pretrained network")
             self.network = networks.Featurizer(input_shape, self.hparams)
         else:
             self.featurizer = networks.Featurizer(input_shape, self.hparams)
