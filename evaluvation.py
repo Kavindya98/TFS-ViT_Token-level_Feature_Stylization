@@ -127,18 +127,27 @@ def get_algorithm(algorithm):
     hparams['resnet_dropout']=0 
     hparams['empty_head']=False
 
-    model = None
+    algo = None
     if algorithm == "ResNet50":
-        model = ResNet((3, 224, 224,),hparams)
+        algo = algorithms.get_algorithm_class('ERM')
     elif algorithm == "ResNet18":
         hparams['resnet18'] =True
-        model = ResNet((3, 224, 224,),hparams)
+        algo = algorithms.get_algorithm_class('ERM')
     elif algorithm == "DeiTBase":
-        model = algorithms.return_backbone_network(algorithm, 1000, hparams)
+        hparams['backbone'] = "DeiTBase"
+        algo = algorithms.get_algorithm_class('ERM_ViT')
     elif algorithm == "ViTBase":
-        model = algorithms.return_backbone_network(algorithm, 1000, hparams)
+        hparams['backbone'] = "ViTBase"
+        algo = algorithms.get_algorithm_class('ERM_ViT')
     else:
         print("Not defined backbone")
+
+    model = algo(
+        input_shape=(3, 224, 224,), 
+        num_classes=1000, 
+        num_domains=None, 
+        hparams=hparams
+    )
 
     return model, hparams
 

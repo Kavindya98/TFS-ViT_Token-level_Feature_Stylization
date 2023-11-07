@@ -120,15 +120,16 @@ class ERM(Algorithm):
     def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(ERM, self).__init__(input_shape, num_classes, num_domains,
                                   hparams)
-        self.network = networks.Featurizer(input_shape, self.hparams)
-        print("moving to the classifier")
-        # self.classifier = networks.Classifier(
-        #     self.featurizer.n_outputs,
-        #     num_classes,
-        #     self.hparams['nonlinear_classifier'])
-        # for p in self.classifier.parameters():
-        #     print(p)
-        # self.network = nn.Sequential(self.featurizer, self.classifier)
+        if not self.hparams['empty_fc']:
+            self.network = networks.Featurizer(input_shape, self.hparams)
+        else:
+            self.featurizer = networks.Featurizer(input_shape, self.hparams)
+            print("moving to the classifier")
+            self.classifier = networks.Classifier(
+                self.featurizer.n_outputs,
+                num_classes,
+                self.hparams['nonlinear_classifier'])
+            self.network = nn.Sequential(self.featurizer, self.classifier)
         if self.hparams['fixed_featurizer']:
             print("fine_tuning_only")
             self.featurizer.requires_grad_(requires_grad=False)
