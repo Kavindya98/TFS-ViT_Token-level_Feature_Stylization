@@ -28,6 +28,9 @@ def _hparams(algorithm, dataset, random_seed):
     # Unconditional hparam definitions.
 
     _hparam('data_augmentation', False, lambda r: False)
+    _hparam('empty_fc', False, lambda r: False)
+    _hparam('empty_head', False, lambda r: False)
+    _hparam('eval', False, lambda r: False)
     _hparam('resnet18', False, lambda r: False)
     _hparam('fixed_featurizer', False, lambda r: False)
     _hparam('custom_train_val', False, lambda r: False)

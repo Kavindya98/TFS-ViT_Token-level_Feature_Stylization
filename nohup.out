@@ -1,377 +1,63 @@
-Not launched: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s0 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-Not launched: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s1 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-2 jobs: 0 done, 0 incomplete, 2 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/DeiTBase/t013_s0 --seed 1069331662 --task domain_generalization --test_envs 0 1 3 --trial_seed 0
-
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/DeiTBase/t013_s1 --seed 1395107178 --task domain_generalization --test_envs 0 1 3 --trial_seed 1
-About to delete 0 jobs.
-Good to go
-Deleting...
-Deleted 0 jobs!
-Not launched: ./Results/PACS/RandConv_ViT/ViTBase/t013_s0 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-Not launched: ./Results/PACS/RandConv_ViT/ViTBase/t013_s1 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-2 jobs: 0 done, 0 incomplete, 2 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/ViTBase/t013_s0 --seed 1069331662 --task domain_generalization --test_envs 0 1 3 --trial_seed 0
-
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/ViTBase/t013_s1 --seed 1395107178 --task domain_generalization --test_envs 0 1 3 --trial_seed 1
-About to delete 0 jobs.
-Good to go
-Deleting...
-Deleted 0 jobs!
-  0%|          | 0/2 [00:00<?, ?it/s]                                     Environment:
-	Python: 3.8.8
-	PyTorch: 1.8.0+cu111
-	Torchvision: 0.9.0+cu111
-	CUDA: 11.1
-	CUDNN: 8005
-	NumPy: 1.20.1
-	PIL: 8.2.0
-Args:
-	algorithm: RandConv_ViT
-	checkpoint_freq: None
-	data_dir: /media/SSD2/Dataset
-	dataset: PACS
-	holdout_fraction: 0.2
-	hparams: {"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}
-	hparams_seed: 0
-	output_dir: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s1
-	save_best_model: True
-	save_model_every_checkpoint: False
-	seed: 1395107178
-	skip_model_save: False
-	steps: None
-	task: domain_generalization
-	test_envs: [0, 1, 3]
-	trial_seed: 1
-	uda_holdout_fraction: 0
-HParams:
-	backbone: DeiTBase
-	batch_size: 32
-	class_balanced: False
-	consistency_loss_w: 10.0
-	custom_train: 0
-	custom_train_val: False
-	custom_val: 0
-	data_augmentation: False
-	digits: True
-	fixed_featurizer: False
-	identity_prob: 0.0
-	invariant_loss: True
-	lr: 5e-05
-	mixing: True
-	nonlinear_classifier: False
-	randomize_kernel: True
-	resnet18: False
-	resnet_dropout: 0.0
-	test_env: [0, 1, 3]
-	weight_decay: 0.0
-	weight_decay_d: 0.0
-device: cuda
+device: cuda:1
 Current cuda device  0
-env  A  in  1639  out  409
-env  C  in  1876  out  468
-env  P  in  1336  out  334
-env  S  in  3144  out  785
-Environment:
-	Python: 3.8.8
-	PyTorch: 1.8.0+cu111
-	Torchvision: 0.9.0+cu111
-	CUDA: 11.1
-	CUDNN: 8005
-	NumPy: 1.20.1
-	PIL: 8.2.0
-Args:
-	algorithm: RandConv_ViT
-	checkpoint_freq: None
-	data_dir: /media/SSD2/Dataset
-	dataset: PACS
-	holdout_fraction: 0.2
-	hparams: {"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}
-	hparams_seed: 0
-	output_dir: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s0
-	save_best_model: True
-	save_model_every_checkpoint: False
-	seed: 1069331662
-	skip_model_save: False
-	steps: None
-	task: domain_generalization
-	test_envs: [0, 1, 3]
-	trial_seed: 0
-	uda_holdout_fraction: 0
-HParams:
-	backbone: DeiTBase
-	batch_size: 32
-	class_balanced: False
-	consistency_loss_w: 10.0
-	custom_train: 0
-	custom_train_val: False
-	custom_val: 0
-	data_augmentation: False
-	digits: True
-	fixed_featurizer: False
-	identity_prob: 0.0
-	invariant_loss: True
-	lr: 5e-05
-	mixing: True
-	nonlinear_classifier: False
-	randomize_kernel: True
-	resnet18: False
-	resnet_dropout: 0.0
-	test_env: [0, 1, 3]
-	weight_decay: 0.0
-	weight_decay_d: 0.0
-device: cuda
+Loading dataset
+0it [00:00, ?it/s]1it [00:00,  4.07it/s]2it [00:00,  3.64it/s]3it [00:01,  2.72it/s]4it [00:01,  2.63it/s]5it [00:01,  2.59it/s]6it [00:02,  2.65it/s]7it [00:02,  2.32it/s]8it [00:03,  2.50it/s]9it [00:03,  2.50it/s]10it [00:03,  2.40it/s]11it [00:04,  2.38it/s]12it [00:04,  2.43it/s]13it [00:05,  2.27it/s]14it [00:05,  2.39it/s]15it [00:06,  2.31it/s]16it [00:06,  2.23it/s]17it [00:07,  2.23it/s]18it [00:07,  2.28it/s]19it [00:07,  2.26it/s]20it [00:08,  2.20it/s]21it [00:08,  2.16it/s]21it [00:08,  2.38it/s]
+env_blur_1_acc 0.52588
+env_blur_2_acc 0.39268
+env_blur_3_acc 0.17128
+env_blur_4_acc 0.13002
+env_blur_5_acc 0.09218
+env_digital_1_acc 0.62908
+env_digital_2_acc 0.56318
+env_digital_3_acc 0.43572
+env_digital_4_acc 0.18456
+env_digital_5_acc 0.04546
+env_noise_1_acc 0.47826
+env_noise_2_acc 0.32048
+env_noise_3_acc 0.1567
+env_noise_4_acc 0.05616
+env_noise_5_acc 0.01164
+env_real_acc 0.7292
+env_weather_1_acc 0.59618
+env_weather_2_acc 0.53358
+env_weather_3_acc 0.44238
+env_weather_4_acc 0.37562
+env_weather_5_acc 0.22008
+device: cuda:1
 Current cuda device  0
-env  A  in  1639  out  409
-env  C  in  1876  out  468
-env  P  in  1336  out  334
-env  S  in  3144  out  785
-Using cache found in /home/kavindya/.cache/torch/hub/facebookresearch_deit_main
 Using cache found in /home/kavindya/.cache/torch/hub/facebookresearch_deit_main
 DeiTBase Network
-full_model_tuning_only
-DeiTBase Network
-full_model_tuning_only
-+ checkpoint_freq: 300
-+ checkpoint_freq: 300
-Best model upto now
-env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
-0.1354484442  0.1613691932  0.1465884861  0.1794871795  0.0965568862  0.0868263473  0.0928753181  0.0904458599  0.0000000000  2.2073750496  14.999130249  0             9.7754886150 
-Best model upto now
-env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
-0.1928004881  0.2078239609  0.1647121535  0.1303418803  0.1744011976  0.2245508982  0.0887404580  0.0891719745  0.0000000000  2.0345799923  14.999125957  0             2.8036301136 
-Best model upto now
-0.7486272117  0.7457212714  0.5271855011  0.5021367521  1.0000000000  0.9910179641  0.5626590331  0.5605095541  7.1856287425  0.1718370914  15.958758354  300           2.2290870420 
-Best model upto now
-0.7583892617  0.7530562347  0.4067164179  0.3952991453  1.0000000000  0.9910179641  0.3784987277  0.3885350318  14.371257485  0.0595144390  15.959120273  600           2.2259120051 
-Best model upto now
-0.7620500305  0.7872860636  0.6071428571  0.6047008547  1.0000000000  0.9910179641  0.5677480916  0.5719745223  21.556886227  0.0194459927  15.959120273  900           2.2292246381 
-Best model upto now
-0.7864551556  0.7603911980  0.4978678038  0.4743589744  1.0000000000  0.9970059880  0.6673027990  0.6662420382  7.1856287425  0.2172672288  15.958668232  300           7.9882907581 
-0.7242220866  0.7261613692  0.4920042644  0.4529914530  0.9992514970  0.9850299401  0.4666030534  0.4738853503  28.742514970  0.0519588663  15.959120273  1200          1.2913243421 
-0.7528981086  0.7506112469  0.5447761194  0.5213675214  1.0000000000  0.9850299401  0.4977735369  0.5184713376  35.928143712  0.0082861602  15.959120273  1500          1.1332311408 
-0.7480170836  0.7652811736  0.5245202559  0.5299145299  1.0000000000  0.9850299401  0.4742366412  0.4929936306  43.113772455  0.0243859160  15.959120273  1800          1.1375058381 
-Best model upto now
-0.7876754118  0.7652811736  0.5298507463  0.5106837607  1.0000000000  1.0000000000  0.6863867684  0.6840764331  14.371257485  0.0443435960  15.959029197  600           5.0667277694 
-0.6711409396  0.6821515892  0.5986140725  0.6004273504  1.0000000000  0.9850299401  0.5582061069  0.5834394904  50.299401197  0.0386416979  15.959120273  2100          1.1365414055 
-0.7516778523  0.7799511002  0.5655650320  0.5619658120  1.0000000000  0.9820359281  0.5470737913  0.5579617834  57.485029940  0.0232168786  15.959120273  2400          1.1367328652 
-0.7370347773  0.7310513447  0.5740938166  0.5512820513  1.0000000000  0.9790419162  0.6288167939  0.6254777070  64.670658682  0.0313930715  15.959120273  2700          1.1366658250 
-0.7260524710  0.7506112469  0.5900852878  0.5641025641  1.0000000000  0.9850299401  0.6399491094  0.6267515924  71.856287425  0.0254255265  15.959120273  3000          1.1368086394 
-Best model upto now
-0.7864551556  0.7530562347  0.4685501066  0.4508547009  1.0000000000  1.0000000000  0.5292620865  0.5324840764  21.556886227  0.0365138231  15.959029197  900           5.0658782347 
-0.7535082367  0.7775061125  0.5911513859  0.5940170940  0.9992514970  0.9850299401  0.6386768448  0.6547770701  79.041916167  0.0198165917  15.959120273  3300          1.1362879817 
-0.7309334960  0.7457212714  0.5346481876  0.5149572650  1.0000000000  0.9880239521  0.6634860051  0.6751592357  86.227544910  0.0163382262  15.959120273  3600          1.1357934046 
-0.7498474680  0.7603911980  0.4690831557  0.4572649573  1.0000000000  0.9850299401  0.4821882952  0.5057324841  93.413173652  0.0233059821  15.959120273  3900          1.1353824417 
-0.7248322148  0.7114914425  0.5735607676  0.5534188034  1.0000000000  0.9880239521  0.5661577608  0.5783439490  100.59880239  0.0040020677  15.959120273  4200          1.1376424193 
-Best model upto now
-0.7846247712  0.7530562347  0.5431769723  0.5470085470  1.0000000000  1.0000000000  0.6224554707  0.6292993631  28.742514970  0.0317235220  15.959029197  1200          5.0604515330 
-0.7419158023  0.7799511002  0.5687633262  0.5747863248  1.0000000000  0.9880239521  0.5426208651  0.5630573248  107.78443113  0.0310226754  15.959120273  4500          1.1360312541 
-0.7162904210  0.7530562347  0.6028784648  0.6004273504  1.0000000000  0.9790419162  0.5104961832  0.5312101911  114.97005988  0.0097958567  15.959120273  4800          1.1359983619 
-0.7260524710  0.7481662592  0.6151385928  0.6282051282  1.0000000000  0.9850299401  0.5629770992  0.5834394904  119.76047904  0.0010592117  15.959120273  5000          1.1374757850 
-Best model upto now
-0.7852348993  0.7506112469  0.5708955224  0.5448717949  1.0000000000  1.0000000000  0.6106870229  0.6050955414  35.928143712  0.0306940860  15.959029197  1500          5.1404413875 
-0.7345942648  0.7066014670  0.5943496802  0.5769230769  0.9992514970  0.9970059880  0.5928753181  0.5898089172  43.113772455  0.0336364402  15.959029197  1800          5.2085908937 
-0.6955460647  0.6723716381  0.5383795309  0.5170940171  1.0000000000  0.9970059880  0.5750636132  0.5757961783  50.299401197  0.0163929088  15.959029197  2100          5.2055988129 
-0.7498474680  0.7090464548  0.5724946695  0.5897435897  1.0000000000  0.9970059880  0.6520356234  0.6484076433  57.485029940  0.0092263611  15.959029197  2400          5.1946193298 
-Best model upto now
-0.7699816962  0.7432762836  0.5357142857  0.5320512821  0.9992514970  1.0000000000  0.6030534351  0.6050955414  64.670658682  0.0194216672  15.959029197  2700          5.1961961365 
-Best model upto now
-0.7632702868  0.7408312958  0.5607675906  0.5405982906  1.0000000000  1.0000000000  0.6603053435  0.6611464968  71.856287425  0.0104802215  15.959029197  3000          5.1971923796 
-Best model upto now
-0.7583892617  0.7408312958  0.5245202559  0.5042735043  1.0000000000  1.0000000000  0.5308524173  0.5261146497  79.041916167  0.0339222692  15.959029197  3300          5.2012924274 
-0.7297132398  0.7139364303  0.5415778252  0.5491452991  0.9992514970  0.9970059880  0.6237277354  0.6063694268  86.227544910  0.0297450390  15.959029197  3600          5.2163374567 
-0.7443563148  0.7114914425  0.4994669510  0.4850427350  1.0000000000  0.9970059880  0.5620229008  0.5694267516  93.413173652  0.0305659895  15.959029197  3900          5.2051139768 
-Best model upto now
-0.7486272117  0.7237163814  0.5261194030  0.5213675214  1.0000000000  1.0000000000  0.6078244275  0.6229299363  100.59880239  0.0213880533  15.959029197  4200          5.2062483088 
-0.7175106772  0.6821515892  0.5597014925  0.5491452991  0.9962574850  0.9910179641  0.5868320611  0.5821656051  107.78443113  0.0106677953  15.959029197  4500          5.2085208511 
-0.7449664430  0.7066014670  0.5165245203  0.5106837607  0.9992514970  0.9940119760  0.5629770992  0.5770700637  114.97005988  0.0241101458  15.959029197  4800          5.2048188003 
-0.6979865772  0.6845965770  0.5538379531  0.5213675214  1.0000000000  0.9940119760  0.5887404580  0.5847133758  119.76047904  0.0440371472  15.959029197  5000          5.2008407533 
-Not launched: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s0 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-Not launched: ./Results/PACS/RandConv_ViT/DeiTBase/t013_s1 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-2 jobs: 0 done, 0 incomplete, 2 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/DeiTBase/t013_s0 --seed 1069331662 --task domain_generalization --test_envs 0 1 3 --trial_seed 0
-
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/DeiTBase/t013_s1 --seed 1395107178 --task domain_generalization --test_envs 0 1 3 --trial_seed 1
-About to launch 2 jobs.
-Good to go
-Launching...
-Making job directories:
-WARNING: using experimental multi_gpu_launcher.
-Launched 2 jobs!
-  0%|          | 0/2 [00:00<?, ?it/s]                                     Environment:
-	Python: 3.8.8
-	PyTorch: 1.8.0+cu111
-	Torchvision: 0.9.0+cu111
-	CUDA: 11.1
-	CUDNN: 8005
-	NumPy: 1.20.1
-	PIL: 8.2.0
-Args:
-	algorithm: RandConv_ViT
-	checkpoint_freq: None
-	data_dir: /media/SSD2/Dataset
-	dataset: PACS
-	holdout_fraction: 0.2
-	hparams: {"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}
-	hparams_seed: 0
-	output_dir: ./Results/PACS/RandConv_ViT/ViTBase/t013_s0
-	save_best_model: True
-	save_model_every_checkpoint: False
-	seed: 1069331662
-	skip_model_save: False
-	steps: None
-	task: domain_generalization
-	test_envs: [0, 1, 3]
-	trial_seed: 0
-	uda_holdout_fraction: 0
-HParams:
-	backbone: ViTBase
-	batch_size: 32
-	class_balanced: False
-	consistency_loss_w: 10.0
-	custom_train: 0
-	custom_train_val: False
-	custom_val: 0
-	data_augmentation: False
-	digits: True
-	fixed_featurizer: False
-	identity_prob: 0.0
-	invariant_loss: True
-	lr: 5e-05
-	mixing: True
-	nonlinear_classifier: False
-	randomize_kernel: True
-	resnet18: False
-	resnet_dropout: 0.0
-	test_env: [0, 1, 3]
-	weight_decay: 0.0
-	weight_decay_d: 0.0
-device: cuda
+Loading dataset
+0it [00:00, ?it/s]1it [00:00,  4.49it/s]2it [00:00,  3.87it/s]3it [00:00,  3.37it/s]4it [00:01,  3.25it/s]5it [00:01,  2.80it/s]6it [00:01,  2.75it/s]7it [00:02,  2.51it/s]8it [00:02,  2.58it/s]9it [00:03,  2.63it/s]10it [00:03,  2.41it/s]11it [00:04,  2.35it/s]12it [00:04,  2.26it/s]13it [00:05,  2.26it/s]14it [00:05,  2.25it/s]15it [00:05,  2.21it/s]16it [00:06,  2.18it/s]17it [00:06,  2.16it/s]18it [00:07,  2.28it/s]19it [00:07,  2.36it/s]20it [00:08,  2.25it/s]21it [00:08,  2.34it/s]21it [00:08,  2.45it/s]
+env_blur_1_acc 0.69152
+env_blur_2_acc 0.61772
+env_blur_3_acc 0.38698
+env_blur_4_acc 0.3147
+env_blur_5_acc 0.2177
+env_digital_1_acc 0.75836
+env_digital_2_acc 0.74274
+env_digital_3_acc 0.71252
+env_digital_4_acc 0.62438
+env_digital_5_acc 0.4342
+env_noise_1_acc 0.77086
+env_noise_2_acc 0.7387
+env_noise_3_acc 0.68428
+env_noise_4_acc 0.58524
+env_noise_5_acc 0.40914
+env_real_acc 0.79016
+env_weather_1_acc 0.70978
+env_weather_2_acc 0.6661
+env_weather_3_acc 0.6469
+env_weather_4_acc 0.63648
+env_weather_5_acc 0.57598
+device: cuda:1
 Current cuda device  0
-env  A  in  1639  out  409
-env  C  in  1876  out  468
-env  P  in  1336  out  334
-env  S  in  3144  out  785
-Environment:
-	Python: 3.8.8
-	PyTorch: 1.8.0+cu111
-	Torchvision: 0.9.0+cu111
-	CUDA: 11.1
-	CUDNN: 8005
-	NumPy: 1.20.1
-	PIL: 8.2.0
-Args:
-	algorithm: RandConv_ViT
-	checkpoint_freq: None
-	data_dir: /media/SSD2/Dataset
-	dataset: PACS
-	holdout_fraction: 0.2
-	hparams: {"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}
-	hparams_seed: 0
-	output_dir: ./Results/PACS/RandConv_ViT/ViTBase/t013_s1
-	save_best_model: True
-	save_model_every_checkpoint: False
-	seed: 1395107178
-	skip_model_save: False
-	steps: None
-	task: domain_generalization
-	test_envs: [0, 1, 3]
-	trial_seed: 1
-	uda_holdout_fraction: 0
-HParams:
-	backbone: ViTBase
-	batch_size: 32
-	class_balanced: False
-	consistency_loss_w: 10.0
-	custom_train: 0
-	custom_train_val: False
-	custom_val: 0
-	data_augmentation: False
-	digits: True
-	fixed_featurizer: False
-	identity_prob: 0.0
-	invariant_loss: True
-	lr: 5e-05
-	mixing: True
-	nonlinear_classifier: False
-	randomize_kernel: True
-	resnet18: False
-	resnet_dropout: 0.0
-	test_env: [0, 1, 3]
-	weight_decay: 0.0
-	weight_decay_d: 0.0
-device: cuda
-Current cuda device  0
-env  A  in  1639  out  409
-env  C  in  1876  out  468
-env  P  in  1336  out  334
-env  S  in  3144  out  785
 ViTBase Network
-full_model_tuning_only
-ViTBase Network
-full_model_tuning_only
-+ checkpoint_freq: 300
-+ checkpoint_freq: 300
-Best model upto now
-env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
-0.1183648566  0.1295843521  0.1231343284  0.1324786325  0.1923652695  0.1916167665  0.0811068702  0.0955414013  0.0000000000  2.3673260212  15.135634422  0             5.5565965176 
-Best model upto now
-env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
-0.1781574131  0.1858190709  0.1476545842  0.1388888889  0.1504491018  0.1407185629  0.1574427481  0.1464968153  0.0000000000  2.2674241066  15.135638713  0             1.4828290939 
-Best model upto now
-0.7492373398  0.7334963325  0.5623667377  0.5405982906  0.9992514970  1.0000000000  0.3177480916  0.3363057325  7.1856287425  0.4296031111  16.097007751  300           1.1373063270 
-0.7724222087  0.7506112469  0.4984008529  0.5000000000  1.0000000000  0.9970059880  0.3263358779  0.3464968153  14.371257485  0.1532453810  16.097007751  600           1.1383035533 
-0.6760219646  0.6625916870  0.4307036247  0.4230769231  0.9970059880  0.9820359281  0.2805343511  0.3184713376  21.556886227  0.0925686057  16.097007751  900           1.1398197500 
-Best model upto now
-0.7449664430  0.7579462103  0.5117270789  0.4957264957  1.0000000000  0.9940119760  0.2395038168  0.2484076433  7.1856287425  0.3890824030  16.097128391  300           5.0878215440 
-0.7528981086  0.7334963325  0.5469083156  0.5598290598  1.0000000000  0.9940119760  0.2729007634  0.2751592357  28.742514970  0.0652357569  16.097007751  1200          1.1379035672 
-Best model upto now
-0.7803538743  0.7506112469  0.5975479744  0.6025641026  1.0000000000  1.0000000000  0.3590966921  0.3732484076  35.928143712  0.0796346600  16.097007751  1500          1.1376807841 
-0.7223917023  0.7090464548  0.5458422175  0.5448717949  1.0000000000  0.9850299401  0.4309796438  0.4420382166  43.113772455  0.0856721649  16.097158908  1800          1.1380326406 
-Best model upto now
-0.7217815741  0.7066014670  0.6002132196  0.6196581197  1.0000000000  1.0000000000  0.4589694656  0.4598726115  50.299401197  0.0343570976  16.097159385  2100          1.1361735408 
-Best model upto now
-0.7547284930  0.7726161369  0.4888059701  0.4508547009  0.9992514970  0.9940119760  0.2162849873  0.2254777070  14.371257485  0.1511572896  16.097128391  600           5.0833166154 
-Best model upto now
-0.6998169616  0.6919315403  0.5810234542  0.6068376068  1.0000000000  1.0000000000  0.4147582697  0.4573248408  57.485029940  0.0519248327  16.097159385  2400          1.1370682597 
-Best model upto now
-0.7413056742  0.7286063570  0.4744136461  0.4743589744  1.0000000000  1.0000000000  0.3794529262  0.3961783439  64.670658682  0.0446531922  16.097160339  2700          1.1363694557 
-0.7126296522  0.7066014670  0.4498933902  0.4337606838  1.0000000000  0.9970059880  0.2283715013  0.2420382166  71.856287425  0.0399063165  16.097160339  3000          1.1388442993 
-0.7211714460  0.7286063570  0.4936034115  0.4850427350  1.0000000000  0.9970059880  0.3486005089  0.3490445860  79.041916167  0.0476025841  16.097160339  3300          1.1370121280 
-Best model upto now
-0.7504575961  0.7726161369  0.4930703625  0.4850427350  1.0000000000  0.9940119760  0.2188295165  0.2216560510  21.556886227  0.0590081547  16.097128391  900           5.0821511952 
-0.7321537523  0.7114914425  0.4669509595  0.4658119658  1.0000000000  0.9970059880  0.2480916031  0.2433121019  86.227544910  0.0368692231  16.097160339  3600          1.1373923747 
-0.5649786455  0.4889975550  0.4077825160  0.4017094017  0.9992514970  0.9820359281  0.3619592875  0.3707006369  93.413173652  0.0809381893  16.097160339  3900          1.1368979923 
-Best model upto now
-0.7309334960  0.7188264059  0.5000000000  0.5000000000  1.0000000000  1.0000000000  0.3565521628  0.3745222930  100.59880239  0.0611211600  16.097160339  4200          1.1364028351 
-Best model upto now
-0.7193410616  0.7114914425  0.5095948827  0.5320512821  1.0000000000  1.0000000000  0.3683206107  0.3910828025  107.78443113  0.0311653863  16.097160339  4500          1.1359412789 
-0.7449664430  0.7628361858  0.4392324094  0.4123931624  1.0000000000  0.9820359281  0.2102417303  0.2280254777  28.742514970  0.0848572090  16.097128391  1200          5.0800089002 
-Best model upto now
-0.7175106772  0.7066014670  0.4301705757  0.4081196581  0.9992514970  1.0000000000  0.2808524173  0.2980891720  114.97005988  0.0577340497  16.097160339  4800          1.1367654268 
-0.7010372178  0.6845965770  0.5229211087  0.5128205128  1.0000000000  0.9970059880  0.4306615776  0.4407643312  119.76047904  0.0324326430  16.097160339  5000          1.1360169518 
-0.7303233679  0.7677261614  0.4189765458  0.4059829060  1.0000000000  0.9910179641  0.1879770992  0.2025477707  35.928143712  0.0419218271  16.097128391  1500          5.1697094957 
-0.7169005491  0.7408312958  0.3875266525  0.3696581197  0.9992514970  0.9880239521  0.1962468193  0.2038216561  43.113772455  0.0974877768  16.097128391  1800          5.2062023592 
-0.6967663209  0.7188264059  0.5826226013  0.5769230769  1.0000000000  0.9910179641  0.3158396947  0.3261146497  50.299401197  0.0709766563  16.097128391  2100          5.1978032041 
-0.6955460647  0.7066014670  0.5474413646  0.5256410256  1.0000000000  0.9910179641  0.1965648855  0.2012738854  57.485029940  0.0485163507  16.097128391  2400          5.2025724276 
-0.6815131178  0.6870415648  0.4642857143  0.4658119658  1.0000000000  0.9850299401  0.1615776081  0.1757961783  64.670658682  0.0730120683  16.097128391  2700          5.2038275266 
-0.6424649176  0.6454767726  0.4717484009  0.4487179487  1.0000000000  0.9910179641  0.1657124682  0.1808917197  71.856287425  0.0727548780  16.097128391  3000          5.2064432820 
-0.7309334960  0.7506112469  0.5447761194  0.5299145299  1.0000000000  0.9880239521  0.1908396947  0.2000000000  79.041916167  0.0627464689  16.097128391  3300          5.2030999160 
-0.7474069555  0.7432762836  0.5197228145  0.5149572650  1.0000000000  0.9880239521  0.1968829517  0.2076433121  86.227544910  0.0242708965  16.097128391  3600          5.1989234058 
-0.7394752898  0.7603911980  0.4664179104  0.4615384615  1.0000000000  0.9820359281  0.1698473282  0.1808917197  93.413173652  0.0437678396  16.097128391  3900          5.1935828733 
-0.7370347773  0.7555012225  0.4840085288  0.4786324786  1.0000000000  0.9820359281  0.1679389313  0.1821656051  100.59880239  0.0408406650  16.097128391  4200          5.1923772947 
-0.7120195241  0.7090464548  0.5111940299  0.4914529915  1.0000000000  0.9880239521  0.1708015267  0.1834394904  107.78443113  0.0669701390  16.097128391  4500          5.1927820643 
-0.6510067114  0.6356968215  0.4840085288  0.4786324786  1.0000000000  0.9820359281  0.1825699746  0.1936305732  114.97005988  0.0344351002  16.097128391  4800          5.1940029248 
-0.7004270897  0.7188264059  0.5415778252  0.5641025641  1.0000000000  0.9880239521  0.1956106870  0.2063694268  119.76047904  0.0231392709  16.097128391  5000          5.1842314112 
-Not launched: ./Results/PACS/RandConv_ViT/ViTBase/t013_s0 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-Not launched: ./Results/PACS/RandConv_ViT/ViTBase/t013_s1 ('PACS', 'RandConv_ViT', [0, 1, 3], 0)
-2 jobs: 0 done, 0 incomplete, 2 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/ViTBase/t013_s0 --seed 1069331662 --task domain_generalization --test_envs 0 1 3 --trial_seed 0
-
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT/ViTBase/t013_s1 --seed 1395107178 --task domain_generalization --test_envs 0 1 3 --trial_seed 1
-About to launch 2 jobs.
-Good to go
-Launching...
-Making job directories:
-WARNING: using experimental multi_gpu_launcher.
-Launched 2 jobs!
+Loading dataset
+0it [00:00, ?it/s]1it [00:00,  4.09it/s]2it [00:00,  3.32it/s]3it [00:00,  3.34it/s]4it [00:01,  3.13it/s]5it [00:01,  2.89it/s]6it [00:01,  2.83it/s]7it [00:02,  2.55it/s]8it [00:02,  2.53it/s]9it [00:03,  2.55it/s]10it [00:03,  2.40it/s]11it [00:04,  2.43it/s]12it [00:04,  2.48it/s]13it [00:04,  2.50it/s]14it [00:05,  2.53it/s]15it [00:05,  2.50it/s]16it [00:06,  2.44it/s]17it [00:06,  2.48it/s]18it [00:07,  2.28it/s]19it [00:07,  2.26it/s]20it [00:07,  2.25it/s]21it [00:08,  2.26it/s]21it [00:08,  2.51it/s]
+Traceback (most recent call last):
+  File "evaluvation.py", line 189, in <module>
+    acc = validation_accuracy(model, loader, weights, device, args.algorithm)
+  File "evaluvation.py", line 108, in validation_accuracy
+    if len(p.shape)==1:
+AttributeError: 'list' object has no attribute 'shape'

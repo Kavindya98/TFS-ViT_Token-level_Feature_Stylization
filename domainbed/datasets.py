@@ -34,6 +34,7 @@ DATASETS = [
     "SVIRO",
     "ImageNet_9",
     "ImageNet_C",
+    "ImageNet_val"
     # WILDS datasets
     "WILDSCamelyon",
     "WILDSFMoW"
@@ -396,9 +397,17 @@ class ImageNet_C(MultipleEnvironmentImageFolder):
 class ImageNet(MultipleEnvironmentImageFolder):
     N_STEPS = 5000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ["train","val"]
+    ENVIRONMENTS = ["train","valid"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "ImageNet/")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
+class ImageNet_val(MultipleEnvironmentImageFolder):
+    N_STEPS = 5000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ["val"]
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "ImageNet_val/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
     
 class OfficeHome(MultipleEnvironmentImageFolder):

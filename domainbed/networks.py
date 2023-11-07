@@ -91,10 +91,10 @@ class ResNet(torch.nn.Module):
 
             for i in range(nc):
                 self.network.conv1.weight.data[:, i, :, :] = tmp[:, i % 3, :, :]
-        hparams['Empty_fc']:
+        if hparams['empty_fc']:
             del self.network.fc
             self.network.fc = Identity()
-        # self.freeze_bn()
+        self.freeze_bn()
         self.hparams = hparams
         self.dropout = nn.Dropout(hparams['resnet_dropout'])
 

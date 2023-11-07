@@ -247,9 +247,6 @@ if __name__ == "__main__":
 
     algorithm.to(device)
 
-    # if args.algorithm == 'RandConv':
-    #     algorithm.rand_conv_module_cuda()
-
     train_minibatches_iterator = zip(*train_loaders)
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])

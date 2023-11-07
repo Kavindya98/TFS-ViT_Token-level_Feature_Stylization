@@ -682,7 +682,8 @@ class RandConv_CNN(ERM):
         self.ks = 1
         self.input_shape = input_shape
         self.identity_prob = self.hparams["identity_prob"]
-        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        if not self.hparams["eval"]:
+            self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         
 
     def randomize_kernel(self):
@@ -770,7 +771,8 @@ class RandConv_ViT(ERM_ViT):
         self.ks = 3
         self.input_shape = input_shape
         self.identity_prob = self.hparams["identity_prob"]
-        self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+        if not self.hparams["eval"]:
+            self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         
 
     def randomize_kernel(self):
@@ -2406,17 +2408,20 @@ def return_backbone_network(network_name, num_classes, hparams):
             'deit_small_patch16_224',
             pretrained=True, source='local')
         #network.head = Identity()
+
         network.head = nn.Linear(384, num_classes)
         
     elif network_name == "DeiTBase":
         network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
         print("DeiTBase Network")
-        network.head = nn.Linear(768, num_classes)
+        if hparams['empty_head']:
+            network.head = nn.Linear(768, num_classes)
 
     elif network_name == "ViTBase":
         network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
         print("ViTBase Network")
-        network.head = nn.Linear(768, num_classes)
+        if hparams['empty_head']:
+            network.head = nn.Linear(768, num_classes)
         
     elif network_name == "T2T14":
         network = t2t_vit_t_14()
