@@ -1,63 +1,12 @@
-device: cuda:1
-Current cuda device  0
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  4.07it/s]2it [00:00,  3.64it/s]3it [00:01,  2.72it/s]4it [00:01,  2.63it/s]5it [00:01,  2.59it/s]6it [00:02,  2.65it/s]7it [00:02,  2.32it/s]8it [00:03,  2.50it/s]9it [00:03,  2.50it/s]10it [00:03,  2.40it/s]11it [00:04,  2.38it/s]12it [00:04,  2.43it/s]13it [00:05,  2.27it/s]14it [00:05,  2.39it/s]15it [00:06,  2.31it/s]16it [00:06,  2.23it/s]17it [00:07,  2.23it/s]18it [00:07,  2.28it/s]19it [00:07,  2.26it/s]20it [00:08,  2.20it/s]21it [00:08,  2.16it/s]21it [00:08,  2.38it/s]
-env_blur_1_acc 0.52588
-env_blur_2_acc 0.39268
-env_blur_3_acc 0.17128
-env_blur_4_acc 0.13002
-env_blur_5_acc 0.09218
-env_digital_1_acc 0.62908
-env_digital_2_acc 0.56318
-env_digital_3_acc 0.43572
-env_digital_4_acc 0.18456
-env_digital_5_acc 0.04546
-env_noise_1_acc 0.47826
-env_noise_2_acc 0.32048
-env_noise_3_acc 0.1567
-env_noise_4_acc 0.05616
-env_noise_5_acc 0.01164
-env_real_acc 0.7292
-env_weather_1_acc 0.59618
-env_weather_2_acc 0.53358
-env_weather_3_acc 0.44238
-env_weather_4_acc 0.37562
-env_weather_5_acc 0.22008
-device: cuda:1
-Current cuda device  0
-Using cache found in /home/kavindya/.cache/torch/hub/facebookresearch_deit_main
-DeiTBase Network
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  4.49it/s]2it [00:00,  3.87it/s]3it [00:00,  3.37it/s]4it [00:01,  3.25it/s]5it [00:01,  2.80it/s]6it [00:01,  2.75it/s]7it [00:02,  2.51it/s]8it [00:02,  2.58it/s]9it [00:03,  2.63it/s]10it [00:03,  2.41it/s]11it [00:04,  2.35it/s]12it [00:04,  2.26it/s]13it [00:05,  2.26it/s]14it [00:05,  2.25it/s]15it [00:05,  2.21it/s]16it [00:06,  2.18it/s]17it [00:06,  2.16it/s]18it [00:07,  2.28it/s]19it [00:07,  2.36it/s]20it [00:08,  2.25it/s]21it [00:08,  2.34it/s]21it [00:08,  2.45it/s]
-env_blur_1_acc 0.69152
-env_blur_2_acc 0.61772
-env_blur_3_acc 0.38698
-env_blur_4_acc 0.3147
-env_blur_5_acc 0.2177
-env_digital_1_acc 0.75836
-env_digital_2_acc 0.74274
-env_digital_3_acc 0.71252
-env_digital_4_acc 0.62438
-env_digital_5_acc 0.4342
-env_noise_1_acc 0.77086
-env_noise_2_acc 0.7387
-env_noise_3_acc 0.68428
-env_noise_4_acc 0.58524
-env_noise_5_acc 0.40914
-env_real_acc 0.79016
-env_weather_1_acc 0.70978
-env_weather_2_acc 0.6661
-env_weather_3_acc 0.6469
-env_weather_4_acc 0.63648
-env_weather_5_acc 0.57598
-device: cuda:1
-Current cuda device  0
-ViTBase Network
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  4.09it/s]2it [00:00,  3.32it/s]3it [00:00,  3.34it/s]4it [00:01,  3.13it/s]5it [00:01,  2.89it/s]6it [00:01,  2.83it/s]7it [00:02,  2.55it/s]8it [00:02,  2.53it/s]9it [00:03,  2.55it/s]10it [00:03,  2.40it/s]11it [00:04,  2.43it/s]12it [00:04,  2.48it/s]13it [00:04,  2.50it/s]14it [00:05,  2.53it/s]15it [00:05,  2.50it/s]16it [00:06,  2.44it/s]17it [00:06,  2.48it/s]18it [00:07,  2.28it/s]19it [00:07,  2.26it/s]20it [00:07,  2.25it/s]21it [00:08,  2.26it/s]21it [00:08,  2.51it/s]
-Traceback (most recent call last):
-  File "evaluvation.py", line 189, in <module>
-    acc = validation_accuracy(model, loader, weights, device, args.algorithm)
-  File "evaluvation.py", line 108, in validation_accuracy
-    if len(p.shape)==1:
-AttributeError: 'list' object has no attribute 'shape'
+  File "evaluvation.py", line 94
+    p = model.predict(x)
+                       ^
+TabError: inconsistent use of tabs and spaces in indentation
+  File "evaluvation.py", line 94
+    p = model.predict(x)
+                       ^
+TabError: inconsistent use of tabs and spaces in indentation
+  File "evaluvation.py", line 94
+    p = model.predict(x)
+                       ^
+TabError: inconsistent use of tabs and spaces in indentation

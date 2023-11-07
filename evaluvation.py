@@ -91,11 +91,11 @@ def validation_accuracy(model, loader, weights, device, algorithm):
         for x, y in loader:
             x = x.to(device)
             y = y.to(device)
-
-            if algorithm == None:
-                p = model.predict(x)
-            else:    
-                p = model(x)
+	    p = model.predict(x)
+            #if algorithm == None:
+                #p = model.predict(x)
+            #else:    
+                #p = model(x)
             
             
             if weights is None:
@@ -126,6 +126,9 @@ def get_algorithm(algorithm):
     hparams['empty_fc']=False
     hparams['resnet_dropout']=0 
     hparams['empty_head']=False
+    hparams['fixed_featurizer']=False
+    hparams["lr"]=0
+    hparams['weight_decay']=0
 
     algo = None
     if algorithm == "ResNet50":
