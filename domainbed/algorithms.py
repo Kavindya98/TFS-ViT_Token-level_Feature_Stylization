@@ -836,7 +836,7 @@ class RandConv_ViT(ERM_ViT):
             self.randomize_kernel()
         self.randomize()
         self.rand_conv_module_cuda()
-        all_x = self.randConv_Op(all_x)
+        #all_x = self.randConv_Op(all_x)
         out = self.predict(all_x)
         loss = F.cross_entropy(out, all_y)
 
