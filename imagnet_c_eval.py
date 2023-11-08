@@ -10,7 +10,7 @@ if __name__ == "__main__":
     parser.add_argument('--cases', type=int, default=0)
     args = parser.parse_args()
 
-    data = json.load(open(args.input_dir))
+    data = json.load(open(os.path.join(args.input_dir,'results.jsonl')))
 
     domain = {"blur":[], "digital":[], "noise":[], "weather":[], "real":[]}
 
