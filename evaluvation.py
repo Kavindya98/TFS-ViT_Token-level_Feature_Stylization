@@ -167,9 +167,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if torch.cuda.is_available():
-        device = "cuda:1"
+        device = "cuda:3"
     else:
         device = "cpu"
+
+    if not os.path.exists(args.output_dir):
+        os.mkdir(args.output_dir)
 
     print('device:', device)
     print ('Current cuda device ', torch.cuda.current_device())
@@ -208,8 +211,7 @@ if __name__ == "__main__":
                 'hparams': hparams,
                 # 'args': vars(model_args)
             })
-    if not os.path.exists(args.output_dir):
-        os.mkdir(args.output_dir)
+    
     epochs_path = os.path.join(args.output_dir, 'results.jsonl')
     with open(epochs_path, 'a') as f:
         f.write(json.dumps(results, sort_keys=True) + "\n")

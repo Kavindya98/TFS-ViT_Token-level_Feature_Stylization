@@ -16,6 +16,7 @@ from domainbed.lib.t2t_vit import t2t_vit_t_14
 from domainbed.lib.t2t_utils import load_for_transfer_learning
 import random
 import timm
+from transformers import  ViTForImageClassification
 
 
 import copy
@@ -175,7 +176,7 @@ class ERM_ViT(Algorithm):
         if self.hparams['fixed_featurizer']:
             print("fine_tuning_only")
             for name, param in self.network.named_parameters():
-                if not "head" in name:
+                if (not "head" in name) or (not "classifier" in name):
                     param.requires_grad = False
             self.optimizer = torch.optim.AdamW(
                 self.network.head.parameters(),
@@ -2420,10 +2421,14 @@ def return_backbone_network(network_name, num_classes, hparams):
             network.head = nn.Linear(768, num_classes)
 
     elif network_name == "ViTBase":
-        network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
+        # network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
+        # print("ViTBase Network")
+        # if hparams['empty_head']:
+        #     network.head = nn.Linear(768, num_classes)
+        network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
         print("ViTBase Network")
         if hparams['empty_head']:
-            network.head = nn.Linear(768, num_classes)
+            network.classifier = nn.Linear(768, num_classes)
         
     elif network_name == "T2T14":
         network = t2t_vit_t_14()
