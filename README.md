@@ -17,7 +17,7 @@ Standard deep learning models such as convolutional neural networks (CNNs) lack 
 
 
 ### Usage
-1- Clone the repository
+1- Clone the repository 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
 
 2- Create an environment and Install the requirements
 
