@@ -115,6 +115,8 @@ def validation_accuracy(model, loader, weights, device, algorithm):
                 # print('p hai ye', p.size(1))
                 correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
             total += batch_weights.sum().item()
+            print("Output +++++", p.argmax(1))
+            break
             
     return correct / total   
 
