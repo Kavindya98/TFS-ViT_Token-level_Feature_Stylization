@@ -113,8 +113,8 @@ def validation_accuracy(model, loader, weights, device, dataset, conversion_arra
                 correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
             else:
                 # print('p hai ye', p.size(1))
-                if dataset == "ImageNet_9":
-                    correct = (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
+                if dataset == "ImageNet_9" or dataset == "Cue_conflicts":
+                    correct += (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
                 else:
                     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
             total += batch_weights.sum().item()
@@ -214,6 +214,10 @@ if __name__ == "__main__":
     if args.dataset == "ImageNet_9":
         with open('in_to_in9.json', 'r') as f:
             conversion_array.update(json.load(f))
+    elif args.dataset == "Cue_conflicts":
+        with open('cue_conflicts.json', 'r') as f:
+            conversion_array.update(json.load(f))
+    
 
 
     for name, loader, weights in evals:

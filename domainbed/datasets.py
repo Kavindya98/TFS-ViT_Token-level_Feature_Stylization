@@ -37,7 +37,8 @@ DATASETS = [
     "ImageNet_val"
     # WILDS datasets
     "WILDSCamelyon",
-    "WILDSFMoW"
+    "WILDSFMoW",
+    "Cue_conflicts",
 ]
 
 def get_dataset_class(dataset_name):
@@ -364,6 +365,14 @@ class ImageNet_9(MultipleEnvironmentImageFolder):
     ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original','valid']
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "ImageNet_9/")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
+class Cue_conflicts(MultipleEnvironmentImageFolder):
+    N_STEPS = 10000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ['texture']
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "Cue_conflicts_stimuli/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_C(MultipleEnvironmentImageFolder):
