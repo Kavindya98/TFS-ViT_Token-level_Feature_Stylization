@@ -354,15 +354,15 @@ class DomainNet(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 1000
     ENVIRONMENTS = ["clip", "info", "paint", "quick", "real", "sketch"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "DomainNet/")
+        self.dir = os.path.join(root, "DomainNet/un")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_9(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original','valid']
+    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg']
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_9/")
+        self.dir = os.path.join(root, "ImageNet_9/un_processed")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_C(MultipleEnvironmentImageFolder):
