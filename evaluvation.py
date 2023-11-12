@@ -83,7 +83,7 @@ def load_eval_dataset(dataset_name, data_dir, hparms):
                          for i in dataset.ENVIRONMENTS]
     return eval_loaders, eval_weights, eval_loader_names
 
-def validation_accuracy(model, loader, weights, device, algorithm):
+def validation_accuracy(model, loader, weights, device, dataset, conversion_array=None):
     correct = 0
     total = 0
     model.eval()
@@ -113,12 +113,20 @@ def validation_accuracy(model, loader, weights, device, algorithm):
                 correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
             else:
                 # print('p hai ye', p.size(1))
-                correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
+                if dataset == "ImageNet_9":
+                    correct = (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
+                else:
+                    correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
             total += batch_weights.sum().item()
-            print("Output +++++", p.argmax(1))
-            break
+            
             
     return correct / total   
+
+def imageNet_9_conversion(output, conversion_array):
+    result = output
+    for j in range(len(output)):
+        result[j]=conversion_array[str(output[j].item())]
+    return result
 
 def get_algorithm(algorithm):
 
@@ -202,8 +210,14 @@ if __name__ == "__main__":
 
     results = dict()
 
+    conversion_array = {}
+    if args.dataset == "ImageNet_9":
+        with open('in_to_in9.json', 'r') as f:
+            conversion_array.update(json.load(f))
+
+
     for name, loader, weights in evals:
-        acc = validation_accuracy(model, loader, weights, device, args.algorithm)
+        acc = validation_accuracy(model, loader, weights, device, args.dataset, conversion_array)
         print(name + '_acc',acc)
         results[name + '_acc'] = acc
     
