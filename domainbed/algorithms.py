@@ -2425,7 +2425,8 @@ def return_backbone_network(network_name, num_classes, hparams):
         # print("ViTBase Network")
         # if hparams['empty_head']:
         #     network.head = nn.Linear(768, num_classes)
-        network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
+        #network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
+        network = timm.create_model("vit_large_patch16_224",pretrained=True)
         print("ViTBase Network")
         if hparams['empty_head']:
             network.classifier = nn.Linear(768, num_classes)
