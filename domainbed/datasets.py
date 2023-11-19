@@ -362,9 +362,9 @@ class DomainNet(MultipleEnvironmentImageFolder):
 class ImageNet_9(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg']
+    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_9/un_processed")
+        self.dir = os.path.join(root, "ImageNet_9/processed")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class Cue_conflicts(MultipleEnvironmentImageFolder):
@@ -401,15 +401,15 @@ class ImageNet_C(MultipleEnvironmentImageFolder):
                     'weather_5']
                 
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "Imagenet-C/processed/")
+        self.dir = os.path.join(root, "Imagenet-C/processed_2/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet(MultipleEnvironmentImageFolder):
-    N_STEPS = 5000
-    CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ["train","valid"]
+    N_STEPS = 120110
+    CHECKPOINT_FREQ = 1000
+    ENVIRONMENTS = ["train","val"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet/")
+        self.dir = os.path.join(root, "ImageNet_V2/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_val(MultipleEnvironmentImageFolder):

@@ -6,7 +6,7 @@ do
         --output_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet_9/${folder}/${file} \
         --saved_model /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet/New/${folder}/${file}/IID_best.pkl --device cuda:2
 
-        python -u imagnet_c_eval.py --input_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet_9/${folder}/${file} --device cuda:2
+        
     done
 done
 

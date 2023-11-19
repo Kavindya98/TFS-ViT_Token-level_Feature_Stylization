@@ -174,11 +174,13 @@ if __name__ == "__main__":
     parser.add_argument('--algorithm', type=str, default=None)
     parser.add_argument('--output_dir', type=str, default="test_ViT_RB")
     parser.add_argument('--saved_model', type=str, default=None)
+    parser.add_argument('--device', type=str, default="cuda:2")
     parser.add_argument('--saved_model_evaluvator', action='store_true')
+    
     args = parser.parse_args()
 
     if torch.cuda.is_available():
-        device = "cuda:3"
+        device = args.device
     else:
         device = "cpu"
 

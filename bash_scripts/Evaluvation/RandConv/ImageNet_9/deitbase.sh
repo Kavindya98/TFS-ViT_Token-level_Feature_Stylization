@@ -1,12 +1,13 @@
-for folder in RandConv_ViT/ViTBase
+for folder in RandConv_ViT/DeiTBase
 do
-    for file in t1_s0 t1_s1
+    for file in t1_s0 
     do 
         python -u evaluvation.py --data_dir /media/SSD2/Dataset --dataset ImageNet_9 \
         --output_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet_9/${folder}/${file} \
-        --saved_model /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet/New/${folder}/${file}/IID_best.pkl --device cuda:2
+        --saved_model /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet/New/${folder}/${file}/IID_best.pkl \
+        --device cuda:1
 
-        python -u imagnet_c_eval.py --input_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet_9/${folder}/${file} --device cuda:2
+        
     done
 done
 

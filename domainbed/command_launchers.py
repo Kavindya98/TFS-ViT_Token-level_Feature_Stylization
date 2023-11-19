@@ -123,12 +123,13 @@ def gpu_launcher_3(commands):
     while len(commands) > 0:
         for gpu_idx in range(n_gpus):
             proc = procs_by_gpu[gpu_idx]
+
             if (proc is None) or (proc.poll() is not None):
                 # Nothing is running on this GPU; launch a command.
                 cmd = commands.pop(0)
                 expoo="export"
                 new_proc = subprocess.Popen(
-                    f'CUDA_VISIBLE_DEVICES={gpu_idx+4} {cmd}', shell=True)
+                    f'CUDA_VISIBLE_DEVICES={gpu_idx+3} {cmd}', shell=True)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
@@ -154,7 +155,7 @@ def gpu_launcher_4(commands):
                 cmd = commands.pop(0)
                 expoo="export"
                 new_proc = subprocess.Popen(
-                    f'CUDA_VISIBLE_DEVICES={gpu_idx+3} {cmd}', shell=True)
+                    f'CUDA_VISIBLE_DEVICES={gpu_idx+4} {cmd}', shell=True)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
