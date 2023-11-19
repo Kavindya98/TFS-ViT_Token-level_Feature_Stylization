@@ -97,27 +97,33 @@ def validation_accuracy(model, loader, weights, device, dataset, conversion_arra
             #else:    
                 #p = model(x)
             
+            _, pred = p.topk(1, 1, True, True)
+            pred = pred.cpu().detach()[:, 0]
+            pred_list = list(pred.numpy())
+            pred = torch.LongTensor([conversion_array[str(x)] for x in pred_list])
+            correct += (pred==y).sum().item()
             
             if weights is None:
                 batch_weights = torch.ones(len(x))
             else:
                 batch_weights = weights[weights_offset: weights_offset + len(x)]
                 weights_offset += len(x)
-            batch_weights = batch_weights.to(device)
-            # print(p.shape)
-            if len(p.shape)==1:
-                p = p.reshape(1,-1)
-            if p.size(1) == 1:
-               
-                # if p.size(1) == 1:
-                correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
-            else:
-                # print('p hai ye', p.size(1))
 
-                if dataset == "ImageNet_9" or dataset == "Cue_conflicts":
-                    correct += (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
-                else:
-                    correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
+            #batch_weights = batch_weights.to(device)
+            # # print(p.shape)
+            # if len(p.shape)==1:
+            #     p = p.reshape(1,-1)
+            # if p.size(1) == 1:
+               
+            #     # if p.size(1) == 1:
+            #     correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
+            # else:
+            #     # print('p hai ye', p.size(1))
+
+            #     if dataset == "ImageNet_9" or dataset == "Cue_conflicts":
+            #         correct += (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
+            #     else:
+            #         correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
             total += batch_weights.sum().item()
             
             
