@@ -12,6 +12,7 @@ import PIL
 import torch
 import torchvision
 import torch.utils.data
+import torch.nn as nn
 import copy
 
 from domainbed import datasets
@@ -87,10 +88,11 @@ def validation_accuracy(model, loader, weights, device, dataset, conversion_arra
     correct = 0
     total = 0
     model.eval()
+    #model = nn.DataParallel(model,device_ids=[0])
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
-            y = y.to(device)
+            #y = y.to(device)
             p = model.predict(x)
             #if algorithm == None:
                 #p = model.predict(x)
@@ -98,8 +100,8 @@ def validation_accuracy(model, loader, weights, device, dataset, conversion_arra
                 #p = model(x)
             
             _, pred = p.topk(1, 1, True, True)
-            pred = pred.cpu().detach()[:, 0]
-            pred_list = list(pred.numpy())
+            pred = pred.cuda().detach()[:, 0]
+            pred_list = list(pred.cpu().numpy())
             pred = torch.LongTensor([conversion_array[str(x)] for x in pred_list])
             correct += (pred==y).sum().item()
             
