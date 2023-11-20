@@ -262,7 +262,7 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         super().__init__()
         environments = [f.name for f in os.scandir(root) if f.is_dir()]
         environments = sorted(environments) # list of all domains in the dataset, in sorted order
-
+        self.ENVIRONMENTS = environments
         transform = transforms.Compose([
             transforms.Resize((224,224)),
             transforms.ToTensor(),
@@ -362,9 +362,9 @@ class DomainNet(MultipleEnvironmentImageFolder):
 class ImageNet_9(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
+    #ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_9/processed")
+        self.dir = os.path.join(root, "bg_challenge/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class Cue_conflicts(MultipleEnvironmentImageFolder):
