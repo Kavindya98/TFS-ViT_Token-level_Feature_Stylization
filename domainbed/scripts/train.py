@@ -225,15 +225,21 @@ if __name__ == "__main__":
         for i, (env, env_weights) in enumerate(uda_splits)
         if i in args.test_envs]
 
+    # eval_loaders = [FastDataLoader(
+    #     dataset=env,
+    #     batch_size=64,
+    #     num_workers=dataset.N_WORKERS)
+    #     for env, _ in (in_splits + out_splits + uda_splits)]
     eval_loaders = [FastDataLoader(
         dataset=env,
-        batch_size=64,
+        batch_size=128,
         num_workers=dataset.N_WORKERS)
-        for env, _ in (in_splits + out_splits + uda_splits)]
-    eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
-    eval_loader_names = ['env{}_in'.format(i)
-                         for i in range(len(in_splits))]
-    eval_loader_names += ['env{}_out'.format(i)
+        for env, _ in (out_splits + uda_splits)]
+    # #eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
+    eval_weights = [None for _, weights in (out_splits + uda_splits)]
+    # eval_loader_names = ['env{}_in'.format(i)
+    #                      for i in range(len(in_splits))]
+    eval_loader_names = ['env{}_out'.format(i)
                           for i in range(len(out_splits))]
     eval_loader_names += ['env{}_uda'.format(i)
                           for i in range(len(uda_splits))]
@@ -317,12 +323,13 @@ if __name__ == "__main__":
             temp_acc = 0
             temp_count = 0
             for name, loader, weights in evals:
-                acc = misc.accuracy(algorithm, loader, weights, device)
+                acc,loss = misc.accuracy(algorithm, loader, weights, device)
                 if args.save_best_model:
                     if int(name[3]) not in args.test_envs and "out" in name:
                         temp_acc += acc
                         temp_count += 1
                 results[name + '_acc'] = acc
+                results[name + '_loss'] = loss
             # print("Validation done")    
             if args.save_best_model:
                 val_acc = temp_acc / (temp_count * 1.0)

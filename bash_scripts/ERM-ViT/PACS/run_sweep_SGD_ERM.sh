@@ -3,7 +3,7 @@
 algorithms=ERM
 datasets=PACS # PACS, VLCS, OfficeHome, TerraIncognita, DomainNet, ImageNet_9 
 data_dir=/media/SSD2/Dataset 
-output_dir=./Results/${datasets}/ERM/ResNet_18_3
+output_dir=./Results/${datasets}/ERM/ResNet_18_4
 
 for command in delete_incomplete launch
 do

@@ -45,9 +45,9 @@ def _cfg(url='', **kwargs):
         'first_conv': 'patch_embed.proj', 'classifier': 'head',
         **kwargs
     }
+#pretrained_cfg
 
-
-default_cfgs = {
+pretrained_cfg = {
     # patch models
     'vit_small_patch16_224': _cfg(
         url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/vit_small_p16_224-15ec54c9.pth',
@@ -245,7 +245,7 @@ class VisionTransformer(nn.Module):
 
     def __init__(self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0.,
-                 drop_path_rate=0., hybrid_backbone=None, norm_layer=nn.LayerNorm):
+                 drop_path_rate=0., hybrid_backbone=None, norm_layer=nn.LayerNorm,**kwargs):
         super().__init__()
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -964,7 +964,7 @@ def vit_small_patch16_224(pretrained=False, **kwargs):
         # NOTE my scale was wrong for original weights, leaving this here until I have better ones for this model
         kwargs.setdefault('qk_scale', 768 ** -0.5)
     model = VisionTransformer(patch_size=16, embed_dim=768, depth=8, num_heads=8, mlp_ratio=3., **kwargs)
-    model.default_cfg = default_cfgs['vit_small_patch16_224']
+    model.pretrained_cfg = pretrained_cfg['vit_small_patch16_224']
     if pretrained:
         load_pretrained(
             model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3), filter_fn=_conv_filter)
@@ -976,7 +976,7 @@ def vit_base_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
         patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_base_patch16_224']
+    model.pretrained_cfg = pretrained_cfg['vit_base_patch16_224']
     if pretrained:
         load_pretrained(
             model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3), filter_fn=_conv_filter)
@@ -988,7 +988,7 @@ def vit_base_patch16_384(pretrained=False, **kwargs):
     model = VisionTransformer(
         img_size=384, patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_base_patch16_384']
+    model.pretrained_cfg = pretrained_cfg['vit_base_patch16_384']
     if pretrained:
         load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
     return model
@@ -999,7 +999,7 @@ def vit_base_patch32_384(pretrained=False, **kwargs):
     model = VisionTransformer(
         img_size=384, patch_size=32, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_base_patch32_384']
+    model.pretrained_cfg = pretrained_cfg['vit_base_patch32_384']
     if pretrained:
         load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
     return model
@@ -1010,7 +1010,7 @@ def vit_large_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
         patch_size=16, embed_dim=1024, depth=24, num_heads=16, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_large_patch16_224']
+    model.pretrained_cfg = pretrained_cfg['vit_large_patch16_224']
     if pretrained:
         load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
     return model
@@ -1021,7 +1021,7 @@ def vit_large_patch16_384(pretrained=False, **kwargs):
     model = VisionTransformer(
         img_size=384, patch_size=16, embed_dim=1024, depth=24, num_heads=16, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_large_patch16_384']
+    model.pretrained_cfg = pretrained_cfg['vit_large_patch16_384']
     if pretrained:
         load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
     return model
@@ -1032,7 +1032,7 @@ def vit_large_patch32_384(pretrained=False, **kwargs):
     model = VisionTransformer(
         img_size=384, patch_size=32, embed_dim=1024, depth=24, num_heads=16, mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
-    model.default_cfg = default_cfgs['vit_large_patch32_384']
+    model.pretrained_cfg = pretrained_cfg['vit_large_patch32_384']
     if pretrained:
         load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
     return model
@@ -1041,7 +1041,7 @@ def vit_large_patch32_384(pretrained=False, **kwargs):
 @register_model
 def vit_huge_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(patch_size=16, embed_dim=1280, depth=32, num_heads=16, mlp_ratio=4, **kwargs)
-    model.default_cfg = default_cfgs['vit_huge_patch16_224']
+    model.pretrained_cfg = pretrained_cfg['vit_huge_patch16_224']
     return model
 
 
@@ -1049,7 +1049,7 @@ def vit_huge_patch16_224(pretrained=False, **kwargs):
 def vit_huge_patch32_384(pretrained=False, **kwargs):
     model = VisionTransformer(
         img_size=384, patch_size=32, embed_dim=1280, depth=32, num_heads=16, mlp_ratio=4, **kwargs)
-    model.default_cfg = default_cfgs['vit_huge_patch32_384']
+    model.pretrained_cfg = pretrained_cfg['vit_huge_patch32_384']
     return model
 
 
@@ -1059,7 +1059,7 @@ def vit_small_resnet26d_224(pretrained=False, **kwargs):
     backbone = resnet26d(pretrained=pretrained_backbone, features_only=True, out_indices=[4])
     model = VisionTransformer(
         img_size=224, embed_dim=768, depth=8, num_heads=8, mlp_ratio=3, hybrid_backbone=backbone, **kwargs)
-    model.default_cfg = default_cfgs['vit_small_resnet26d_224']
+    model.pretrained_cfg = pretrained_cfg['vit_small_resnet26d_224']
     return model
 
 
@@ -1069,7 +1069,7 @@ def vit_small_resnet50d_s3_224(pretrained=False, **kwargs):
     backbone = resnet50d(pretrained=pretrained_backbone, features_only=True, out_indices=[3])
     model = VisionTransformer(
         img_size=224, embed_dim=768, depth=8, num_heads=8, mlp_ratio=3, hybrid_backbone=backbone, **kwargs)
-    model.default_cfg = default_cfgs['vit_small_resnet50d_s3_224']
+    model.pretrained_cfg = pretrained_cfg['vit_small_resnet50d_s3_224']
     return model
 
 
@@ -1079,7 +1079,7 @@ def vit_base_resnet26d_224(pretrained=False, **kwargs):
     backbone = resnet26d(pretrained=pretrained_backbone, features_only=True, out_indices=[4])
     model = VisionTransformer(
         img_size=224, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, hybrid_backbone=backbone, **kwargs)
-    model.default_cfg = default_cfgs['vit_base_resnet26d_224']
+    model.pretrained_cfg = pretrained_cfg['vit_base_resnet26d_224']
     return model
 
 
@@ -1089,5 +1089,5 @@ def vit_base_resnet50d_224(pretrained=False, **kwargs):
     backbone = resnet50d(pretrained=pretrained_backbone, features_only=True, out_indices=[4])
     model = VisionTransformer(
         img_size=224, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, hybrid_backbone=backbone, **kwargs)
-    model.default_cfg = default_cfgs['vit_base_resnet50d_224']
+    model.pretrained_cfg = pretrained_cfg['vit_base_resnet50d_224']
     return model

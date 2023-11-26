@@ -177,6 +177,7 @@ def accuracy(network, loader, weights, device,noise_sd=0.5,addnoise=False):
     correct = 0
     total = 0
     weights_offset = 0
+    loss = []
 
     network.eval()
     with torch.no_grad():
@@ -185,7 +186,11 @@ def accuracy(network, loader, weights, device,noise_sd=0.5,addnoise=False):
             y = y.to(device)
             if(addnoise):
                 x=x + torch.randn_like(x, device='cuda') * noise_sd
-            p = network.predict(x)
+            network.randomize_kernel()
+            network.randomize()
+            network.rand_conv_module_cuda()
+            p = network.predict(network.randConv_Op(x))
+            loss.append(F.cross_entropy(p, y).item())
             if weights is None:
                 batch_weights = torch.ones(len(x))
             else:
@@ -205,7 +210,7 @@ def accuracy(network, loader, weights, device,noise_sd=0.5,addnoise=False):
             total += batch_weights.sum().item()
     network.train()
 
-    return correct / total
+    return correct / total, np.mean(loss)
 
 
 def two_model_analysis(network,network_comp, loader, weights, device,noise_sd=0.5,addnoise=False,env_name="env0"):

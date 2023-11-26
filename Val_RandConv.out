@@ -1,0 +1,180 @@
+nohup: ignoring input
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Incomplete: ./Results/ImageNet/Fullset/Small_Epoch/RandConv_CNN_V3/t1_s0 ('ImageNet', 'RandConv_CNN', [1], 0)
+1 jobs: 0 done, 1 incomplete, 0 not launched.
+python -m domainbed.scripts.train --algorithm RandConv_CNN --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Small_Epoch/RandConv_CNN_V3/t1_s0 --seed 1637210862 --task domain_generalization --test_envs 1 --trial_seed 0
+About to delete 1 jobs.
+Good to go
+Deleting...
+Deleted 1 jobs!
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Not launched: ./Results/ImageNet/Fullset/Small_Epoch/RandConv_CNN_V3/t1_s0 ('ImageNet', 'RandConv_CNN', [1], 0)
+1 jobs: 0 done, 0 incomplete, 1 not launched.
+python -m domainbed.scripts.train --algorithm RandConv_CNN --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Small_Epoch/RandConv_CNN_V3/t1_s0 --seed 1637210862 --task domain_generalization --test_envs 1 --trial_seed 0
+About to launch 1 jobs.
+Good to go
+Launching...
+Making job directories:
+  0%|          | 0/1 [00:00<?, ?it/s]                                     WARNING: using experimental multi_gpu_launcher.
+Environment:
+	Python: 3.8.8
+	PyTorch: 2.0.1+cu117
+	Torchvision: 0.15.2+cu117
+	CUDA: 11.7
+	CUDNN: 8500
+	NumPy: 1.20.1
+	PIL: 8.2.0
+Args:
+	algorithm: RandConv_CNN
+	checkpoint_freq: None
+	data_dir: /media/SSD2/Dataset
+	dataset: ImageNet
+	holdout_fraction: 0.2
+	hparams: {"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}
+	hparams_seed: 0
+	output_dir: ./Results/ImageNet/Fullset/Small_Epoch/RandConv_CNN_V3/t1_s0
+	save_best_model: True
+	save_model_every_checkpoint: False
+	seed: 1637210862
+	skip_model_save: False
+	steps: None
+	task: domain_generalization
+	test_envs: [1]
+	trial_seed: 0
+	uda_holdout_fraction: 0
+HParams:
+	alpha_max: 1.0
+	alpha_min: 0.0
+	backbone: DeitSmall
+	batch_size: 64
+	class_balanced: False
+	consistency_loss_w: 10.0
+	custom_train: 0
+	custom_train_val: True
+	custom_val: 1
+	data_augmentation: False
+	digits: True
+	empty_fc: False
+	empty_head: False
+	eval: False
+	fixed_featurizer: False
+	identity_prob: 0.0
+	invariant_loss: True
+	lr: 0.0001
+	mixing: True
+	nonlinear_classifier: False
+	randomize_kernel: True
+	resnet18: False
+	resnet_dropout: 0.0
+	test_env: [1]
+	weight_decay: 0.0
+	weight_decay_d: 0.0
+device: cuda
+Current cuda device  0
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+50000  length of val  1281167  length of train
+env  train  in  1281167  out  50000
+taken the whole pretrained network
+/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+full_model_tuning_only
++ checkpoint_freq: 1000
+Best model upto now
+env0_out_acc  env0_out_los  epoch         loss          mem_gb        step          step_time     train_acc    
+0.4134200000  3.0991124433  0.0000000000  4.5522217751  15.867166519  0             2.3971903324  0.7968750000 
+Best model upto now
+0.4832200000  2.3263094450  0.0499544556  2.9059885406  16.067604541  1000          0.7201988277  0.4947656250 
+Best model upto now
+0.4948200000  2.2645853511  0.0999089112  2.5450043164  16.069373130  2000          0.7206476321  0.5361250000 
+Best model upto now
+0.5028400000  2.2577950183  0.1498633668  2.4139960397  16.069373130  3000          0.7212398169  0.5505937500 
+Best model upto now
+0.5083200000  2.1351418010  0.1998178223  2.3450628359  16.069373130  4000          0.7212401130  0.5591562500 
+Best model upto now
+0.5168000000  2.1209815387  0.2497722779  2.2709278091  16.069373130  5000          0.7212556207  0.5684218750 
+Best model upto now
+0.5344800000  2.0296708504  0.2997267335  2.2372108086  16.069373130  6000          0.7205425858  0.5742500000 
+0.5160200000  2.1150064514  0.3496811891  2.1879895673  16.069373130  7000          0.7206658075  0.5789218750 
+Best model upto now
+0.5362400000  1.9994438832  0.3996356447  2.1811987380  16.069373130  8000          0.7219906592  0.5841718750 
+Best model upto now
+0.5463000000  1.9494565966  0.4495901003  2.1469251057  16.070227623  9000          0.7206230302  0.5897812500 
+Best model upto now
+0.5609400000  1.8779770294  0.4995445559  2.0895448738  16.070594310  10000         0.7201999314  0.5973750000 
+0.5479600000  1.9370841459  0.5494990114  2.0744114004  16.070594310  11000         0.7210287495  0.6018593750 
+0.5408600000  1.9669953292  0.5994534670  2.0636232547  16.070594310  12000         0.7203677428  0.6025625000 
+0.5525200000  1.9242502878  0.6494079226  2.0312054862  16.070594310  13000         0.7212780621  0.6074687500 
+0.5549800000  1.9045895890  0.6993623782  2.0010476762  16.070594310  14000         0.7210981984  0.6142343750 
+0.5588200000  1.8929225539  0.7493168338  1.9864613410  16.070594310  15000         0.7186879990  0.6182500000 
+0.5608400000  1.8816704460  0.7992712894  1.9547397599  16.070594310  16000         0.7208168623  0.6212656250 
+0.5585600000  1.8910506302  0.8492257450  1.9455563986  16.070594310  17000         0.7214540653  0.6253750000 
+Best model upto now
+0.5656000000  1.8556324167  0.8991802006  1.9371825557  16.070594310  18000         0.7206438489  0.6260312500 
+0.5587600000  1.9134599675  0.9491346561  1.9421456708  16.070594310  19000         0.7212219708  0.6253750000 
+0.5639000000  1.8643070856  0.9990891117  1.8638210282  16.070594310  20000         0.7205060153  0.6376718750 
+Best model upto now
+0.5668200000  1.8387960912  0.9999882919  1.9432633387  16.070594310  20018         0.7231335243  0.6284722222 
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Launched 1 jobs!
+bash_scripts/ERM-ViT/ImageNet/run_sweep_RandConv_ViT.sh: line 31: unexpected EOF while looking for matching `"'
+bash_scripts/ERM-ViT/ImageNet/run_sweep_RandConv_ViT.sh: line 34: syntax error: unexpected end of file

@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     data = json.load(open(os.path.join(args.input_dir,'results.jsonl')))
 
-    domain = {"blur":[], "digital":[], "noise":[], "weather":[], "real":[]}
+    domain = {"blur":[], "digital":[], "noise":[], "weather":[]}
 
     for k in data:
         if "env" in k:

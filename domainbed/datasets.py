@@ -2,14 +2,17 @@
 
 import os
 import torch
+import math
 from PIL import Image, ImageFile
 from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
 from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN
 from torchvision.transforms.functional import rotate
+import timm
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from timm.data import create_transform
+from torchvision.transforms.functional import InterpolationMode
 
 # MNISTM, SYN,
 # from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
@@ -262,13 +265,42 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         super().__init__()
         environments = [f.name for f in os.scandir(root) if f.is_dir()]
         environments = sorted(environments) # list of all domains in the dataset, in sorted order
-        self.ENVIRONMENTS = environments
+        # environments = ["valid"]
+        # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
+        # data_config = timm.data.resolve_model_data_config(model)
+        # transform = timm.data.create_transform(**data_config, is_training=False)
+        MEAN = [0.4717, 0.4499, 0.3837]
+        STD = [0.2600, 0.2516, 0.2575]
+        # if hparams["backbone"]=="ViTBase":
+        #     MEAN = [0.5, 0.5, 0.5]
+        #     STD = [0.5, 0.5, 0.5]
+        # else:
+        #     MEAN = [0.485, 0.456, 0.406]
+        #     STD = [0.229, 0.224, 0.225]
+        # self.ENVIRONMENTS = environments
         transform = transforms.Compose([
-            transforms.Resize((224,224)),
+            #transforms.Resize((224,224),interpolation=InterpolationMode.BICUBIC),
             transforms.ToTensor(),
             transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                mean=MEAN, std=STD)
         ])
+        # if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+        #     transform = transforms.Compose([
+        #         transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
+        #         transforms.CenterCrop(224),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize(
+        #             mean=MEAN, std=STD)
+        #     ])
+        # else:
+        #     transform = transforms.Compose([
+        #         transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+        #         transforms.CenterCrop(224),
+        #         transforms.ToTensor(),
+        #         transforms.ConvertImageDtype(torch.float),
+        #         transforms.Normalize(
+        #             mean=MEAN, std=STD)
+        #     ])
 
         # augment_transform = transforms.Compose([
         #     # transforms.Resize((224,224)),
@@ -280,6 +312,8 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         #     transforms.Normalize(
         #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         # ])
+        #mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        #[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]
 
         augment_transform = create_transform(
             input_size=224,
@@ -299,9 +333,11 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
                 print('[INFO] Doing Data Augmentation')
                 env_transform = augment_transform
             else:
+                print('[INFO] NOT Doing Data Augmentation')
                 env_transform = transform
 
-            path = os.path.join(root, environment)
+            path = os.path.join(root, environment,"val")
+            #path = os.path.join(root, environment)
             env_dataset = ImageFolder(path,
                 transform=env_transform)
             ################################ Code required for RCERM ################################ 
@@ -334,7 +370,7 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
 
         self.input_shape = (3, 224, 224,)
         self.num_classes = len(self.datasets[-1].classes)
-        print("Classes ++++",self.datasets[-1].classes)
+        #print("Classes ++++",self.datasets[-1].classes)
 
 class VLCS(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
@@ -344,8 +380,8 @@ class VLCS(MultipleEnvironmentImageFolder):
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class PACS(MultipleEnvironmentImageFolder):
-    CHECKPOINT_FREQ = 300
-
+    CHECKPOINT_FREQ = 1
+    N_STEPS = 1
     ENVIRONMENTS = ["A", "C", "P", "S"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "PACS/")
@@ -362,7 +398,14 @@ class DomainNet(MultipleEnvironmentImageFolder):
 class ImageNet_9(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    #ENVIRONMENTS = ['mixed_next', 'mixed_rand', 'mixed_same', 'no_fg', 'only_fg', 'original']
+    ENVIRONMENTS = ['mixed_next',
+                    'mixed_rand',
+                    'mixed_same',
+                    'no_fg',
+                    'only_bg_b',
+                    'only_bg_t',
+                    'only_fg',
+                    'original']
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "bg_challenge/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
@@ -378,46 +421,26 @@ class Cue_conflicts(MultipleEnvironmentImageFolder):
 class ImageNet_C(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['blur_1',
-                    'blur_2',
-                    'blur_3',
-                    'blur_4',
-                    'blur_5',
-                    'digital_1',
-                    'digital_2',
-                    'digital_3',
-                    'digital_4',
-                    'digital_5',
-                    'noise_1',
-                    'noise_2',
-                    'noise_3',
-                    'noise_4',
-                    'noise_5',
-                    'real',
-                    'weather_1',
-                    'weather_2',
-                    'weather_3',
-                    'weather_4',
-                    'weather_5']
-                
+    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/corruption_severity") if f.is_dir()])               
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "Imagenet-C/processed_2/")
+        self.dir = os.path.join(root, "Imagenet-C/corruption_severity")
+        
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet(MultipleEnvironmentImageFolder):
-    N_STEPS = 120110
+    N_STEPS = 20019
     CHECKPOINT_FREQ = 1000
-    ENVIRONMENTS = ["train","val"]
+    ENVIRONMENTS = ["train","valid"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_V2/")
+        self.dir = os.path.join(root, "ImageNet_val/JustCopy")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_val(MultipleEnvironmentImageFolder):
     N_STEPS = 5000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ["val"]
+    ENVIRONMENTS = ["valid"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_val/")
+        self.dir = os.path.join(root, "ImageNet_val/JustCopy")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
     
 class OfficeHome(MultipleEnvironmentImageFolder):

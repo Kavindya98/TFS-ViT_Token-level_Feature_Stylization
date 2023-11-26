@@ -15,7 +15,7 @@ Standard deep learning models such as convolutional neural networks (CNNs) lack 
 - [timm 0.4.12](https://github.com/rwightman/pytorch-image-models)
 
 
-
+nohup bash bash_scripts/ERM-ViT/ImageNet/run_sweep_RandConv_ViT.sh > RandConv_ViT.out 2>&1 &
 ### Usage
 1- Clone the repository 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
 

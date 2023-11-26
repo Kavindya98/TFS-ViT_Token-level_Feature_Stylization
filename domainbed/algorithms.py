@@ -704,7 +704,7 @@ class RandConv_CNN(ERM):
         # print("randomized weights")
 
     def mixing(self,all_x,all_x_out):
-        alpha= random.random()  
+        alpha= round(random.uniform(self.hparams["alpha_min"],self.hparams["alpha_max"]), 1)  
         all_x_out = alpha*all_x_out + (1-alpha)*all_x
         # print("mixed with alpha: ",alpha)
         return all_x_out   
@@ -749,7 +749,7 @@ class RandConv_CNN(ERM):
         self.randomize()
         self.rand_conv_module_cuda()
         #all_x = self.randConv_Op(all_x)
-        out = self.predict(all_x)
+        out = self.predict(self.randConv_Op(all_x))
         loss = F.cross_entropy(out, all_y)
 
         if self.hparams["invariant_loss"]:
@@ -757,13 +757,14 @@ class RandConv_CNN(ERM):
         else:
             inv_loss=0
 
-        loss += inv_loss*self.hparams["consistency_loss_w"]    
-
+        loss += inv_loss*self.hparams["consistency_loss_w"]  
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        return {'loss': loss.item()}    
+        return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
 
 class RandConv_ViT(ERM_ViT):
 
@@ -793,7 +794,7 @@ class RandConv_ViT(ERM_ViT):
         # print("randomized weights")
 
     def mixing(self,all_x,all_x_out):
-        alpha= random.random()  
+        alpha= round(random.uniform(self.hparams["alpha_min"],self.hparams["alpha_max"]), 1)  
         all_x_out = alpha*all_x_out + (1-alpha)*all_x
         # print("mixed with alpha: ",alpha)
         return all_x_out   
@@ -838,7 +839,7 @@ class RandConv_ViT(ERM_ViT):
         self.randomize()
         self.rand_conv_module_cuda()
         #all_x = self.randConv_Op(all_x)
-        out = self.predict(all_x)
+        out = self.predict(self.randConv_Op(all_x))
         loss = F.cross_entropy(out, all_y)
 
         if self.hparams["invariant_loss"]:
@@ -847,12 +848,12 @@ class RandConv_ViT(ERM_ViT):
             inv_loss=0
 
         loss += inv_loss*self.hparams["consistency_loss_w"]    
-
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        return {'loss': loss.item()}
+        return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}
 
 class Mixup(ERM):
     """
@@ -2415,7 +2416,8 @@ def return_backbone_network(network_name, num_classes, hparams):
         network.head = nn.Linear(384, num_classes)
         
     elif network_name == "DeiTBase":
-        network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
+        #network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
+        network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True)
         print("DeiTBase Network")
         if hparams['empty_head']:
             network.head = nn.Linear(768, num_classes)
@@ -2425,8 +2427,11 @@ def return_backbone_network(network_name, num_classes, hparams):
         # print("ViTBase Network")
         # if hparams['empty_head']:
         #     network.head = nn.Linear(768, num_classes)
+        
         #network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
+        #network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
         network = timm.create_model("vit_large_patch16_224",pretrained=True)
+        #network = timm.create_model("hf_hub:timm/vit_base_patch16_224.orig_in21k_ft_in1k", pretrained=True)
         print("ViTBase Network")
         if hparams['empty_head']:
             network.classifier = nn.Linear(768, num_classes)

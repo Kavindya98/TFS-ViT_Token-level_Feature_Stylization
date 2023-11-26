@@ -1,54 +1,105 @@
-device: cuda:2
+device: cuda:4
 Current cuda device  0
-ViTBase Network
-full_model_tuning_only
-Classes ++++ ['00_dog', '01_bird', '02_wheeled vehicle', '03_reptile', '04_carnivore', '05_insect', '06_musical instrument', '07_primate', '08_fish']
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  4.38it/s]2it [00:00,  4.21it/s]3it [00:00,  3.67it/s]4it [00:01,  3.01it/s]5it [00:01,  2.81it/s]6it [00:01,  2.85it/s]6it [00:01,  3.08it/s]
-env_mixed_next_acc 0.6494623655913978
-env_mixed_rand_acc 0.6893667861409797
-env_mixed_same_acc 0.8007168458781362
-env_no_fg_acc 0.5634408602150538
-env_only_fg_acc 0.7020310633213859
-env_original_acc 0.9526881720430107
-device: cuda:2
-Current cuda device  0
-ViTBase Network
-full_model_tuning_only
-Classes ++++ ['00_dog', '01_bird', '02_wheeled vehicle', '03_reptile', '04_carnivore', '05_insect', '06_musical instrument', '07_primate', '08_fish']
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  2.35it/s]2it [00:00,  2.97it/s]3it [00:01,  2.57it/s]4it [00:01,  2.42it/s]5it [00:02,  2.26it/s]6it [00:02,  2.30it/s]6it [00:02,  2.38it/s]
 Traceback (most recent call last):
-  File "evaluvation.py", line 233, in <module>
-    acc = validation_accuracy(model, loader, weights, device, args.dataset, conversion_array)
-  File "evaluvation.py", line 104, in validation_accuracy
-    correct += (pred==y).sum().item()
-RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:2 and cpu!
-device: cuda:2
-Current cuda device  0
-ViTBase Network
-full_model_tuning_only
-Classes ++++ ['00_dog', '01_bird', '02_wheeled vehicle', '03_reptile', '04_carnivore', '05_insect', '06_musical instrument', '07_primate', '08_fish']
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  2.51it/s]2it [00:00,  3.24it/s]3it [00:01,  2.91it/s]4it [00:01,  2.58it/s]5it [00:01,  2.46it/s]6it [00:02,  2.25it/s]6it [00:02,  2.45it/s]
-Traceback (most recent call last):
-  File "evaluvation.py", line 234, in <module>
-    acc = validation_accuracy(model, loader, weights, device, args.dataset, conversion_array)
-  File "evaluvation.py", line 90, in validation_accuracy
-    model = nn.DataParallel(model,device_ids=[0])
-NameError: name 'nn' is not defined
-device: cuda:2
-Current cuda device  0
-ViTBase Network
-full_model_tuning_only
-Classes ++++ ['00_dog', '01_bird', '02_wheeled vehicle', '03_reptile', '04_carnivore', '05_insect', '06_musical instrument', '07_primate', '08_fish']
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  3.89it/s]2it [00:00,  3.39it/s]3it [00:01,  2.71it/s]4it [00:01,  2.59it/s]5it [00:01,  2.52it/s]6it [00:02,  2.61it/s]6it [00:02,  2.70it/s]
-Traceback (most recent call last):
-  File "evaluvation.py", line 235, in <module>
-    acc = validation_accuracy(model, loader, weights, device, args.dataset, conversion_array)
-  File "evaluvation.py", line 96, in validation_accuracy
-    p = model.predict(x)
-  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1614, in __getattr__
+  File "evaluvation.py", line 203, in <module>
+    model, hparams = get_algorithm(args.algorithm)
+  File "evaluvation.py", line 168, in get_algorithm
+    model = algo(
+  File "/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/algorithms.py", line 173, in __init__
+    self.network = return_backbone_network(backbone, num_classes, hparams)
+  File "/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/algorithms.py", line 2433, in return_backbone_network
+    network = timm.create_model("vit_large_patch16_224",pretrained=True)
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed/lib/python3.8/site-packages/timm/models/factory.py", line 57, in create_model
+    model = create_fn(**model_args, **kwargs)
+  File "/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py", line 1015, in vit_large_patch16_224
+    load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3))
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed/lib/python3.8/site-packages/timm/models/helpers.py", line 93, in load_pretrained
+    cfg = getattr(model, 'default_cfg')
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed/lib/python3.8/site-packages/torch/nn/modules/module.py", line 947, in __getattr__
     raise AttributeError("'{}' object has no attribute '{}'".format(
-AttributeError: 'DataParallel' object has no attribute 'predict'
+AttributeError: 'VisionTransformer' object has no attribute 'default_cfg'
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+device: cuda:2
+Current cuda device  0
+ViTBase Network
+full_model_tuning_only
+[INFO] NOT Doing Data Augmentation
+Traceback (most recent call last):
+  File "evaluvation.py", line 212, in <module>
+    eval_loaders, eval_weights, eval_loader_names = load_eval_dataset(args.dataset, args.data_dir, hparams)
+  File "evaluvation.py", line 72, in load_eval_dataset
+    dataset = vars(datasets)[dataset_name](data_dir,
+  File "/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/datasets.py", line 411, in __init__
+    super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+  File "/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/datasets.py", line 341, in __init__
+    env_dataset = ImageFolder(path,
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/datasets/folder.py", line 309, in __init__
+    super().__init__(
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/datasets/folder.py", line 145, in __init__
+    samples = self.make_dataset(self.root, class_to_idx, extensions, is_valid_file)
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/datasets/folder.py", line 189, in make_dataset
+    return make_dataset(directory, class_to_idx, extensions=extensions, is_valid_file=is_valid_file)
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/datasets/folder.py", line 102, in make_dataset
+    raise FileNotFoundError(msg)
+FileNotFoundError: Found no valid file for the classes 00_dog, 01_bird, 02_wheeled vehicle, 03_reptile, 04_carnivore, 05_insect, 06_musical instrument, 07_primate, 08_fish. Supported extensions are: .jpg, .jpeg, .png, .ppm, .bmp, .pgm, .tif, .tiff, .webp
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+device: cuda:2
+Current cuda device  0
+ViTBase Network
+full_model_tuning_only
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+Loading dataset
+0it [00:00, ?it/s]1it [00:00,  3.13it/s]2it [00:00,  2.48it/s]3it [00:01,  2.44it/s]4it [00:01,  2.66it/s]5it [00:01,  2.50it/s]6it [00:02,  2.47it/s]7it [00:02,  2.41it/s]8it [00:03,  2.28it/s]8it [00:03,  2.42it/s]
+env_mixed_next_acc 0.7945679012345679
+env_mixed_rand_acc 0.8217283950617283
+env_mixed_same_acc 0.8980246913580247
+env_no_fg_acc 0.5760493827160493
+env_only_bg_b_acc 0.24419753086419754
+env_only_bg_t_acc 0.16814814814814816
+env_only_fg_acc 0.8980246913580247
+env_original_acc 0.9738271604938271

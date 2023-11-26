@@ -117,6 +117,8 @@ def _hparams(algorithm, dataset, random_seed):
 
     elif algorithm == 'RandConv_CNN' or algorithm == 'RandConv_ViT':
         _hparam('identity_prob', 0.0, lambda r: r.choice([0.0, 0.5]))
+        _hparam('alpha_min', 0.0, lambda r: r.choice([0.0, 0.5]))
+        _hparam('alpha_max', 1.0, lambda r: r.choice([0.0, 0.5]))
         _hparam('randomize_kernel', True, lambda r: True)
         _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
         _hparam('invariant_loss', True, lambda r: True)
