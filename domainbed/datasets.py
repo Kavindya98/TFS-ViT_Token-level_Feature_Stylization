@@ -269,38 +269,38 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
         # data_config = timm.data.resolve_model_data_config(model)
         # transform = timm.data.create_transform(**data_config, is_training=False)
-        MEAN = [0.4717, 0.4499, 0.3837]
-        STD = [0.2600, 0.2516, 0.2575]
-        # if hparams["backbone"]=="ViTBase":
-        #     MEAN = [0.5, 0.5, 0.5]
-        #     STD = [0.5, 0.5, 0.5]
-        # else:
-        #     MEAN = [0.485, 0.456, 0.406]
-        #     STD = [0.229, 0.224, 0.225]
-        # self.ENVIRONMENTS = environments
-        transform = transforms.Compose([
-            #transforms.Resize((224,224),interpolation=InterpolationMode.BICUBIC),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=MEAN, std=STD)
-        ])
-        # if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
-        #     transform = transforms.Compose([
-        #         transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
-        #         transforms.CenterCrop(224),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(
-        #             mean=MEAN, std=STD)
-        #     ])
-        # else:
-        #     transform = transforms.Compose([
-        #         transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
-        #         transforms.CenterCrop(224),
-        #         transforms.ToTensor(),
-        #         transforms.ConvertImageDtype(torch.float),
-        #         transforms.Normalize(
-        #             mean=MEAN, std=STD)
-        #     ])
+        # MEAN = [0.4717, 0.4499, 0.3837]
+        # STD = [0.2600, 0.2516, 0.2575]
+        if hparams["backbone"]=="ViTBase":
+            MEAN = [0.5, 0.5, 0.5]
+            STD = [0.5, 0.5, 0.5]
+        else:
+            MEAN = [0.485, 0.456, 0.406]
+            STD = [0.229, 0.224, 0.225]
+        #self.ENVIRONMENTS = environments
+        # transform = transforms.Compose([
+        #     #transforms.Resize((224,224),interpolation=InterpolationMode.BICUBIC),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(
+        #         mean=MEAN, std=STD)
+        # ])
+        if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+            transform = transforms.Compose([
+                transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=MEAN, std=STD)
+            ])
+        else:
+            transform = transforms.Compose([
+                transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.ConvertImageDtype(torch.float),
+                transforms.Normalize(
+                    mean=MEAN, std=STD)
+            ])
 
         # augment_transform = transforms.Compose([
         #     # transforms.Resize((224,224)),
@@ -336,8 +336,8 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
                 print('[INFO] NOT Doing Data Augmentation')
                 env_transform = transform
 
-            path = os.path.join(root, environment,"val")
-            #path = os.path.join(root, environment)
+            # path = os.path.join(root, environment,"val")
+            path = os.path.join(root, environment)
             env_dataset = ImageFolder(path,
                 transform=env_transform)
             ################################ Code required for RCERM ################################ 
