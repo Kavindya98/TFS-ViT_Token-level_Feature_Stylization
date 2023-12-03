@@ -172,8 +172,33 @@ def random_pairs_of_minibatches(minibatches):
 
     return pairs
 
+def average_accuracy(x,y,network,batch_weights,times=1):
+    loss=[]
+    acc=[]
+    with torch.no_grad():
+        for i in range(times):
+            network.randomize_kernel()
+            network.randomize()
+            network.rand_conv_module_cuda()
+            img = network.randConv_Op(x)
+            img = torch.clamp(img,-1,1)
+            p = network.predict(img)
+            loss.append(F.cross_entropy(p, y).item()/times)
+            if len(p.shape)==1:
+                p = p.reshape(1,-1)
+            if p.size(1) == 1:
+                # if p.size(1) == 1:
+                acc.append((p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item())
+            else:
+                # print('p hai ye', p.size(1))
+                acc.append((p.argmax(1).eq(y).float() * batch_weights).sum().item())
+    
+    return np.sum(loss), np.mean(acc)
+            
 
-def accuracy(network, loader, weights, device,noise_sd=0.5,addnoise=False):
+
+
+def accuracy(network, loader, weights, device,val_id,current_id,noise_sd=0.5,addnoise=False):
     correct = 0
     total = 0
     weights_offset = 0
@@ -186,30 +211,48 @@ def accuracy(network, loader, weights, device,noise_sd=0.5,addnoise=False):
             y = y.to(device)
             if(addnoise):
                 x=x + torch.randn_like(x, device='cuda') * noise_sd
-            network.randomize_kernel()
-            network.randomize()
-            network.rand_conv_module_cuda()
-            p = network.predict(network.randConv_Op(x))
-            loss.append(F.cross_entropy(p, y).item())
+            # network.randomize_kernel()
+            # network.randomize()
+            # network.rand_conv_module_cuda()
+            # p = network.predict(x)
+            # loss.append(F.cross_entropy(p, y).item())
+            
             if weights is None:
                 batch_weights = torch.ones(len(x))
             else:
                 batch_weights = weights[weights_offset: weights_offset + len(x)]
                 weights_offset += len(x)
             batch_weights = batch_weights.to(device)
-            # print(p.shape)
-            if len(p.shape)==1:
-                p = p.reshape(1,-1)
-            if p.size(1) == 1:
+            
+            # if len(p.shape)==1:
+            #     p = p.reshape(1,-1)
+            # if p.size(1) == 1:
 
-                # if p.size(1) == 1:
-                correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
+            #     # if p.size(1) == 1:
+            #     correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
+            # else:
+            #     # print('p hai ye', p.size(1))
+            #     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
+
+            if val_id == current_id:
+                los, corr = average_accuracy(x,y,network,batch_weights,times=1)
+                loss.append(los)
+                correct+=corr
             else:
-                # print('p hai ye', p.size(1))
-                correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
+                p = network.predict(x)
+                loss.append(F.cross_entropy(p, y).item())
+                if len(p.shape)==1:
+                    p = p.reshape(1,-1)
+                if p.size(1) == 1:
+
+                    # if p.size(1) == 1:
+                    correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
+                else:
+                    # print('p hai ye', p.size(1))
+                    correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
             total += batch_weights.sum().item()
     network.train()
-
+    #print("Correct",correct,"loss",loss)
     return correct / total, np.mean(loss)
 
 

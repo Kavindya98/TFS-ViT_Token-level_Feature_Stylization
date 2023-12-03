@@ -60,7 +60,9 @@ def load_algorithm(file_path):
     for j in model.state_dict():
         if "rand_conv" in j:
             del model.state_dict()[j]
+    
     model.load_state_dict(d["model_dict"])
+    
     model.eval()
 
     return model, args, hparams, d
@@ -105,28 +107,28 @@ def validation_accuracy(model, loader, weights, device, dataset, conversion_arra
             # pred = torch.LongTensor([conversion_array[str(x)] for x in pred_list])
             # correct += (pred==y).sum().item()
             
-            if weights is None:
-                batch_weights = torch.ones(len(x))
-            else:
-                batch_weights = weights[weights_offset: weights_offset + len(x)]
-                weights_offset += len(x)
+            # if weights is None:
+            #     batch_weights = torch.ones(len(x))
+            # else:
+            #     batch_weights = weights[weights_offset: weights_offset + len(x)]
+            #     weights_offset += len(x)
 
-            batch_weights = batch_weights.to(device)
+            # batch_weights = batch_weights.to(device)
             # print(p.shape)
             if len(p.shape)==1:
                 p = p.reshape(1,-1)
             if p.size(1) == 1:
                
                 # if p.size(1) == 1:
-                correct += (p.gt(0).eq(y).float() * batch_weights.view(-1, 1)).sum().item()
+                correct += (p.gt(0).eq(y).float()).sum().item() #* batch_weights.view(-1, 1)
             else:
                 # print('p hai ye', p.size(1))
 
                 if dataset == "ImageNet_9" or dataset == "Cue_conflicts":
-                    correct += (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float() * batch_weights).sum().item()
+                    correct += (imageNet_9_conversion(p.argmax(1), conversion_array).eq(y).float()).sum().item() #* batch_weights
                 else:
-                    correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
-            total += batch_weights.sum().item()
+                    correct += (p.argmax(1).eq(y).float()).sum().item() #* batch_weights
+            total += torch.ones(len(x)).sum().item()
          
             
     return correct / total   
@@ -148,6 +150,7 @@ def get_algorithm(algorithm):
     hparams['fixed_featurizer']=False
     hparams["lr"]=0
     hparams['weight_decay']=0
+    hparams["eval"]=True
 
     algo = None
     if algorithm == "ResNet50":

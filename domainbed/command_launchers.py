@@ -5,6 +5,7 @@ A command launcher launches a list of commands on a cluster; implement your own
 launcher to add support for your cluster. We've provided an example launcher
 which runs all commands serially on the local machine.
 """
+import os
 
 import subprocess
 import time
@@ -71,16 +72,17 @@ def gpu_launcher_2(commands):
             proc = procs_by_gpu[gpu_idx]
             if (proc is None) or (proc.poll() is not None):
                 # Nothing is running on this GPU; launch a command.
+                
                 cmd = commands.pop(0)
                 expoo="export"
-                new_proc = subprocess.Popen(
-                    f'CUDA_VISIBLE_DEVICES={gpu_idx+2} {cmd}', shell=True)
-                print('CUDA_VISIBLE_DEVICES: ',gpu_idx+2)
+                new_proc = subprocess.Popen(f'CUDA_VISIBLE_DEVICES=0 {cmd}',shell=True)
+                #new_proc = subprocess.call(f'{cmd}',shell=True)
+                print('CUDA_VISIBLE_DEVICES: ',2)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
 
-    # Wait for the last few tasks to finish before returning
+    #Wait for the last few tasks to finish before returning
     for p in procs_by_gpu:
         if p is not None:
             p.wait()
@@ -101,8 +103,35 @@ def gpu_launcher_1(commands):
                 cmd = commands.pop(0)
                 expoo="export"
                 new_proc = subprocess.Popen(
-                    f'CUDA_VISIBLE_DEVICES={gpu_idx+1} {cmd}', shell=True)
+                    f'CUDA_VISIBLE_DEVICES=2 {cmd}', shell=True)
                 print('CUDA_VISIBLE_DEVICES: ',gpu_idx+1)
+                procs_by_gpu[gpu_idx] = new_proc
+                break
+        time.sleep(1)
+
+    # Wait for the last few tasks to finish before returning
+    for p in procs_by_gpu:
+        if p is not None:
+            p.wait()
+
+def gpu_launcher_0(commands):
+    """
+    Launch commands on the local machine, using all GPUs in parallel.
+    """
+    print('WARNING: using experimental multi_gpu_launcher.')
+    n_gpus = 1
+    procs_by_gpu = [None]*n_gpus
+
+    while len(commands) > 0:
+        for gpu_idx in range(n_gpus):
+            proc = procs_by_gpu[gpu_idx]
+            if (proc is None) or (proc.poll() is not None):
+                # Nothing is running on this GPU; launch a command.
+                cmd = commands.pop(0)
+                expoo="export"
+                new_proc = subprocess.Popen(
+                    f'CUDA_VISIBLE_DEVICES=1 {cmd}', shell=True)
+                print('CUDA_VISIBLE_DEVICES: ',gpu_idx)
                 procs_by_gpu[gpu_idx] = new_proc
                 break
         time.sleep(1)
@@ -171,6 +200,7 @@ REGISTRY = {
     'multi_gpu': multi_gpu_launcher,
     'gpu_2':gpu_launcher_2,
     'gpu_1':gpu_launcher_1,
+    'gpu_0':gpu_launcher_0,
     'gpu_3':gpu_launcher_3,
     'gpu_4':gpu_launcher_4
 }

@@ -1,9 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+import os
 
 import argparse
 import collections
 import json
-import os
 import random
 import sys
 import time
@@ -56,6 +56,9 @@ if __name__ == "__main__":
     parser.add_argument('--save_model_every_checkpoint', action='store_true')
     parser.add_argument('--save_best_model', action='store_true')
     
+
+
+    
     args = parser.parse_args()
     args.save_best_model = True
 
@@ -103,6 +106,8 @@ if __name__ == "__main__":
 
     if torch.cuda.is_available():
         device = "cuda"
+        #torch.cuda.set_device("cuda:2")
+        #torch.cuda.set_device(2)
     else:
         device = "cpu"
 
@@ -137,10 +142,13 @@ if __name__ == "__main__":
     assigned = False
     for env_i, env in enumerate(dataset):  # env is a domain
         uda = []
+        in_ = []
+        out = []
         if hparams['custom_train_val'] and not (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
-            out, in_ = misc.split_dataset(env,
-                                      int(len(env) * args.holdout_fraction),
-                                      misc.seed_hash(args.trial_seed, env_i))
+            # out, in_ = misc.split_dataset(env,
+            #                           int(len(env) * args.holdout_fraction),
+            #                           misc.seed_hash(args.trial_seed, env_i))
+            out = env
             
         elif  hparams['custom_train_val'] and (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
             if not assigned:
@@ -159,7 +167,7 @@ if __name__ == "__main__":
                                       int(len(env) * args.holdout_fraction),
                                       misc.seed_hash(args.trial_seed, env_i))
             
-
+        
 
         # if not assigned and hparams['custom_train_val']:
         #     for env_j, env_ in enumerate(dataset):
@@ -197,17 +205,24 @@ if __name__ == "__main__":
                 uda_weights = misc.make_weights_for_balanced_classes(uda)
         else:
             in_weights, out_weights, uda_weights = None, None, None
-        
-        in_splits.append((in_, in_weights))
-        out_splits.append((out, out_weights))
+        if len(in_)!=0:
+            in_splits.append((in_, in_weights))
+        if len(out)!=0:
+            out_splits.append((out, out_weights))
         if len(uda):
             uda_splits.append((uda, uda_weights))
 
     if args.task == "domain_adaptation" and len(uda_splits) == 0:
         raise ValueError("Not enough unlabeled samples for domain adaptation.")
     envs_d = datasets.get_dataset_class(args.dataset).ENVIRONMENTS
-    for i in range(len(in_splits)):
-        print("env ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
+    # for i in range(len(in_splits)):
+    #     print("env ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
+    for i in range(len(envs_d)):
+        if i ==hparams['custom_train']:
+            print("env ",i," : ",envs_d[i]," in ",len(in_splits[i][0]))
+        else:
+            print("env ",i," : ",envs_d[i]," out ",len(out_splits[i-1][0]))
+    
 
     train_loaders = [InfiniteDataLoader(
         dataset=env,
@@ -239,7 +254,7 @@ if __name__ == "__main__":
     eval_weights = [None for _, weights in (out_splits + uda_splits)]
     # eval_loader_names = ['env{}_in'.format(i)
     #                      for i in range(len(in_splits))]
-    eval_loader_names = ['env{}_out'.format(i)
+    eval_loader_names = ['env{}_out'.format(i+1)
                           for i in range(len(out_splits))]
     eval_loader_names += ['env{}_uda'.format(i)
                           for i in range(len(uda_splits))]
@@ -322,10 +337,12 @@ if __name__ == "__main__":
             evals = zip(eval_loader_names, eval_loaders, eval_weights)
             temp_acc = 0
             temp_count = 0
+            
             for name, loader, weights in evals:
-                acc,loss = misc.accuracy(algorithm, loader, weights, device)
+                acc,loss = misc.accuracy(algorithm, loader, weights, device,val_id=hparams['custom_val'],current_id=int(name[3]))
                 if args.save_best_model:
-                    if int(name[3]) not in args.test_envs and "out" in name:
+                    #if int(name[3]) not in args.test_envs and "out" in name:
+                    if hparams['custom_val'] == int(name[3]):
                         temp_acc += acc
                         temp_count += 1
                 results[name + '_acc'] = acc

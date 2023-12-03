@@ -7,7 +7,7 @@ from PIL import Image, ImageFile
 from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
-from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN
+from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN, MNISTM, SYN
 from torchvision.transforms.functional import rotate
 import timm
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
@@ -209,7 +209,7 @@ class RotatedMNIST(MultipleEnvironmentMNIST):
         return TensorDataset(x, y)
     
 class DIGITS(MultipleDomainDataset):
-    ENVIRONMENTS = ['MNIST', 'MNIST-M', 'SVHN','USPS','SYN']
+    ENVIRONMENTS = ['MNIST','MNIST_VAL','MNIST-M', 'SVHN','USPS','SYN'] #
     INPUT_SHAPE = (3, 32, 32)
     N_STEPS = 10000           
     CHECKPOINT_FREQ = 250
@@ -230,10 +230,11 @@ class DIGITS(MultipleDomainDataset):
         original_dataset_tr = MNIST(root, train=True, transform=transform, download=True)
         original_dataset_te = MNIST(root, train=False, transform=transform, download=True)
 
-        original_dataset_tr.data = torch.cat((original_dataset_te.data,original_dataset_tr.data))
-        original_dataset_tr.targets = torch.cat((original_dataset_te.targets,original_dataset_tr.targets))
+        # original_dataset_tr.data = torch.cat((original_dataset_te.data,original_dataset_tr.data))
+        # original_dataset_tr.targets = torch.cat((original_dataset_te.targets,original_dataset_tr.targets))
         
         self.datasets.append(original_dataset_tr)
+        self.datasets.append(original_dataset_te)
 
         #loading MNIST-M DATASET
         original_dataset_te = MNISTM(root, train=False, transform=transform, download=True)
@@ -241,7 +242,7 @@ class DIGITS(MultipleDomainDataset):
         self.datasets.append(original_dataset_te)
 
         #loading SVHN
-        original_dataset_te = SVHN(root, split="train", transform=transform, download=True)
+        original_dataset_te = SVHN(root, split="test", transform=transform, download=True)
 
         self.datasets.append(original_dataset_te)
 
@@ -284,6 +285,7 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         #     transforms.Normalize(
         #         mean=MEAN, std=STD)
         # ])
+        
         if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
             transform = transforms.Compose([
                 transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
@@ -329,15 +331,27 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
         self.datasets = []
         for i, environment in enumerate(environments):
 
-            if augment and (i not in test_envs):
+            if hparams["eval"]:
+                print("Eval transform")
+                if 'mixed_same' in environments:
+                    env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor()])
+                else:
+                    env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor(),transforms.Normalize(
+                    mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])])
+            elif augment and (i not in test_envs):
                 print('[INFO] Doing Data Augmentation')
                 env_transform = augment_transform
             else:
                 print('[INFO] NOT Doing Data Augmentation')
                 env_transform = transform
 
-            # path = os.path.join(root, environment,"val")
-            path = os.path.join(root, environment)
+            
+
+            if 'mixed_same' in environments:
+                print("ImageNet-9 path used")
+                path = os.path.join(root, environment,"val")
+            else:
+                path = os.path.join(root, environment)
             env_dataset = ImageFolder(path,
                 transform=env_transform)
             ################################ Code required for RCERM ################################ 
@@ -380,6 +394,7 @@ class VLCS(MultipleEnvironmentImageFolder):
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class PACS(MultipleEnvironmentImageFolder):
+    # Photo domain should taken to first
     CHECKPOINT_FREQ = 1
     N_STEPS = 1
     ENVIRONMENTS = ["A", "C", "P", "S"]

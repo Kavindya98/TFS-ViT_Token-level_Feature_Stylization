@@ -17,7 +17,7 @@ from domainbed.lib.t2t_utils import load_for_transfer_learning
 import random
 import timm
 from transformers import  ViTForImageClassification
-
+import math
 
 import copy
 import numpy as np
@@ -725,9 +725,14 @@ class RandConv_CNN(ERM):
 
     def invariant_loss(self, all_x, out):
         self.randomize()
-        output1 = self.predict(self.randConv_Op(all_x))
+        img1=self.randConv_Op(all_x)
+        img1 = torch.clamp(img1,-1,1)
+        output1 = self.predict(img1)
+        
         self.randomize()
-        output2 = self.predict(self.randConv_Op(all_x))
+        img2=self.randConv_Op(all_x)
+        img2 = torch.clamp(img2,-1,1)
+        output2 = self.predict(img2)
 
         p_clean, p_aug1, p_aug2 = F.softmax(
                                 out, dim=1), F.softmax(
@@ -748,22 +753,25 @@ class RandConv_CNN(ERM):
             self.randomize_kernel()
         self.randomize()
         self.rand_conv_module_cuda()
-        #all_x = self.randConv_Op(all_x)
-        out = self.predict(self.randConv_Op(all_x))
+        img = self.randConv_Op(all_x)
+        img = torch.clamp(img,-1,1)
+        #out = self.predict(self.randConv_Op(all_x))
+        out = self.predict(img)
         loss = F.cross_entropy(out, all_y)
 
         if self.hparams["invariant_loss"]:
             inv_loss = self.invariant_loss(all_x,out)
         else:
             inv_loss=0
-
+        
+        
         loss += inv_loss*self.hparams["consistency_loss_w"]  
         correct = (out.argmax(1).eq(all_y).float()).sum().item()  
         
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
+        
         return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
 
 class RandConv_ViT(ERM_ViT):
@@ -815,9 +823,14 @@ class RandConv_ViT(ERM_ViT):
 
     def invariant_loss(self, all_x, out):
         self.randomize()
-        output1 = self.predict(self.randConv_Op(all_x))
+        img1=self.randConv_Op(all_x)
+        img1 = torch.clamp(img1,-1,1)
+        output1 = self.predict(img1)
+        
         self.randomize()
-        output2 = self.predict(self.randConv_Op(all_x))
+        img2=self.randConv_Op(all_x)
+        img2 = torch.clamp(img2,-1,1)
+        output2 = self.predict(img2)
 
         p_clean, p_aug1, p_aug2 = F.softmax(
                                 out, dim=1), F.softmax(
@@ -838,8 +851,10 @@ class RandConv_ViT(ERM_ViT):
             self.randomize_kernel()
         self.randomize()
         self.rand_conv_module_cuda()
-        #all_x = self.randConv_Op(all_x)
-        out = self.predict(self.randConv_Op(all_x))
+        img = self.randConv_Op(all_x)
+        img = torch.clamp(img,-1,1)
+        #out = self.predict(self.randConv_Op(all_x))
+        out = self.predict(img)
         loss = F.cross_entropy(out, all_y)
 
         if self.hparams["invariant_loss"]:
@@ -852,6 +867,8 @@ class RandConv_ViT(ERM_ViT):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        
+        
 
         return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}
 
@@ -2429,8 +2446,8 @@ def return_backbone_network(network_name, num_classes, hparams):
         #     network.head = nn.Linear(768, num_classes)
         
         #network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
-        #network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
-        network = timm.create_model("vit_large_patch16_224",pretrained=True)
+        network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
+        #network = timm.create_model("vit_large_patch16_224",pretrained=True)
         #network = timm.create_model("hf_hub:timm/vit_base_patch16_224.orig_in21k_ft_in1k", pretrained=True)
         print("ViTBase Network")
         if hparams['empty_head']:

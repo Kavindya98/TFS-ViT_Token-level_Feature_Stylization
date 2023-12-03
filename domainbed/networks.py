@@ -254,6 +254,7 @@ def Featurizer(input_shape, hparams):
     elif input_shape[1:3] == (28, 28):
         return MNIST_CNN(input_shape)
     elif input_shape[1:3] == (32, 32) and hparams["digits"]:
+        print("Using LeNet")
         return LeNet(input_shape)
     elif input_shape[1:3] == (32, 32) and not hparams["digits"]:
         return wide_resnet.Wide_ResNet(input_shape, 16, 2, 0.)
