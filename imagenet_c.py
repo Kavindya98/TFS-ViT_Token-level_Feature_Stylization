@@ -120,15 +120,15 @@ def show_performance(distortion_name):
 
     for severity in range(5, 6):
         distorted_dataset = dset.ImageFolder(
-            root="/media/SSD2/Dataset/Imagenet-C/corruption_severity/" + distortion_name + "_" + str(severity),
+            root="/media/SSD2/Dataset/Imagenet-C/all_image/" + distortion_name + "/" + str(severity),
             
             transform=trn.Compose(
                 [trn.CenterCrop(224), trn.ToTensor(),trn.Normalize(mean, std)] 
             ),
         )
         
-        #print("/media/SSD2/Dataset/Imagenet-C/all_image/" + distortion_name + "/" + str(severity))
-        print("/media/SSD2/Dataset/Imagenet-C/corruption_severity/" + distortion_name + "_" + str(severity))
+        print("/media/SSD2/Dataset/Imagenet-C/all_image/" + distortion_name + "/" + str(severity))
+        # print("/media/SSD2/Dataset/Imagenet-C/corruption_severity/" + distortion_name + "_" + str(severity))
         #, trn.Normalize(mean, std)
         distorted_dataset_loader = torch.utils.data.DataLoader(
             distorted_dataset,
@@ -161,21 +161,21 @@ def show_performance(distortion_name):
 print("\nUsing ImageNet data")
 
 distortions = [
-    "noise_gaussian_noise",
-    "noise_shot_noise",
-    "noise_impulse_noise",
-    "blur_defocus_blur",
-    "blur_glass_blur",
-    "blur_motion_blur",
-    "blur_zoom_blur",
-    "weather_snow",
-    "weather_frost",
-    "weather_fog",
-    "weather_brightness",
-    "digital_contrast",
-    "digital_elastic_transform",
-    "digital_pixelate",
-    "digital_jpeg_compression"
+    "noise/gaussian_noise",
+    "noise/shot_noise",
+    "noise/impulse_noise",
+    "blur/defocus_blur",
+    "blur/glass_blur",
+    "blur/motion_blur",
+    "blur/zoom_blur",
+    "weather/snow",
+    "weather/frost",
+    "weather/fog",
+    "weather/brightness",
+    "digital/contrast",
+    "digital/elastic_transform",
+    "digital/pixelate",
+    "digital/jpeg_compression"
     #"speckle_noise",
     #"gaussian_blur",
     #"spatter",

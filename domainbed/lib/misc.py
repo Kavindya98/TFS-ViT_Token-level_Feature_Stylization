@@ -198,7 +198,7 @@ def average_accuracy(x,y,network,batch_weights,times=1):
 
 
 
-def accuracy(network, loader, weights, device,val_id,current_id,noise_sd=0.5,addnoise=False):
+def accuracy(network, loader, weights, device,val_id,current_id,randconv=False,noise_sd=0.5,addnoise=False):
     correct = 0
     total = 0
     weights_offset = 0
@@ -234,7 +234,7 @@ def accuracy(network, loader, weights, device,val_id,current_id,noise_sd=0.5,add
             #     # print('p hai ye', p.size(1))
             #     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
 
-            if val_id == current_id:
+            if val_id == current_id and randconv==True:
                 los, corr = average_accuracy(x,y,network,batch_weights,times=1)
                 loss.append(los)
                 correct+=corr

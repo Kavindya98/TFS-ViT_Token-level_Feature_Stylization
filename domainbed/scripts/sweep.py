@@ -114,7 +114,7 @@ def single_domain_gen_train_env(dataset):
     all_test_envs=[]
     test_envs = list(range(datasets.num_environments(dataset)))
     if dataset == "PACS":
-        test_envs.remove(2)
+        test_envs.remove(0)
         all_test_envs.append(test_envs)
     elif dataset == "DomainNet":
         test_envs.remove(4)

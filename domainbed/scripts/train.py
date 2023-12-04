@@ -163,7 +163,10 @@ if __name__ == "__main__":
             else:
                 continue  
         else:
-            out, in_ = misc.split_dataset(env,
+            if env_i in args.test_envs:
+                out = env
+            else:
+                out, in_ = misc.split_dataset(env,
                                       int(len(env) * args.holdout_fraction),
                                       misc.seed_hash(args.trial_seed, env_i))
             
@@ -218,10 +221,16 @@ if __name__ == "__main__":
     # for i in range(len(in_splits)):
     #     print("env ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
     for i in range(len(envs_d)):
-        if i ==hparams['custom_train']:
-            print("env ",i," : ",envs_d[i]," in ",len(in_splits[i][0]))
+        if hparams['custom_train_val']:
+            if i ==hparams['custom_train']:
+                print("env ",i," : ",envs_d[i]," in ",len(in_splits[i][0]))
+            else:
+                print("env ",i," : ",envs_d[i]," out ",len(out_splits[i-1][0]))
         else:
-            print("env ",i," : ",envs_d[i]," out ",len(out_splits[i-1][0]))
+            if i ==hparams['custom_train']:
+                print("env ",i," : ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
+            else:
+                print("env ",i," : ",envs_d[i]," out ",len(out_splits[i][0]))
     
 
     train_loaders = [InfiniteDataLoader(
@@ -245,16 +254,33 @@ if __name__ == "__main__":
     #     batch_size=64,
     #     num_workers=dataset.N_WORKERS)
     #     for env, _ in (in_splits + out_splits + uda_splits)]
-    eval_loaders = [FastDataLoader(
+    if hparams['custom_train_val']:
+        eval_loaders = [FastDataLoader(
+            dataset=env,
+            batch_size=128,
+            num_workers=dataset.N_WORKERS)
+            for env, _ in (out_splits + uda_splits)]
+    else:
+        eval_loaders = [FastDataLoader(
         dataset=env,
         batch_size=128,
         num_workers=dataset.N_WORKERS)
-        for env, _ in (out_splits + uda_splits)]
+        for env, _ in (in_splits + out_splits + uda_splits)]
+    
     # #eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
-    eval_weights = [None for _, weights in (out_splits + uda_splits)]
+    if hparams['custom_train_val']:
+        eval_weights = [None for _, weights in (out_splits + uda_splits)]
+    else:
+        eval_weights = [None for _, weights in (in_splits + out_splits + uda_splits)]
     # eval_loader_names = ['env{}_in'.format(i)
     #                      for i in range(len(in_splits))]
-    eval_loader_names = ['env{}_out'.format(i+1)
+    if hparams['custom_train_val']:
+        eval_loader_names = ['env{}_out'.format(i+1)
+                            for i in range(len(out_splits))]
+    else:
+        eval_loader_names = ['env{}_in'.format(i)
+                          for i in range(len(in_splits))]
+        eval_loader_names += ['env{}_out'.format(i)
                           for i in range(len(out_splits))]
     eval_loader_names += ['env{}_uda'.format(i)
                           for i in range(len(uda_splits))]
@@ -267,7 +293,7 @@ if __name__ == "__main__":
         algorithm.load_state_dict(algorithm_dict)
 
     algorithm.to(device)
-
+    print(len(train_loaders)," lengthe of train loader ++++++++++++++++")
     train_minibatches_iterator = zip(*train_loaders)
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])
@@ -339,10 +365,10 @@ if __name__ == "__main__":
             temp_count = 0
             
             for name, loader, weights in evals:
-                acc,loss = misc.accuracy(algorithm, loader, weights, device,val_id=hparams['custom_val'],current_id=int(name[3]))
+                acc,loss = misc.accuracy(algorithm, loader, weights, device,val_id=hparams['custom_val'],current_id=int(name[3]),randconv=True)
                 if args.save_best_model:
                     #if int(name[3]) not in args.test_envs and "out" in name:
-                    if hparams['custom_val'] == int(name[3]):
+                    if hparams['custom_val'] == int(name[3]) and "out" in name:
                         temp_acc += acc
                         temp_count += 1
                 results[name + '_acc'] = acc

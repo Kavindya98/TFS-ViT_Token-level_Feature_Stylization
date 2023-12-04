@@ -2434,10 +2434,12 @@ def return_backbone_network(network_name, num_classes, hparams):
         
     elif network_name == "DeiTBase":
         #network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
-        network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True)
+        
         print("DeiTBase Network")
         if hparams['empty_head']:
-            network.head = nn.Linear(768, num_classes)
+            network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True,num_classes=0)
+        else:
+            network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True)
 
     elif network_name == "ViTBase":
         # network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
@@ -2446,12 +2448,14 @@ def return_backbone_network(network_name, num_classes, hparams):
         #     network.head = nn.Linear(768, num_classes)
         
         #network = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
-        network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
+        
         #network = timm.create_model("vit_large_patch16_224",pretrained=True)
         #network = timm.create_model("hf_hub:timm/vit_base_patch16_224.orig_in21k_ft_in1k", pretrained=True)
         print("ViTBase Network")
         if hparams['empty_head']:
-            network.classifier = nn.Linear(768, num_classes)
+            network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True,num_classes=0)
+        else:
+            network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
         
     elif network_name == "T2T14":
         network = t2t_vit_t_14()

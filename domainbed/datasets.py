@@ -264,7 +264,8 @@ class DIGITS(MultipleDomainDataset):
 class MultipleEnvironmentImageFolder(MultipleDomainDataset):
     def __init__(self, root, test_envs, augment, hparams):
         super().__init__()
-        environments = [f.name for f in os.scandir(root) if f.is_dir()]
+        environments = [f.name for f in os.scandir(root) if f.is_dir() and "valid" in f.name]
+        #environments = [f.name for f in os.scandir(root) if f.is_dir()]
         environments = sorted(environments) # list of all domains in the dataset, in sorted order
         # environments = ["valid"]
         # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
@@ -395,9 +396,9 @@ class VLCS(MultipleEnvironmentImageFolder):
 
 class PACS(MultipleEnvironmentImageFolder):
     # Photo domain should taken to first
-    CHECKPOINT_FREQ = 1
-    N_STEPS = 1
-    ENVIRONMENTS = ["A", "C", "P", "S"]
+    CHECKPOINT_FREQ = 300
+    N_STEPS = 5000
+    ENVIRONMENTS = ["AA_P", "AR", "C", "S"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "PACS/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
@@ -436,7 +437,7 @@ class Cue_conflicts(MultipleEnvironmentImageFolder):
 class ImageNet_C(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/corruption_severity") if f.is_dir()])               
+    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/corruption_severity") if f.is_dir() and ("5" in f.name)])               
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "Imagenet-C/corruption_severity")
         

@@ -8,7 +8,7 @@ data_dir=/media/SSD2/Dataset
 
 for command in delete_incomplete launch
 do
-    for backbone in ViTBase 
+    for backbone in DeiTBase 
     do 
         output_dir=./Results/${datasets}/RandConv_ViT_Clipped/${backbone}
         python -u -m domainbed.scripts.sweep ${command} --data_dir=${data_dir} \
@@ -18,4 +18,4 @@ do
     done
 done
 
-# nohup bash bash_scripts/ERM-ViT/PACS/run_sweep_SGD_Randconv_ViT.sh > PACS_randconv_VIT.out 2>&1 &
+# nohup bash bash_scripts/ERM-ViT/PACS/run_sweep_SGD_Randconv_DeiT.sh > PACS_randconv_DeiT.out 2>&1 &

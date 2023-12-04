@@ -134,3 +134,52 @@ Best model upto now
 0.4487800000  2.5191712803  0.1998178223  2.7811231258  16.177283287  4000          0.7333929598  0.5046250000 
 Best model upto now
 0.4843000000  2.3539456379  0.2497722779  2.7189480535  16.177283287  5000          0.7334344120  0.5151718750 
+0.4834200000  2.3047461019  0.2997267335  2.6630174603  16.177283287  6000          0.7323713527  0.5234062500 
+Best model upto now
+0.4860000000  2.2849569653  0.3496811891  2.6065710953  16.177283287  7000          0.7353398740  0.5297500000 
+Best model upto now
+0.4954000000  2.2637593597  0.3996356447  2.5782171762  16.177283287  8000          0.7356029541  0.5379687500 
+Best model upto now
+0.5001800000  2.2296860438  0.4495901003  2.5504209663  16.177283287  9000          0.7356937308  0.5424218750 
+Best model upto now
+0.5048400000  2.2018936348  0.4995445559  2.5098926831  16.177283287  10000         0.7351939912  0.5471093750 
+Best model upto now
+0.5082800000  2.1590545187  0.5494990114  2.4728111703  16.179604053  11000         0.7361590240  0.5542187500 
+Best model upto now
+0.5143000000  2.1141109092  0.5994534670  2.4650968673  16.179604053  12000         0.7349768851  0.5541406250 
+0.5102000000  2.1473658100  0.6494079226  2.4103184124  16.179604053  13000         0.7345236986  0.5666875000 
+Best model upto now
+0.5226400000  2.0901678910  0.6993623782  2.3903749453  16.179604053  14000         0.7347488844  0.5688125000 
+Best model upto now
+0.5227800000  2.0995703219  0.7493168338  2.3772015086  16.179604053  15000         0.7356961315  0.5728906250 
+Best model upto now
+0.5240400000  2.0988114450  0.7992712894  2.3417539357  16.179604053  16000         0.7356882567  0.5768281250 
+Best model upto now
+0.5244800000  2.0702593772  0.8492257450  2.3270296515  16.179604053  17000         0.7356032925  0.5808906250 
+Best model upto now
+0.5294600000  2.0768620431  0.8991802006  2.3104236425  16.179604053  18000         0.7350498078  0.5817031250 
+Best model upto now
+0.5361400000  2.0442306181  0.9491346561  2.3208048763  16.179604053  19000         0.7333062966  0.5806250000 
+0.5317600000  2.0482385689  0.9990891117  2.2592274607  16.179604053  20000         0.7332533758  0.5936718750 
+0.5352000000  2.0232212931  0.9999882919  2.3760855463  16.179604053  20018         0.7349180381  0.5807291667 
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Launched 1 jobs!

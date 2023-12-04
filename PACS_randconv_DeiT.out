@@ -19,9 +19,9 @@ nohup: ignoring input
   def vit_base_resnet26d_224(pretrained=False, **kwargs):
 /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
   def vit_base_resnet50d_224(pretrained=False, **kwargs):
-Not launched: ./Results/ImageNet/Fullset/Small_Epoch_Clipped_Alpha/RandConv_ViT/ViTBase/t1_s2 ('ImageNet', 'RandConv_ViT', [1], 0)
+Not launched: ./Results/PACS/RandConv_ViT_Clipped/DeiTBase/t123_s2 ('PACS', 'RandConv_ViT', [1, 2, 3], 0)
 1 jobs: 0 done, 0 incomplete, 1 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":64,"lr":5e-05 ,"resnet_dropout":0.0,"alpha_min":0.5,"alpha_max":1.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Small_Epoch_Clipped_Alpha/RandConv_ViT/ViTBase/t1_s2 --seed 6113218 --task domain_generalization --test_envs 1 --trial_seed 2
+python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false,"empty_head":true}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT_Clipped/DeiTBase/t123_s2 --seed 907770641 --task domain_generalization --test_envs 1 2 3 --trial_seed 2
 About to delete 0 jobs.
 Good to go
 Deleting...
@@ -46,15 +46,14 @@ Deleted 0 jobs!
   def vit_base_resnet26d_224(pretrained=False, **kwargs):
 /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
   def vit_base_resnet50d_224(pretrained=False, **kwargs):
-Not launched: ./Results/ImageNet/Fullset/Small_Epoch_Clipped_Alpha/RandConv_ViT/ViTBase/t1_s2 ('ImageNet', 'RandConv_ViT', [1], 0)
+Not launched: ./Results/PACS/RandConv_ViT_Clipped/DeiTBase/t123_s2 ('PACS', 'RandConv_ViT', [1, 2, 3], 0)
 1 jobs: 0 done, 0 incomplete, 1 not launched.
-python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"backbone":"ViTBase","batch_size":64,"lr":5e-05 ,"resnet_dropout":0.0,"alpha_min":0.5,"alpha_max":1.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"weight_decay":0.0,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Small_Epoch_Clipped_Alpha/RandConv_ViT/ViTBase/t1_s2 --seed 6113218 --task domain_generalization --test_envs 1 --trial_seed 2
+python -m domainbed.scripts.train --algorithm RandConv_ViT --data_dir /media/SSD2/Dataset --dataset PACS --holdout_fraction 0.2 --hparams '{"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false,"empty_head":true}' --hparams_seed 0 --output_dir ./Results/PACS/RandConv_ViT_Clipped/DeiTBase/t123_s2 --seed 907770641 --task domain_generalization --test_envs 1 2 3 --trial_seed 2
 About to launch 1 jobs.
 Good to go
 Launching...
 Making job directories:
   0%|          | 0/1 [00:00<?, ?it/s]                                     WARNING: using experimental multi_gpu_launcher.
-CUDA_VISIBLE_DEVICES:  2
 Environment:
 	Python: 3.8.8
 	PyTorch: 2.0.1+cu117
@@ -67,34 +66,34 @@ Args:
 	algorithm: RandConv_ViT
 	checkpoint_freq: None
 	data_dir: /media/SSD2/Dataset
-	dataset: ImageNet
+	dataset: PACS
 	holdout_fraction: 0.2
-	hparams: {"backbone":"ViTBase","batch_size":64,"lr":5e-05 ,"resnet_dropout":0.0,"alpha_min":0.5,"alpha_max":1.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"weight_decay":0.0,"fixed_featurizer":false}
+	hparams: {"backbone":"DeiTBase","batch_size":32,"lr":5e-05 ,"resnet_dropout":0.0,"weight_decay":0.0,"fixed_featurizer":false,"empty_head":true}
 	hparams_seed: 0
-	output_dir: ./Results/ImageNet/Fullset/Small_Epoch_Clipped_Alpha/RandConv_ViT/ViTBase/t1_s2
+	output_dir: ./Results/PACS/RandConv_ViT_Clipped/DeiTBase/t123_s2
 	save_best_model: True
 	save_model_every_checkpoint: False
-	seed: 6113218
+	seed: 907770641
 	skip_model_save: False
 	steps: None
 	task: domain_generalization
-	test_envs: [1]
+	test_envs: [1, 2, 3]
 	trial_seed: 2
 	uda_holdout_fraction: 0
 HParams:
 	alpha_max: 1.0
-	alpha_min: 0.5
-	backbone: ViTBase
-	batch_size: 64
+	alpha_min: 0.0
+	backbone: DeiTBase
+	batch_size: 32
 	class_balanced: False
 	consistency_loss_w: 10.0
 	custom_train: 0
-	custom_train_val: True
-	custom_val: 1
+	custom_train_val: False
+	custom_val: 0
 	data_augmentation: False
 	digits: True
 	empty_fc: False
-	empty_head: False
+	empty_head: True
 	eval: False
 	fixed_featurizer: False
 	identity_prob: 0.0
@@ -105,58 +104,45 @@ HParams:
 	randomize_kernel: True
 	resnet18: False
 	resnet_dropout: 0.0
-	test_env: [1]
+	test_env: [1, 2, 3]
 	weight_decay: 0.0
 	weight_decay_d: 0.0
 device: cuda
 Current cuda device  0
 [INFO] NOT Doing Data Augmentation
 [INFO] NOT Doing Data Augmentation
-50000  length of val  1281167  length of train
-env  0  :  train  in  1281167
-env  1  :  valid  out  50000
-ViTBase Network
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+env  0  :  AA_P  in  1336  out  334
+env  1  :  AR  out  2048
+env  2  :  C  out  2344
+env  3  :  S  out  3929
+DeiTBase Network
 full_model_tuning_only
-+ checkpoint_freq: 1000
+1  lengthe of train loader ++++++++++++++++
++ checkpoint_freq: 300
 Best model upto now
-env1_out_acc  env1_out_los  epoch         loss          mem_gb        step          step_time     train_acc    
-0.3586800000  3.6794166359  0.0000000000  8.2551755905  26.046531677  0             2.9731221199  0.5312500000 
+env0_in_acc   env0_in_loss  env0_out_acc  env0_out_los  env1_out_acc  env1_out_los  env2_out_acc  env2_out_los  env3_out_acc  env3_out_los  epoch         loss          mem_gb        step          step_time     train_acc    
+0.1302395210  6.1608985554  0.0898203593  6.2456204096  0.0019531250  6.7267028093  0.0034129693  6.5094632099  0.0005090354  6.7558779101  0.0000000000  6.9698724747  11.101700782  0             2.0748233795  0.0000000000 
 Best model upto now
-0.6202600000  1.7538195983  0.0499544556  2.8001438487  27.027554035  1000          1.3610208809  0.6312500000 
+0.9955089820  0.0230171884  0.9850299401  0.0648400853  0.7631835938  1.1947071627  0.5776450512  1.6544911987  0.6477475185  1.4938346109  7.1856287425  0.3951243801  11.983315944  300           1.0543606861  0.9434375000 
 Best model upto now
-0.6465000000  1.5509282079  0.0999089112  2.1344209173  27.034336566  2000          1.3608766913  0.6798125000 
-Best model upto now
-0.6582400000  1.4937427988  0.1498633668  1.9587989787  27.034336566  3000          1.3605320609  0.6988593750 
-Best model upto now
-0.6630000000  1.4747055223  0.1998178223  1.8670961698  27.034336566  4000          1.3617860918  0.7076250000 
-Best model upto now
-0.6676000000  1.4093526648  0.2497722779  1.7594429170  27.034336566  5000          1.3614569664  0.7186093750 
-Best model upto now
-0.6744000000  1.3951641782  0.2997267335  1.7177394565  27.034336566  6000          1.3623360269  0.7223593750 
-Best model upto now
-0.6770000000  1.3533427304  0.3496811891  1.6628758757  27.034336566  7000          1.3629316072  0.7329531250 
-Best model upto now
-0.6845400000  1.3163497672  0.3996356447  1.6040758219  27.034336566  8000          1.3677653713  0.7386562500 
-0.6831000000  1.3241114004  0.4495901003  1.5679563333  27.034336566  9000          1.4149791837  0.7414375000 
-Best model upto now
-0.6927600000  1.2858689877  0.4995445559  1.5209599011  27.034336566  10000         2.9170588386  0.7503906250 
-Best model upto now
-0.6941600000  1.2857818174  0.5494990114  1.5274951535  27.034336566  11000         1.5341904531  0.7489531250 
-Best model upto now
-0.6949000000  1.2677882302  0.5994534670  1.5017663921  27.034336566  12000         1.3643680050  0.7490937500 
-Best model upto now
-0.6980000000  1.2398745367  0.6494079226  1.4596642470  27.034336566  13000         1.3622633002  0.7571875000 
-Best model upto now
-0.6998200000  1.2410869170  0.6993623782  1.4317812176  27.034336566  14000         1.3644840040  0.7610937500 
-0.6981000000  1.2525922799  0.7493168338  1.4289288887  27.034336566  15000         1.3640211046  0.7600156250 
-0.6965800000  1.2415817601  0.7992712894  1.4051084865  27.034336566  16000         1.3635228379  0.7631562500 
-Best model upto now
-0.7075000000  1.1851833467  0.8492257450  1.3978978865  27.034336566  17000         1.3635781634  0.7659375000 
-0.7033600000  1.2072372787  0.8991802006  1.3508427646  27.034336566  18000         1.3632322078  0.7720468750 
-0.7060600000  1.2001345970  0.9491346561  1.3770525751  27.034336566  19000         1.3646542327  0.7701718750 
-Best model upto now
-0.7079400000  1.1930796815  0.9990891117  1.3426418229  27.034336566  20000         1.3644466259  0.7756406250 
-0.7078000000  1.1906305506  0.9999882919  1.3842193517  27.034336566  20018         1.3586166832  0.7534722222 
+0.9985029940  0.0088596041  0.9970059880  0.0253409772  0.7939453125  1.0353027657  0.5887372014  1.6600554460  0.6057520998  1.5673468920  14.371257485  0.0466665422  11.983315944  600           1.0573270718  0.9978125000 
+0.9977544910  0.0040286227  0.9940119760  0.0162620660  0.7714843750  1.2785800993  0.5665529010  1.8827864622  0.5777551540  1.6945812087  21.556886227  0.0553695935  11.983590602  900           1.0562724376  0.9967708333 
+0.9970059880  0.0103506866  0.9910179641  0.0140277877  0.7846679688  1.2587711252  0.5720989761  1.7129639450  0.6164418427  1.4969499073  28.742514970  0.0274357276  11.983590602  1200          1.0577152872  0.9984375000 
+0.9992514970  0.0019207924  0.9880239521  0.0462701995  0.7207031250  1.7606557757  0.5439419795  2.0234177426  0.5596843981  1.7994400801  35.928143712  0.0456292161  11.983590602  1500          1.0575013487  0.9969791667 
+1.0000000000  0.0002258553  0.9880239521  0.0199828104  0.7626953125  1.3948944956  0.5507679181  2.0401892976  0.5576482566  1.8888488777  43.113772455  0.0359488057  11.983590602  1800          1.0580986913  0.9986458333 
+0.9992514970  0.0034325096  0.9820359281  0.1241296654  0.7436523438  1.5332923084  0.5081058020  2.4681431432  0.4069737847  2.6929479953  50.299401197  0.0389051512  11.983590602  2100          1.0587960585  0.9977083333 
+1.0000000000  0.0002518561  0.9880239521  0.0568255675  0.7343750000  1.6086309403  0.5631399317  2.1432147214  0.5744464240  1.8008786517  57.485029940  0.0080843494  11.983590602  2400          1.0591198699  0.9997916667 
+0.9977544910  0.0092192178  0.9880239521  0.0863553088  0.7182617188  1.6442398801  0.5972696246  1.9239329790  0.6052430644  1.6845620986  64.670658682  0.0255329942  11.983590602  2700          1.0583323638  0.9994791667 
+1.0000000000  0.0003406986  0.9910179641  0.0613725826  0.7177734375  1.9020477384  0.6305460751  1.8004166013  0.6899974548  1.4243894354  71.856287425  0.0378393719  11.983590602  3000          1.0588432225  0.9982291667 
+1.0000000000  0.0002812180  0.9910179641  0.0386554407  0.7216796875  1.8287849054  0.5755119454  2.0229283697  0.6067701705  1.6749808442  79.041916167  0.0448498723  11.983590602  3300          1.0623357050  0.9976041667 
+0.9992514970  0.0031659601  0.9880239521  0.0765016618  0.7324218750  1.9301065430  0.5985494881  2.0071721265  0.5713922118  2.1317489762  86.227544910  0.0147963029  11.983590602  3600          1.0629992867  0.9990625000 
+1.0000000000  0.0000796577  0.9880239521  0.0341849618  0.7084960938  1.9707803130  0.6023890785  1.8445380926  0.6849071010  1.4012448249  93.413173652  0.0046470143  11.983590602  3900          1.0633184059  0.9998958333 
+1.0000000000  0.0000747306  0.9910179641  0.0241044950  0.7377929688  1.6699565277  0.5691126280  1.9958608590  0.6424026470  1.5513267556  100.59880239  0.0101416970  11.983590602  4200          1.0626151450  0.9994791667 
+0.9962574850  0.0210776254  0.9880239521  0.0273901479  0.7006835938  1.9356719777  0.5503412969  2.1032544751  0.5752099771  1.7483213025  107.78443113  0.0320227087  11.983590602  4500          1.0636222688  0.9985416667 
+0.9992514970  0.0023495648  0.9910179641  0.0509982631  0.7324218750  1.5635905340  0.5644197952  2.0069270950  0.6233138203  1.6274852368  114.97005988  0.0216042894  11.983590602  4800          1.0629484431  0.9989583333 
+0.9962574850  0.0132997804  0.9940119760  0.0473075597  0.7324218750  1.8115907609  0.5661262799  2.2059641324  0.6164418427  1.8355135802  119.73652694  0.0371227682  11.983590602  4999          1.0624188047  0.9979585427 
 /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
   def vit_small_patch16_224(pretrained=False, **kwargs):
 /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
