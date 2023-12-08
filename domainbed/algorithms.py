@@ -758,21 +758,22 @@ class RandConv_CNN(ERM):
         #out = self.predict(self.randConv_Op(all_x))
         out = self.predict(img)
         loss = F.cross_entropy(out, all_y)
-
+        task_loss=loss.item()
         if self.hparams["invariant_loss"]:
             inv_loss = self.invariant_loss(all_x,out)
+            loss += inv_loss*self.hparams["consistency_loss_w"]
         else:
-            inv_loss=0
+            inv_loss= torch.zeros(1)
         
         
-        loss += inv_loss*self.hparams["consistency_loss_w"]  
+          
         correct = (out.argmax(1).eq(all_y).float()).sum().item()  
         
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         
-        return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
 
 class RandConv_ViT(ERM_ViT):
 

@@ -13,6 +13,7 @@ import timm
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from timm.data import create_transform
 from torchvision.transforms.functional import InterpolationMode
+from domainbed.lib.cifar10c import CIFAR10C as cifar10c
 
 # MNISTM, SYN,
 # from wilds.datasets.camelyon17_dataset import Camelyon17Dataset
@@ -208,6 +209,50 @@ class RotatedMNIST(MultipleEnvironmentMNIST):
 
         return TensorDataset(x, y)
     
+class CIFAR10C(MultipleDomainDataset):
+    ENVIRONMENTS = sorted([line.rstrip('\n') for line in open("/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/lib/corruptions.txt")])
+    N_STEPS = 5000           
+    CHECKPOINT_FREQ = 300
+    def __init__(self, root, test_envs, hparams):
+        root = os.path.join(root, "CIFAR-10-C/")
+        super().__init__()
+        self.datasets = []
+        envs = self.ENVIRONMENTS
+
+        if hparams["backbone"]=="ViTBase":
+            MEAN = [0.5, 0.5, 0.5]
+            STD = [0.5, 0.5, 0.5]
+        else:
+            MEAN = [0.485, 0.456, 0.406]
+            STD = [0.229, 0.224, 0.225]
+        
+        if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+            transform = transforms.Compose([
+                transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=MEAN, std=STD)
+            ])
+        else:
+            transform = transforms.Compose([
+                transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.ConvertImageDtype(torch.float),
+                transforms.Normalize(
+                    mean=MEAN, std=STD)
+            ])
+
+        for corruption in envs:
+            datast = cifar10c(root, corruption, transform=transform)
+            self.datasets.append(datast)
+        
+        
+
+
+
+
 class DIGITS(MultipleDomainDataset):
     ENVIRONMENTS = ['MNIST','MNIST_VAL','MNIST-M', 'SVHN','USPS','SYN'] #
     INPUT_SHAPE = (3, 32, 32)
@@ -264,8 +309,8 @@ class DIGITS(MultipleDomainDataset):
 class MultipleEnvironmentImageFolder(MultipleDomainDataset):
     def __init__(self, root, test_envs, augment, hparams):
         super().__init__()
-        environments = [f.name for f in os.scandir(root) if f.is_dir() and "valid" in f.name]
-        #environments = [f.name for f in os.scandir(root) if f.is_dir()]
+        #environments = [f.name for f in os.scandir(root) if f.is_dir() and "valid" in f.name]
+        environments = [f.name for f in os.scandir(root) if f.is_dir()]
         environments = sorted(environments) # list of all domains in the dataset, in sorted order
         # environments = ["valid"]
         # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
@@ -437,15 +482,15 @@ class Cue_conflicts(MultipleEnvironmentImageFolder):
 class ImageNet_C(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/corruption_severity") if f.is_dir() and ("5" in f.name)])               
+    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/severity_5") if f.is_dir() ])               
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "Imagenet-C/corruption_severity")
+        self.dir = os.path.join(root, "Imagenet-C/severity_5")
         
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet(MultipleEnvironmentImageFolder):
-    N_STEPS = 20019
-    CHECKPOINT_FREQ = 1000
+    N_STEPS = 20019*90
+    CHECKPOINT_FREQ = 5000
     ENVIRONMENTS = ["train","valid"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "ImageNet_val/JustCopy")

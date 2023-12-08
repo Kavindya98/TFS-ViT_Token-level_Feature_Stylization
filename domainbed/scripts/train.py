@@ -26,6 +26,42 @@ from domainbed.lib.query import Q
 
 import os
 
+def load_algorithm(file_path):
+
+    d = torch.load(file_path)
+    args = d["args"]
+    print('Saved Args:')
+    for k in args:
+        print('\t{}: {}'.format(k, args[k]))
+
+    hparams=d["model_hparams"]
+    hparams["data_augmentation"] = False
+    hparams['empty_head']=False
+    hparams["eval"]=True
+    print('Saved HParams:')
+    for k, v in sorted(hparams.items()):
+        print('\t{}: {}'.format(k, v))
+ 
+    algo = algorithms.get_algorithm_class(d["args"]["algorithm"])
+    model = algo(
+        input_shape=d["model_input_shape"], 
+        num_classes=d["model_num_classes"], 
+        num_domains=d["model_num_domains"], 
+        hparams=d["model_hparams"]
+    )
+    for i in d["model_dict"]:
+        if "rand_conv" in i:
+            del d["model_dict"][i]
+    for j in model.state_dict():
+        if "rand_conv" in j:
+            del model.state_dict()[j]
+    
+    model.load_state_dict(d["model_dict"])
+    
+    
+
+    return model, args, hparams
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
@@ -49,6 +85,7 @@ if __name__ == "__main__":
                         help='Checkpoint every N steps. Default is dataset-dependent.')
     parser.add_argument('--test_envs', type=int, nargs='+', default=[0])
     parser.add_argument('--output_dir', type=str, default="test_ViT_RB")
+    parser.add_argument('--', type=str, default="test_ViT_RB")
     parser.add_argument('--holdout_fraction', type=float, default=0.001)
     parser.add_argument('--uda_holdout_fraction', type=float, default=0,
                         help="For domain adaptation, % of test to use unlabeled for training.")
@@ -93,6 +130,10 @@ if __name__ == "__main__":
         js["test_env"] = args.test_envs
         # print(args.hparams)
         hparams.update(js)
+    
+    if hparams["continue_checkpoint"] != " ":
+        "Loading model details"
+    
 
     print('HParams:')
     for k, v in sorted(hparams.items()):
@@ -293,7 +334,7 @@ if __name__ == "__main__":
         algorithm.load_state_dict(algorithm_dict)
 
     algorithm.to(device)
-    print(len(train_loaders)," lengthe of train loader ++++++++++++++++")
+    print(len(train_loaders)," length of train loader ++++++++++++++++")
     train_minibatches_iterator = zip(*train_loaders)
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])
@@ -337,6 +378,12 @@ if __name__ == "__main__":
     last_results_keys = None
     best_val_acc = 0
     for step in range(start_step, n_steps):
+
+        # step wise increase the inconsistancy loss
+        if step % 2*int(steps_per_epoch) ==0:           
+            hparams['invariant_loss']=True
+            hparams['consistency_loss_w']+=2
+
         step_start_time = time.time()
         minibatches_device = [(x.to(device), y.to(device))
                               for x, y in next(train_minibatches_iterator)]

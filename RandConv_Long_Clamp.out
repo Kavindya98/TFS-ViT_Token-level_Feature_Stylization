@@ -1,0 +1,230 @@
+nohup: ignoring input
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Incomplete: ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2 ('ImageNet', 'RandConv_CNN', [1], 0)
+1 jobs: 0 done, 1 incomplete, 0 not launched.
+python -m domainbed.scripts.train --algorithm RandConv_CNN --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2 --seed 1637210862 --task domain_generalization --test_envs 1 --trial_seed 2
+About to delete 1 jobs.
+Good to go
+Deleting...
+Deleted 1 jobs!
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+Not launched: ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2 ('ImageNet', 'RandConv_CNN', [1], 0)
+1 jobs: 0 done, 0 incomplete, 1 not launched.
+python -m domainbed.scripts.train --algorithm RandConv_CNN --data_dir /media/SSD2/Dataset --dataset ImageNet --holdout_fraction 0.2 --hparams '{"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}' --hparams_seed 0 --output_dir ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2 --seed 1637210862 --task domain_generalization --test_envs 1 --trial_seed 2
+About to launch 1 jobs.
+Good to go
+Launching...
+Making job directories:
+  0%|          | 0/1 [00:00<?, ?it/s]                                     WARNING: using experimental multi_gpu_launcher.
+CUDA_VISIBLE_DEVICES:  0
+Environment:
+	Python: 3.8.8
+	PyTorch: 2.0.1+cu117
+	Torchvision: 0.15.2+cu117
+	CUDA: 11.7
+	CUDNN: 8500
+	NumPy: 1.20.1
+	PIL: 8.2.0
+Args:
+	algorithm: RandConv_CNN
+	checkpoint_freq: None
+	data_dir: /media/SSD2/Dataset
+	dataset: ImageNet
+	holdout_fraction: 0.2
+	hparams: {"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}
+	hparams_seed: 0
+	output_dir: ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2
+	save_best_model: True
+	save_model_every_checkpoint: False
+	seed: 1637210862
+	skip_model_save: False
+	steps: None
+	task: domain_generalization
+	test_envs: [1]
+	trial_seed: 2
+	uda_holdout_fraction: 0
+HParams:
+	alpha_max: 1.0
+	alpha_min: 0.0
+	backbone: DeitSmall
+	batch_size: 64
+	class_balanced: False
+	consistency_loss_w: 10.0
+	custom_train: 0
+	custom_train_val: True
+	custom_val: 1
+	data_augmentation: False
+	digits: True
+	empty_fc: False
+	empty_head: False
+	eval: False
+	fixed_featurizer: False
+	identity_prob: 0.0
+	invariant_loss: True
+	lr: 0.0001
+	mixing: True
+	nonlinear_classifier: False
+	randomize_kernel: True
+	resnet18: False
+	resnet_dropout: 0.0
+	test_env: [1]
+	weight_decay: 0.0
+	weight_decay_d: 0.0
+device: cuda
+Current cuda device  0
+[INFO] NOT Doing Data Augmentation
+[INFO] NOT Doing Data Augmentation
+50000  length of val  1281167  length of train
+env  0  :  train  in  1281167
+env  1  :  valid  out  50000
+taken the whole pretrained network
+/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+full_model_tuning_only
+1  lengthe of train loader ++++++++++++++++
++ checkpoint_freq: 5000
+Best model upto now
+env1_out_acc  env1_out_los  epoch         inv_loss      loss          mem_gb        step          step_time     task_loss     train_acc    
+0.3640200000  3.4522511297  0.0000000000  0.4189742506  4.9121518135  15.974832534  0             1.9173793793  0.7224092484  0.8281250000 
+Best model upto now
+0.5019000000  2.2001459589  0.2497722779  0.0585027172  2.7860845266  16.175758838  5000          0.7357338548  2.2010573540  0.5142375000 
+Best model upto now
+0.5303200000  2.0752372794  0.4995445559  0.0516212156  2.4205890990  16.175758838  10000         0.7343493146  1.9043769408  0.5642187500 
+Best model upto now
+0.5416000000  2.0078118921  0.7493168338  0.0496252362  2.2789977676  16.177283287  15000         0.7332720388  1.7827454013  0.5872281250 
+Best model upto now
+0.5458200000  1.9872702253  0.9990891117  0.0486662000  2.1781721523  16.177283287  20000         0.7341864521  1.6915101493  0.6055312500 
+Best model upto now
+0.5535600000  1.9527258919  1.2488613897  0.0479962376  2.1072552388  16.177283287  25000         0.7330837749  1.6272928619  0.6183406250 
+Best model upto now
+0.5617400000  1.8802869472  1.4986336676  0.0472075374  2.0442195174  16.177283287  30000         0.7326415936  1.5721441411  0.6299625000 
+Best model upto now
+0.5657200000  1.8646217789  1.7484059455  0.0465302651  1.9801197345  16.177283287  35000         0.7336559443  1.5148170810  0.6413312500 
+Best model upto now
+0.5748000000  1.8118652175  1.9981782234  0.0459519030  1.9268411104  16.177283287  40000         0.7329665596  1.4673220775  0.6514312500 
+0.5710800000  1.8443269885  2.2479505014  0.0456023808  1.8963999766  16.179602623  45000         0.7324290632  1.4403761661  0.6570718750 
+Best model upto now
+0.5839200000  1.7780146486  2.4977227793  0.0450876341  1.8379753512  16.179602623  50000         0.7320595943  1.3870990083  0.6678250000 
+Best model upto now
+0.5887600000  1.7454666366  2.7474950572  0.0453606231  1.8083065566  16.179602623  55000         0.7327397810  1.3547003228  0.6743718750 
+Best model upto now
+0.5923800000  1.7417277430  2.9972673352  0.0448206792  1.7693362983  16.179602623  60000         0.7322449226  1.3211295047  0.6814156250 
+Best model upto now
+0.5933800000  1.7360478115  3.2470396131  0.0446483662  1.7401994231  16.179602623  65000         0.7318833722  1.2937157585  0.6874625000 
+0.5864600000  1.7581448018  3.4968118910  0.0443852460  1.7051175995  16.179602623  70000         0.7358643683  1.2612651376  0.6938968750 
+0.5920200000  1.7380468245  3.7465841690  0.0443178199  1.6765019363  16.179602623  75000         0.7357627139  1.2333237347  0.7002312500 
+Best model upto now
+0.5948200000  1.7300215289  3.9963564469  0.0442440075  1.6583885266  16.179602623  80000         0.7353763605  1.2159484510  0.7033031250 
+Best model upto now
+0.5989600000  1.7114377238  4.2461287248  0.0440456404  1.6206378698  16.179602623  85000         0.7353394454  1.1801814632  0.7105937500 
+0.5980200000  1.7273415867  4.4959010028  0.0437962692  1.5951468498  16.179602623  90000         0.7371487501  1.1571841560  0.7164718750 
+Best model upto now
+0.6043000000  1.6942372215  4.7456732807  0.0435316786  1.5714353488  16.179602623  95000         0.7371222982  1.1361185613  0.7213000000 
+Best model upto now
+0.6064600000  1.6701712892  4.9954455586  0.0438089122  1.5567089895  16.179602623  100000        0.7352398104  1.1186198664  0.7246593750 
+0.6031000000  1.6892821914  5.2452178366  0.0435280479  1.5217465967  16.179602623  105000        0.7358092912  1.0864661157  0.7310406250 
+0.6032400000  1.6855331126  5.4949901145  0.0436492172  1.5060944817  16.179602623  110000        0.7357523832  1.0696023090  0.7354750000 
+0.6015400000  1.6950862328  5.7447623924  0.0433852880  1.4826942430  16.179602623  115000        0.7356137325  1.0488413609  0.7395656250 
+Best model upto now
+0.6094200000  1.6715070073  5.9945346703  0.0429480689  1.4532636167  16.179602623  120000        0.7346628064  1.0237829256  0.7446156250 
+0.6016600000  1.6975721029  6.2443069483  0.0425516246  1.4305714564  16.179602623  125000        0.7348061923  1.0050552072  0.7487312500 
+Best model upto now
+0.6139200000  1.6647676797  6.4940792262  0.0428747207  1.4235532265  16.179602623  130000        0.7351500433  0.9948060179  0.7512156250 
+0.6068000000  1.6931416940  6.7438515041  0.0428640064  1.3953780201  16.179602623  135000        0.7352155987  0.9667379540  0.7570968750 
+0.6044200000  1.6872424040  6.9936237821  0.0427159005  1.3800794554  16.179602623  140000        0.7345838157  0.9529204486  0.7603281250 
+0.6109000000  1.6859830786  7.2433960600  0.0427319115  1.3666696265  16.179602623  145000        0.7351310678  0.9393505107  0.7639656250 
+0.0010000000  nan           7.4931683379  nan           nan           16.179602623  150000        0.7341991050  nan           0.6971875000 
+0.0010000000  nan           7.7429406159  nan           nan           16.179602623  155000        0.7168771808  nan           0.0010062500 
+0.0010000000  nan           7.9927128938  nan           nan           16.179602623  160000        0.7172283874  nan           0.0009812500 
+0.0010000000  nan           8.2424851717  nan           nan           16.179602623  165000        0.7174145588  nan           0.0010968750 
+0.0010000000  nan           8.4922574497  nan           nan           16.179602623  170000        0.7173786513  nan           0.0010843750 
+0.0010000000  nan           8.7420297276  nan           nan           16.179602623  175000        0.7180841419  nan           0.0009531250 
+0.0010000000  nan           8.9918020055  nan           nan           16.179602623  180000        0.7181923836  nan           0.0010812500 
+0.0010000000  nan           9.2415742834  nan           nan           16.179602623  185000        0.7183084092  nan           0.0010468750 
+0.0010000000  nan           9.4913465614  nan           nan           16.179602623  190000        0.7186423881  nan           0.0011000000 
+0.0010000000  nan           9.7411188393  nan           nan           16.179602623  195000        0.7188926253  nan           0.0010375000 
+0.0010000000  nan           9.9908911172  nan           nan           16.179602623  200000        0.7194076136  nan           0.0009781250 
+0.0010000000  nan           10.240663395  nan           nan           16.179602623  205000        0.7185664435  nan           0.0009875000 
+0.0010000000  nan           10.490435673  nan           nan           16.179602623  210000        0.7195283230  nan           0.0010281250 
+0.0010000000  nan           10.740207951  nan           nan           16.179602623  215000        0.7196023062  nan           0.0010531250 
+0.0010000000  nan           10.989980229  nan           nan           16.179602623  220000        0.7189765829  nan           0.0010343750 
+0.0010000000  nan           11.239752506  nan           nan           16.179602623  225000        0.7191353790  nan           0.0010093750 
+0.0010000000  nan           11.489524784  nan           nan           16.179602623  230000        0.7191950313  nan           0.0010468750 
+0.0010000000  nan           11.739297062  nan           nan           16.179602623  235000        0.7195326825  nan           0.0010062500 
+0.0010000000  nan           11.989069340  nan           nan           16.179602623  240000        0.7179325792  nan           0.0010281250 
+0.0010000000  nan           12.238841618  nan           nan           16.179602623  245000        0.7181547172  nan           0.0009906250 
+0.0010000000  nan           12.488613896  nan           nan           16.179602623  250000        0.7183872107  nan           0.0010406250 
+0.0010000000  nan           12.738386174  nan           nan           16.179602623  255000        0.7188702948  nan           0.0010437500 
+0.0010000000  nan           12.988158452  nan           nan           16.179602623  260000        0.7189259289  nan           0.0010187500 
+0.0010000000  nan           13.237930730  nan           nan           16.179602623  265000        0.7185794868  nan           0.0010656250 
+0.0010000000  nan           13.487703008  nan           nan           16.179602623  270000        0.7187247540  nan           0.0011000000 
+0.0010000000  nan           13.737475286  nan           nan           16.179602623  275000        0.7181389280  nan           0.0010843750 
+0.0010000000  nan           13.987247564  nan           nan           16.179602623  280000        0.7178311531  nan           0.0010843750 
+0.0010000000  nan           14.237019842  nan           nan           16.179602623  285000        0.7177499608  nan           0.0010718750 
+0.0010000000  nan           14.486792120  nan           nan           16.179602623  290000        0.7189328587  nan           0.0010781250 
+0.0010000000  nan           14.736564397  nan           nan           16.179602623  295000        0.7177765296  nan           0.0009156250 
+0.0010000000  nan           14.986336675  nan           nan           16.179602623  300000        0.7201881299  nan           0.0010000000 
+0.0010000000  nan           15.236108953  nan           nan           16.179602623  305000        0.7194818067  nan           0.0009656250 
+0.0010000000  nan           15.485881231  nan           nan           16.179602623  310000        0.7189946332  nan           0.0009687500 
+0.0010000000  nan           15.735653509  nan           nan           16.179602623  315000        0.7190786995  nan           0.0010656250 
+0.0010000000  nan           15.985425787  nan           nan           16.179602623  320000        0.7186159214  nan           0.0010187500 
+0.0010000000  nan           16.235198065  nan           nan           16.179602623  325000        0.7194033937  nan           0.0010062500 
+0.0010000000  nan           16.484970343  nan           nan           16.179602623  330000        0.7194224732  nan           0.0009593750 
+0.0010000000  nan           16.734742621  nan           nan           16.179602623  335000        0.7189937578  nan           0.0009468750 
+0.0010000000  nan           16.984514899  nan           nan           16.179602623  340000        0.7184304743  nan           0.0010562500 
+0.0010000000  nan           17.234287177  nan           nan           16.179602623  345000        0.7200504930  nan           0.0010531250 
+0.0010000000  nan           17.484059455  nan           nan           16.179602623  350000        0.7180583974  nan           0.0009093750 
+0.0010000000  nan           17.733831733  nan           nan           16.179602623  355000        0.7193888269  nan           0.0009843750 
+0.0010000000  nan           17.983604011  nan           nan           16.179602623  360000        0.7191239177  nan           0.0010437500 
+0.0010000000  nan           18.233376289  nan           nan           16.179602623  365000        0.7197011411  nan           0.0010406250 
+0.0010000000  nan           18.483148566  nan           nan           16.179602623  370000        0.7192872342  nan           0.0011250000 
+0.0010000000  nan           18.732920844  nan           nan           16.179602623  375000        0.7200893378  nan           0.0011375000 
+0.0010000000  nan           18.982693122  nan           nan           16.179602623  380000        0.7201405745  nan           0.0009531250 
+0.0010000000  nan           19.232465400  nan           nan           16.179602623  385000        0.7205877723  nan           0.0009937500 
+0.0010000000  nan           19.482237678  nan           nan           16.179602623  390000        0.7208734463  nan           0.0009500000 
+0.0010000000  nan           19.732009956  nan           nan           16.179602623  395000        0.7197759748  nan           0.0009843750 
+0.0010000000  nan           19.981782234  nan           nan           16.179602623  400000        0.7205335260  nan           0.0010968750 
+0.0010000000  nan           20.231554512  nan           nan           16.179602623  405000        0.7190319894  nan           0.0009468750 
+0.0010000000  nan           20.481326790  nan           nan           16.179602623  410000        0.7198699442  nan           0.0009531250 
+Terminated
+Launched 1 jobs!

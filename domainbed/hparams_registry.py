@@ -39,6 +39,7 @@ def _hparams(algorithm, dataset, random_seed):
     _hparam('resnet_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
     _hparam('class_balanced', False, lambda r: False)
     _hparam('backbone',"DeitSmall",lambda r:"DeitSmall")
+    _hparam('continue_checkpoint'," ",lambda r:" ")
     # TODO: nonlinear classifiers disabled
     _hparam('nonlinear_classifier', False,
             lambda r: bool(r.choice([False, False])))
