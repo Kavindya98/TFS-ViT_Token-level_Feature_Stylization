@@ -26,28 +26,29 @@ from domainbed.lib.query import Q
 
 import os
 
-def load_algorithm(file_path):
+def load_algorithm(file_path,hparams):
 
     d = torch.load(file_path)
     args = d["args"]
+    print("Saved Model ++++++++++++++++++++++")
     print('Saved Args:')
     for k in args:
         print('\t{}: {}'.format(k, args[k]))
 
-    hparams=d["model_hparams"]
+    #hparams=d["model_hparams"]
     hparams["data_augmentation"] = False
-    hparams['empty_head']=False
+    #hparams['empty_head']=False
     hparams["eval"]=True
-    print('Saved HParams:')
-    for k, v in sorted(hparams.items()):
-        print('\t{}: {}'.format(k, v))
+    # print('Saved HParams:')
+    # for k, v in sorted(hparams.items()):
+    #     print('\t{}: {}'.format(k, v))
  
     algo = algorithms.get_algorithm_class(d["args"]["algorithm"])
     model = algo(
         input_shape=d["model_input_shape"], 
         num_classes=d["model_num_classes"], 
         num_domains=d["model_num_domains"], 
-        hparams=d["model_hparams"]
+        hparams=hparams
     )
     for i in d["model_dict"]:
         if "rand_conv" in i:
@@ -58,7 +59,7 @@ def load_algorithm(file_path):
     
     model.load_state_dict(d["model_dict"])
     
-    
+    model.train()
 
     return model, args, hparams
 
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     args.save_best_model = True
 
 
-    start_step = 0
+    
     algorithm_dict = None
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -132,7 +133,9 @@ if __name__ == "__main__":
         hparams.update(js)
     
     if hparams["continue_checkpoint"] != " ":
-        "Loading model details"
+        print("Loading model details")
+        model, _, _ = load_algorithm(hparams["continue_checkpoint"],hparams)
+        
     
 
     print('HParams:')
@@ -160,6 +163,20 @@ if __name__ == "__main__":
                                                args.test_envs, hparams)
     else:
         raise NotImplementedError
+    
+    if hparams["continue_checkpoint"] == " ":
+        algorithm_class = algorithms.get_algorithm_class(args.algorithm)
+        algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+                                    len(dataset) - len(args.test_envs), hparams)
+
+        if algorithm_dict is not None:
+            algorithm.load_state_dict(algorithm_dict)
+    else:
+        print("Saved model loaded")
+        algorithm = model
+
+
+    algorithm.to(device)
 
     ### DEBUGGING    
     #     print(dataset)
@@ -326,20 +343,18 @@ if __name__ == "__main__":
     eval_loader_names += ['env{}_uda'.format(i)
                           for i in range(len(uda_splits))]
 
-    algorithm_class = algorithms.get_algorithm_class(args.algorithm)
-    algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
-                                len(dataset) - len(args.test_envs), hparams)
-
-    if algorithm_dict is not None:
-        algorithm.load_state_dict(algorithm_dict)
-
-    algorithm.to(device)
+    
     print(len(train_loaders)," length of train loader ++++++++++++++++")
     train_minibatches_iterator = zip(*train_loaders)
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])
 
     steps_per_epoch = min([len(env) / hparams['batch_size'] for env, _ in in_splits])
+
+    if hparams["continue_checkpoint"] == " ":
+        start_step = 0
+    else:
+        start_step=hparams["checkpoint_step_start"]
 
     n_steps = args.steps or dataset.N_STEPS
     checkpoint_freq = args.checkpoint_freq or dataset.CHECKPOINT_FREQ
@@ -380,7 +395,7 @@ if __name__ == "__main__":
     for step in range(start_step, n_steps):
 
         # step wise increase the inconsistancy loss
-        if step % 2*int(steps_per_epoch) ==0:           
+        if step % 2*int(hparams["checkpoint_step_start"]) ==0:           
             hparams['invariant_loss']=True
             hparams['consistency_loss_w']+=2
 

@@ -40,6 +40,7 @@ def _hparams(algorithm, dataset, random_seed):
     _hparam('class_balanced', False, lambda r: False)
     _hparam('backbone',"DeitSmall",lambda r:"DeitSmall")
     _hparam('continue_checkpoint'," ",lambda r:" ")
+    _hparam('checkpoint_step_start', 0, lambda r: r.choice([0]))
     # TODO: nonlinear classifiers disabled
     _hparam('nonlinear_classifier', False,
             lambda r: bool(r.choice([False, False])))
