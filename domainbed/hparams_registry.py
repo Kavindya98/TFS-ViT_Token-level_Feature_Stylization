@@ -32,14 +32,20 @@ def _hparams(algorithm, dataset, random_seed):
     _hparam('empty_head', False, lambda r: False)
     _hparam('eval', False, lambda r: False)
     _hparam('resnet18', False, lambda r: False)
+    _hparam('scheduler', False, lambda r: False)
+    _hparam('nesterov', False, lambda r: False)
+    _hparam('normalization', True, lambda r: False)
     _hparam('fixed_featurizer', False, lambda r: False)
+    _hparam('unfreeze_train_bn', False, lambda r: False)
+    _hparam('val_augmentation', False, lambda r: False)
     _hparam('custom_train_val', False, lambda r: False)
     _hparam('custom_val', 0, lambda r: r.choice([0]))
     _hparam('custom_train', 0, lambda r: r.choice([0]))
     _hparam('resnet_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
     _hparam('class_balanced', False, lambda r: False)
-    _hparam('backbone',"DeitSmall",lambda r:"DeitSmall")
+    _hparam('backbone',"ResNet",lambda r:"DeitSmall")
     _hparam('continue_checkpoint'," ",lambda r:" ")
+    _hparam('total_steps', 0, lambda r: r.choice([0]))
     _hparam('checkpoint_step_start', 0, lambda r: r.choice([0]))
     # TODO: nonlinear classifiers disabled
     _hparam('nonlinear_classifier', False,
@@ -121,10 +127,23 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('identity_prob', 0.0, lambda r: r.choice([0.0, 0.5]))
         _hparam('alpha_min', 0.0, lambda r: r.choice([0.0, 0.5]))
         _hparam('alpha_max', 1.0, lambda r: r.choice([0.0, 0.5]))
+        _hparam('kernel_size', 0.0, lambda r: r.choice([0.0, 3.0]))
         _hparam('randomize_kernel', True, lambda r: True)
+        _hparam('loss_aug', True, lambda r: True)
         _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
         _hparam('invariant_loss', True, lambda r: True)
         _hparam('consistency_loss_w', 10.0, lambda r: r.choice([10.0, 5.0]))
+        _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
+        
+
+    elif algorithm == 'AugMix_CNN' or algorithm == 'AugMix_ViT':
+         _hparam('consistency_loss_w', 12.0, lambda r: r.choice([10.0, 5.0]))
+         _hparam('all_ops', False, lambda r:  bool(r.choice([True, False])))
+         _hparam('mixture_width', 3, lambda r: r.choice([1, 5]))
+         _hparam('mixture_depth', -1, lambda r: r.choice([1, -1]))
+         _hparam('aug_severity', 3.0, lambda r: r.choice([1.0, 5.0]))
+         _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
+         
 
     # Dataset-and-algorithm-specific hparam definitions. Each block of code
     # below corresponds to exactly one hparam. Avoid nested conditionals.

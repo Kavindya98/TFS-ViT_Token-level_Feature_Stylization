@@ -8,6 +8,7 @@ from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
 from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN, MNISTM, SYN
+from torchvision.datasets import CIFAR10 as cifar10
 from torchvision.transforms.functional import rotate
 import timm
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
@@ -38,7 +39,10 @@ DATASETS = [
     "SVIRO",
     "ImageNet_9",
     "ImageNet_C",
-    "ImageNet_val"
+    "ImageNet_val",
+    "ImageNet_V2",
+    "CIFAR10",
+    "CIFAR10C"
     # WILDS datasets
     "WILDSCamelyon",
     "WILDSFMoW",
@@ -83,6 +87,7 @@ class MultipleDomainDataset:
     N_WORKERS = 8            # Default, subclasses may override
     ENVIRONMENTS = None      # Subclasses should override
     INPUT_SHAPE = None       # Subclasses should override
+    
 
     def __getitem__(self, index):
         return self.datasets[index]
@@ -213,45 +218,77 @@ class CIFAR10C(MultipleDomainDataset):
     ENVIRONMENTS = sorted([line.rstrip('\n') for line in open("/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/lib/corruptions.txt")])
     N_STEPS = 5000           
     CHECKPOINT_FREQ = 300
+    INPUT_SHAPE = (3, 32, 32)
     def __init__(self, root, test_envs, hparams):
         root = os.path.join(root, "CIFAR-10-C/")
         super().__init__()
         self.datasets = []
         envs = self.ENVIRONMENTS
 
-        if hparams["backbone"]=="ViTBase":
-            MEAN = [0.5, 0.5, 0.5]
-            STD = [0.5, 0.5, 0.5]
-        else:
-            MEAN = [0.485, 0.456, 0.406]
-            STD = [0.229, 0.224, 0.225]
+        # if hparams["backbone"]=="ViTBase":
+        #     MEAN = [0.5, 0.5, 0.5]
+        #     STD = [0.5, 0.5, 0.5]
+        # else:
+        #     MEAN = [0.485, 0.456, 0.406]
+        #     STD = [0.229, 0.224, 0.225]
         
-        if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
-            transform = transforms.Compose([
-                transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=MEAN, std=STD)
-            ])
-        else:
-            transform = transforms.Compose([
-                transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.ConvertImageDtype(torch.float),
-                transforms.Normalize(
-                    mean=MEAN, std=STD)
-            ])
+        # if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+        #     transform = transforms.Compose([
+        #         transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
+        #         transforms.CenterCrop(224),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize(
+        #             mean=MEAN, std=STD)
+        #     ])
+        # else:
+
+        test_transform = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize([0.5] * 3, [0.5] * 3)
+                ])
 
         for corruption in envs:
-            datast = cifar10c(root, corruption, transform=transform)
+            datast = cifar10c(root, corruption, transform=test_transform)
             self.datasets.append(datast)
+
+        self.input_shape = self.INPUT_SHAPE
+        self.num_classes = 10
         
         
+class CIFAR10(MultipleDomainDataset):
+    ENVIRONMENTS = ["real_train","real_val"]
+    N_STEPS = 39100           
+    CHECKPOINT_FREQ = 391
+    INPUT_SHAPE = (3, 32, 32)
+    def __init__(self, root, test_envs, hparams):
+        root = os.path.join(root, "cifar/")
+        super().__init__()
+        self.datasets = []
+        envs = self.ENVIRONMENTS  
 
+        train_transform = transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32, padding=4),
+                transforms.ToTensor() ,
+                #transforms.ConvertImageDtype(torch.float),
+                transforms.Normalize([0.5] * 3, [0.5] * 3) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+            ])
 
+        hparams["mean_std"]=[[0.5] * 3, [0.5] * 3]        
 
+        test_transform = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize([0.5] * 3, [0.5] * 3)])
+
+        
+        self.datasets.append(cifar10(root="/media/SSD2/Dataset/cifar",train=True, transform=train_transform, download=False))
+        print("Training dataset completed")
+
+        self.datasets.append(cifar10(root="/media/SSD2/Dataset/cifar",train=False, transform=test_transform, download=False))
+        print("Validation dataset completed")
+
+        self.input_shape = self.INPUT_SHAPE
+        self.num_classes = 10
 
 class DIGITS(MultipleDomainDataset):
     ENVIRONMENTS = ['MNIST','MNIST_VAL','MNIST-M', 'SVHN','USPS','SYN'] #
@@ -309,97 +346,93 @@ class DIGITS(MultipleDomainDataset):
 class MultipleEnvironmentImageFolder(MultipleDomainDataset):
     def __init__(self, root, test_envs, augment, hparams):
         super().__init__()
-        #environments = [f.name for f in os.scandir(root) if f.is_dir() and "valid" in f.name]
+
         environments = [f.name for f in os.scandir(root) if f.is_dir()]
         environments = sorted(environments) # list of all domains in the dataset, in sorted order
-        # environments = ["valid"]
-        # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
-        # data_config = timm.data.resolve_model_data_config(model)
-        # transform = timm.data.create_transform(**data_config, is_training=False)
-        # MEAN = [0.4717, 0.4499, 0.3837]
-        # STD = [0.2600, 0.2516, 0.2575]
+        
         if hparams["backbone"]=="ViTBase":
             MEAN = [0.5, 0.5, 0.5]
             STD = [0.5, 0.5, 0.5]
         else:
             MEAN = [0.485, 0.456, 0.406]
             STD = [0.229, 0.224, 0.225]
-        #self.ENVIRONMENTS = environments
-        # transform = transforms.Compose([
-        #     #transforms.Resize((224,224),interpolation=InterpolationMode.BICUBIC),
-        #     transforms.ToTensor(),
-        #     transforms.Normalize(
-        #         mean=MEAN, std=STD)
-        # ])
-        
-        if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
-            transform = transforms.Compose([
-                transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=MEAN, std=STD)
-            ])
-        else:
-            transform = transforms.Compose([
-                transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.ConvertImageDtype(torch.float),
-                transforms.Normalize(
-                    mean=MEAN, std=STD)
-            ])
 
-        # augment_transform = transforms.Compose([
-        #     # transforms.Resize((224,224)),
-        #     transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
-        #     transforms.RandomHorizontalFlip(),
-        #     transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
-        #     transforms.RandomGrayscale(),
-        #     transforms.ToTensor(),
-        #     transforms.Normalize(
-        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        # ])
-        #mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        #[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]
+        hparams["mean_std"] = [MEAN,STD]
 
-        augment_transform = create_transform(
-            input_size=224,
-            is_training=True,
-            color_jitter=0.3,
-            auto_augment='rand-m9-mstd0.5-inc1',
-            interpolation='bicubic',
-            re_prob=0.25,
-            re_mode='pixel',
-            re_count=1,
-        )
+        # train transform
+        transform = transforms.Compose([
+            transforms.RandomResizedCrop(size=224,
+                interpolation=InterpolationMode.BILINEAR,antialias=True),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.ToTensor(),
+            #transforms.ConvertImageDtype(torch.float),
+            transforms.Normalize(
+                mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+        ])
+
+        augment_transform = transforms.Compose([
+            # transforms.Resize((224,224)),
+            transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+            transforms.RandomGrayscale(),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
 
         self.datasets = []
         for i, environment in enumerate(environments):
 
-            if hparams["eval"]:
-                print("Eval transform")
-                if 'mixed_same' in environments:
-                    env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor()])
-                else:
-                    env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor(),transforms.Normalize(
-                    mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])])
-            elif augment and (i not in test_envs):
-                print('[INFO] Doing Data Augmentation')
+            if augment and (i not in test_envs):
+                print('[INFO] Doing Special Data Augmentation for Training')
                 env_transform = augment_transform
-            else:
-                print('[INFO] NOT Doing Data Augmentation')
+            elif i not in test_envs:
+                print('[INFO] NOT Doing Special Data Augmentation for Training')
                 env_transform = transform
-
-            
-
-            if 'mixed_same' in environments:
-                print("ImageNet-9 path used")
-                path = os.path.join(root, environment,"val")
             else:
-                path = os.path.join(root, environment)
+                
+                hparams["normalization"]=True
+                
+                if hparams["normalization"]==True: 
+                    print("++++++++ Using Normailztion for val/test data")
+                else:
+                    print("+++++++++++ Not Using Normailztion for val/test data")
+
+                print('[INFO] Doing ImageNet validation Augmentation')
+                if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+                    env_transform = transforms.Compose([
+                        transforms.Resize(size=math.floor(224/0.9),
+                                          interpolation=InterpolationMode.BICUBIC),
+                        transforms.CenterCrop(224),
+                        transforms.ToTensor(),
+                        transforms.Normalize(
+                            mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+                    ])
+                else:
+                #     env_transform = transforms.Compose([
+                #     transforms.Resize(size=256,
+                #                 interpolation=InterpolationMode.BILINEAR,antialias=True),
+                #     transforms.CenterCrop(224),
+                #     transforms.ToTensor(),
+                #     transforms.Normalize(
+                #         mean=MEAN, std=STD)
+                # ])
+                    env_transform = transforms.Compose([
+                    transforms.Resize(size=256,
+                               interpolation=InterpolationMode.BILINEAR,antialias=True),
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+                ])
+                
+                
+                
+            path = os.path.join(root, environment)
             env_dataset = ImageFolder(path,
                 transform=env_transform)
+            self.datasets.append(env_dataset)
             ################################ Code required for RCERM ################################ 
             # env_dataset: <class 'torchvision.datasets.folder.ImageFolder'>, 
             # Dataset ImageFolder
@@ -416,7 +449,7 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
             #     Root location: ../../DG/DomainBed/domainbed/data/PACS/sketch
             # access it via:
             ################################ Code required for RCERM ################################ 
-            self.datasets.append(env_dataset)
+            
             ################################ Code required for RCERM ################################ 
 #             # env_dataset containst first all elts of class 0, then class 1, ...class C-1
 #             for (batch_idx, sample_batched) in enumerate(self.datasets[i]):
@@ -426,12 +459,9 @@ class MultipleEnvironmentImageFolder(MultipleDomainDataset):
 #                 ## eg, im  0  : (<PIL.Image.Image image mode=RGB size=227x227 at 0x7FB44448C430>, 0)
             ################################ Code required for RCERM ################################ 
 
-            
-
         self.input_shape = (3, 224, 224,)
         self.num_classes = len(self.datasets[-1].classes)
-        #print("Classes ++++",self.datasets[-1].classes)
-
+        
 class VLCS(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
     ENVIRONMENTS = ["C", "L", "S", "V"]
@@ -439,13 +469,21 @@ class VLCS(MultipleEnvironmentImageFolder):
         self.dir = os.path.join(root, "VLCS/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
+# class PACS(MultipleEnvironmentImageFolder):
+#     # Photo domain should taken to first
+#     CHECKPOINT_FREQ = 300
+#     N_STEPS = 2500
+#     ENVIRONMENTS = ['AAP_train', 'AAP_val', 'AR', 'C', 'S']
+#     def __init__(self, root, test_envs, hparams):
+#         self.dir = os.path.join(root, "PACS/Split_data")
+#         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
 class PACS(MultipleEnvironmentImageFolder):
-    # Photo domain should taken to first
     CHECKPOINT_FREQ = 300
-    N_STEPS = 5000
-    ENVIRONMENTS = ["AA_P", "AR", "C", "S"]
+    N_STEPS = 2500
+    ENVIRONMENTS = ['AAP', 'AR', 'C', 'S']
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "PACS/")
+        self.dir = os.path.join(root, "PACS/Unsplit_data")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class DomainNet(MultipleEnvironmentImageFolder):
@@ -468,13 +506,13 @@ class ImageNet_9(MultipleEnvironmentImageFolder):
                     'only_fg',
                     'original']
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "bg_challenge/")
+        self.dir = os.path.join(root, "ImageNet_9/bg_challenge")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class Cue_conflicts(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = ['texture']
+    ENVIRONMENTS = ['iid','texture']
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "Cue_conflicts_stimuli/")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
@@ -489,11 +527,20 @@ class ImageNet_C(MultipleEnvironmentImageFolder):
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet(MultipleEnvironmentImageFolder):
-    N_STEPS = 20019*90
+    N_STEPS = 20019*20
+    N_WORKERS = 16
     CHECKPOINT_FREQ = 5000
     ENVIRONMENTS = ["train","valid"]
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "ImageNet_val/JustCopy")
+        super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
+
+class ImageNet_V2(MultipleEnvironmentImageFolder):
+    N_STEPS = 5000
+    CHECKPOINT_FREQ = 300
+    ENVIRONMENTS = ["eval"]
+    def __init__(self, root, test_envs, hparams):
+        self.dir = os.path.join(root, "ImageNet_V2/data")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 
 class ImageNet_val(MultipleEnvironmentImageFolder):
@@ -501,7 +548,7 @@ class ImageNet_val(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
     ENVIRONMENTS = ["valid"]
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "ImageNet_val/JustCopy")
+        self.dir = os.path.join(root, "ImageNet_val/validation")
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
     
 class OfficeHome(MultipleEnvironmentImageFolder):
@@ -621,3 +668,148 @@ class SVIRO(MultipleEnvironmentImageFolder):
 #         super().__init__(
 #             dataset, "region", test_envs, hparams['data_augmentation'], hparams)
 
+# OLD method before confirming the 
+
+# class MultipleEnvironmentImageFolder(MultipleDomainDataset):
+#     def __init__(self, root, test_envs, augment, hparams):
+#         super().__init__()
+#         environments = [f.name for f in os.scandir(root) if f.is_dir() and "valid" in f.name]
+#         #environments = [f.name for f in os.scandir(root) if f.is_dir()]
+#         environments = sorted(environments) # list of all domains in the dataset, in sorted order
+#         # environments = ["valid"]
+#         # model = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
+#         # data_config = timm.data.resolve_model_data_config(model)
+#         # transform = timm.data.create_transform(**data_config, is_training=False)
+#         MEAN = [0.485, 0.456, 0.406]
+#         STD = [0.229, 0.224, 0.225]
+#         # if hparams["backbone"]=="ViTBase":
+#         #     MEAN = [0.5, 0.5, 0.5]
+#         #     STD = [0.5, 0.5, 0.5]
+#         # else:
+#         #     MEAN = [0.485, 0.456, 0.406]
+#         #     STD = [0.229, 0.224, 0.225]
+#         #self.ENVIRONMENTS = environments
+#         # transform = transforms.Compose([
+#         #     #transforms.Resize((224,224),interpolation=InterpolationMode.BICUBIC),
+#         #     transforms.ToTensor(),
+#         #     transforms.Normalize(
+#         #         mean=MEAN, std=STD)
+#         # ])
+        
+        
+        
+        
+        
+        
+#         transform = transforms.Compose([
+#             transforms.RandomResizedCrop(size=224,interpolation=InterpolationMode.BILINEAR,antialias=True),
+#             transforms.RandomHorizontalFlip(0.5),
+#             transforms.ToTensor(),
+#             transforms.ConvertImageDtype(torch.float),
+#             transforms.Normalize(
+#                 mean=MEAN, std=STD)
+#         ])
+
+#         augment_transform = transforms.Compose([
+#             # transforms.Resize((224,224)),
+#             transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
+#             transforms.RandomHorizontalFlip(),
+#             transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+#             transforms.RandomGrayscale(),
+#             transforms.ToTensor(),
+#             transforms.Normalize(
+#                 mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+#         ])
+#         #mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+#         #[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]
+
+
+#         self.datasets = []
+#         for i, environment in enumerate(environments):
+
+#             if hparams["eval"]:
+#                 print("Eval transform")
+#                 if 'mixed_same' in environments:
+#                     env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor()])
+#                 else:
+#                     env_transform = transforms.Compose([transforms.CenterCrop(224),transforms.ToTensor(),transforms.Normalize(
+#                     mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])])
+#                     # env_transform = transforms.Compose([
+#                     #                 transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+#                     #                 transforms.CenterCrop(224),
+#                     #                 transforms.ToTensor(),
+#                     #                 transforms.ConvertImageDtype(torch.float),
+#                     #                 transforms.Normalize(
+#                     #                     mean=MEAN, std=STD)
+#                     #             ])
+#             elif augment and (i not in test_envs):
+#                 print('[INFO] Doing Data Augmentation')
+#                 env_transform = augment_transform
+#             elif 'train'==environment:
+#                 print('[INFO] NOT Doing Special Data Augmentation')
+#                 env_transform = transform
+#             else:
+#                 print('[INFO] Doing ImageNet validation Augmentation')
+#                 env_transform = transforms.Compose([
+#                     transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+#                     transforms.CenterCrop(224),
+#                     transforms.ToTensor(),
+#                     transforms.Normalize(
+#                         mean=MEAN, std=STD)
+#                 # if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+#                 #     env_transform = transforms.Compose([
+#                 #         transforms.Resize(size=math.floor(224/0.9),interpolation=InterpolationMode.BICUBIC),
+#                 #         transforms.CenterCrop(224),
+#                 #         transforms.ToTensor(),
+#                 #         transforms.Normalize(
+#                 #             mean=MEAN, std=STD)
+#                 #     ])
+#                 # else:
+#                 #     env_transform = transforms.Compose([
+#                 #     transforms.Resize(size=256,interpolation=InterpolationMode.BILINEAR,antialias=True),
+#                 #     transforms.CenterCrop(224),
+#                 #     transforms.ToTensor(),
+#                 #     transforms.Normalize(
+#                 #         mean=MEAN, std=STD)
+#             ])
+                
+            
+
+#             if 'mixed_same' in environments:
+#                 print("ImageNet-9 path used")
+#                 path = os.path.join(root, environment,"val")
+#             else:
+#                 path = os.path.join(root, environment)
+#             env_dataset = ImageFolder(path,
+#                 transform=env_transform)
+#             ################################ Code required for RCERM ################################ 
+#             # env_dataset: <class 'torchvision.datasets.folder.ImageFolder'>, 
+#             # Dataset ImageFolder
+#             #     Number of datapoints: 2050
+#             #     Root location: ../../DG/DomainBed/domainbed/data/PACS/art_painting
+#             # Dataset ImageFolder
+#             #     Number of datapoints: 2345
+#             #     Root location: ../../DG/DomainBed/domainbed/data/PACS/cartoon
+#             # Dataset ImageFolder
+#             #     Number of datapoints: 1671
+#             #     Root location: ../../DG/DomainBed/domainbed/data/PACS/photo
+#             # Dataset ImageFolder
+#             #     Number of datapoints: 3934
+#             #     Root location: ../../DG/DomainBed/domainbed/data/PACS/sketch
+#             # access it via:
+#             ################################ Code required for RCERM ################################ 
+#             self.datasets.append(env_dataset)
+#             ################################ Code required for RCERM ################################ 
+# #             # env_dataset containst first all elts of class 0, then class 1, ...class C-1
+# #             for (batch_idx, sample_batched) in enumerate(self.datasets[i]):
+# #             ###     if batch_idx==1:
+# #             ###         break
+# #                 print('im ',batch_idx,' :',sample_batched)
+# #                 ## eg, im  0  : (<PIL.Image.Image image mode=RGB size=227x227 at 0x7FB44448C430>, 0)
+#             ################################ Code required for RCERM ################################ 
+
+            
+
+#         self.input_shape = (3, 224, 224,)
+#         self.num_classes = len(self.datasets[-1].classes)
+#         #print("Classes ++++",self.datasets[-1].classes)

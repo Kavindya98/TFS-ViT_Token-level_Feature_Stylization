@@ -1,0 +1,28 @@
+2023-12-11 16:25:04,248 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Current SDK version is 0.16.1
+2023-12-11 16:25:04,248 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Configure stats pid to 29534
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Loading settings from /home/kavindya/.config/wandb/settings
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Loading settings from /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/wandb/settings
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-12-11 16:25:04,249 WARNING MainThread:29534 [wandb_setup.py:_flush():76] Could not find program at -m domainbed.scripts.train
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': None, 'program': '-m domainbed.scripts.train'}
+2023-12-11 16:25:04,249 INFO    MainThread:29534 [wandb_init.py:_log_setup():524] Logging user logs to /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/wandb/run-20231211_162504-ouzckz9t/logs/debug.log
+2023-12-11 16:25:04,250 INFO    MainThread:29534 [wandb_init.py:_log_setup():525] Logging internal logs to /media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/wandb/run-20231211_162504-ouzckz9t/logs/debug-internal.log
+2023-12-11 16:25:04,250 INFO    MainThread:29534 [wandb_init.py:init():564] calling init triggers
+2023-12-11 16:25:04,250 INFO    MainThread:29534 [wandb_init.py:init():571] wandb.init called with sweep_config: {}
+config: {}
+2023-12-11 16:25:04,250 INFO    MainThread:29534 [wandb_init.py:init():614] starting backend
+2023-12-11 16:25:04,250 INFO    MainThread:29534 [wandb_init.py:init():618] setting up manager
+2023-12-11 16:25:04,258 INFO    MainThread:29534 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-12-11 16:25:04,260 INFO    MainThread:29534 [wandb_init.py:init():624] backend started and connected
+2023-12-11 16:25:04,271 INFO    MainThread:29534 [wandb_init.py:init():716] updated telemetry
+2023-12-11 16:25:04,288 INFO    MainThread:29534 [wandb_init.py:init():749] communicating run to backend with 90.0 second timeout
+2023-12-11 16:25:04,794 ERROR   MainThread:29534 [wandb_init.py:init():775] encountered error: It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+2023-12-11 16:25:04,927 ERROR   MainThread:29534 [wandb_init.py:init():1188] It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+Traceback (most recent call last):
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/wandb/sdk/wandb_init.py", line 1170, in init
+    run = wi.init()
+  File "/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/wandb/sdk/wandb_init.py", line 781, in init
+    raise error
+wandb.errors.CommError: It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+2023-12-11 16:25:05,932 WARNING MsgRouterThr:29534 [router.py:message_loop():77] message_loop has been closed

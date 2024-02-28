@@ -4,5 +4,7 @@ domainbed/scripts/test_ViT_RB/IID_best.pkl
 domainbed/pretrained_models/
 domainbed/data
 Results/
-
-
+runs/
+OUT/
+OLD_OUT/
+domainbed/_pycache_/

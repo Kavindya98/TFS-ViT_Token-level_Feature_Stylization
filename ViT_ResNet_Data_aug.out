@@ -1,0 +1,30 @@
+nohup: ignoring input
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch16_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_large_patch32_384(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_small_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet26d_224(pretrained=False, **kwargs):
+/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  def vit_base_resnet50d_224(pretrained=False, **kwargs):
+device: cuda:2
+Current cuda device  0
+ViTBase Network
+full_model_tuning_only
+[INFO] Doing ImageNet validation Augmentation
+Loading dataset
+0it [00:00, ?it/s]1it [00:00,  6.49it/s]1it [00:00,  6.43it/s]
+env_valid_acc 0.8179    env_valid_error 0.1821
+Mean Corruption Error: 18.210

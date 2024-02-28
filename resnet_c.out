@@ -1,62 +1,0 @@
-nohup: ignoring input
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet50d_224(pretrained=False, **kwargs):
-device: cuda:2
-Current cuda device  0
-taken the whole pretrained network
-/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
-  warnings.warn(
-/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
-  warnings.warn(msg)
-full_model_tuning_only
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  5.14it/s]2it [00:00,  4.01it/s]3it [00:00,  3.34it/s]4it [00:01,  3.00it/s]5it [00:01,  3.03it/s]6it [00:01,  2.71it/s]7it [00:02,  2.71it/s]8it [00:02,  2.66it/s]9it [00:03,  2.51it/s]10it [00:03,  2.56it/s]11it [00:03,  2.60it/s]12it [00:04,  2.53it/s]13it [00:04,  2.56it/s]14it [00:05,  2.37it/s]15it [00:05,  2.43it/s]15it [00:05,  2.66it/s]
-env_blur_defocus_blur_5_acc 0.08114
-env_blur_glass_blur_5_acc 0.05972
-env_blur_motion_blur_5_acc 0.09592
-env_blur_zoom_blur_5_acc 0.14754
-env_digital_contrast_5_acc 0.00718
-env_digital_elastic_transform_5_acc 0.11092
-env_digital_jpeg_compression_5_acc 0.3253
-env_digital_pixelate_5_acc 0.18194
-env_noise_gaussian_noise_5_acc 0.04468
-env_noise_impulse_noise_5_acc 0.04064
-env_noise_shot_noise_5_acc 0.04738
-env_weather_brightness_5_acc 0.45786
-env_weather_fog_5_acc 0.12322
-env_weather_frost_5_acc 0.14482
-env_weather_snow_5_acc 0.06916
-{'blur': [0.08114, 0.05972, 0.09592, 0.14754], 'digital': [0.00718, 0.11092, 0.3253, 0.18194], 'noise': [0.04468, 0.04064, 0.04738], 'weather': [0.45786, 0.12322, 0.14482, 0.06916]}

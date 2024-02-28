@@ -122,6 +122,9 @@ def single_domain_gen_train_env(dataset):
     elif dataset == "DIGITS":
         test_envs.remove(0)
         all_test_envs.append(test_envs)
+    elif dataset == "CIFAR10":
+        test_envs.remove(0)
+        all_test_envs.append(test_envs)
     elif dataset == "ImageNet_9":
         test_envs.remove(5)
         all_test_envs.append(test_envs)  
@@ -141,7 +144,7 @@ def single_domain_gen_train_env(dataset):
 
 
 def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparams, steps, checkpoint_freq,
-    data_dir, task, holdout_fraction, single_test_envs,single_domain_gen, hparams, which_envs):
+    data_dir, task, holdout_fraction, single_test_envs,single_domain_gen, hparams, which_envs, continue_checkpoint):
     args_list = []
     for trial_seed in range(n_trials):
         for dataset in dataset_names:
@@ -169,7 +172,8 @@ def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparam
                         train_args['hparams_seed'] = hparams_seed
                         train_args['data_dir'] = data_dir
                         train_args['task'] = task
-                        train_args['trial_seed'] = trial_seed+2
+                        train_args['continue_checkpoint'] = continue_checkpoint
+                        train_args['trial_seed'] = trial_seed
                         train_args['seed'] = misc.seed_hash(dataset,
                             algorithm, test_envs, hparams_seed, trial_seed)
                         if steps is not None:
@@ -199,6 +203,7 @@ if __name__ == "__main__":
     parser.add_argument('--algorithms', nargs='+', type=str, default=algorithms.ALGORITHMS)
     parser.add_argument('--single_test_envs', action='store_true')
     parser.add_argument('--output_dir', type=str, required=True)
+    parser.add_argument('--continue_checkpoint', type=str, default=" ")
     parser.add_argument('--data_dir', type=str, required=True)
     parser.add_argument('--command_launcher', type=str, required=True)
     parser.add_argument('--hparams', type=str, default=None)
@@ -215,7 +220,7 @@ if __name__ == "__main__":
     parser.add_argument('--which_envs', nargs='+', type=int, default=None)
     args = parser.parse_args()
 
-
+    
 
     args_list = make_args_list(
         n_trials=args.n_trials,
@@ -232,6 +237,7 @@ if __name__ == "__main__":
         single_domain_gen=args.single_domain_gen,
         hparams=args.hparams,
         which_envs=args.which_envs,
+        continue_checkpoint=args.continue_checkpoint
     )
 
     jobs = [Job(train_args, args.output_dir, args.single_test_envs) for train_args in args_list]

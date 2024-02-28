@@ -15,6 +15,10 @@ import torch
 import torchvision
 import torch.utils.data
 import copy
+import torch.nn as nn
+
+from torch.utils.tensorboard import SummaryWriter
+
 
 from domainbed import datasets
 from domainbed import hparams_registry
@@ -28,17 +32,19 @@ import os
 
 def load_algorithm(file_path,hparams):
 
+    print("Filepath #####",file_path)
     d = torch.load(file_path)
     args = d["args"]
     print("Saved Model ++++++++++++++++++++++")
-    print('Saved Args:')
-    for k in args:
-        print('\t{}: {}'.format(k, args[k]))
+    # print('Saved Args:')
+    # for k in args:
+    #     print('\t{}: {}'.format(k, args[k]))
 
     #hparams=d["model_hparams"]
     hparams["data_augmentation"] = False
-    #hparams['empty_head']=False
     hparams["eval"]=True
+    #hparams['empty_head']=False
+    
     # print('Saved HParams:')
     # for k, v in sorted(hparams.items()):
     #     print('\t{}: {}'.format(k, v))
@@ -53,11 +59,19 @@ def load_algorithm(file_path,hparams):
     for i in d["model_dict"]:
         if "rand_conv" in i:
             del d["model_dict"][i]
+        # if "classifier" in i:
+        #     print("Classifier in saved model",i)
     for j in model.state_dict():
         if "rand_conv" in j:
             del model.state_dict()[j]
+        # if "classifier" in j:
+        #     print("Classifier in loaded template model",j)
+        
     
     model.load_state_dict(d["model_dict"])
+    hparams["eval"]=False
+
+    
     
     model.train()
 
@@ -86,7 +100,7 @@ if __name__ == "__main__":
                         help='Checkpoint every N steps. Default is dataset-dependent.')
     parser.add_argument('--test_envs', type=int, nargs='+', default=[0])
     parser.add_argument('--output_dir', type=str, default="test_ViT_RB")
-    parser.add_argument('--', type=str, default="test_ViT_RB")
+    parser.add_argument('--continue_checkpoint', type=str, default=" ")
     parser.add_argument('--holdout_fraction', type=float, default=0.001)
     parser.add_argument('--uda_holdout_fraction', type=float, default=0,
                         help="For domain adaptation, % of test to use unlabeled for training.")
@@ -99,8 +113,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     args.save_best_model = True
-
-
+    writer = SummaryWriter(comment=args.output_dir.split("/")[-2])
     
     algorithm_dict = None
 
@@ -132,15 +145,17 @@ if __name__ == "__main__":
         # print(args.hparams)
         hparams.update(js)
     
+    if args.continue_checkpoint != " ":
+        hparams["continue_checkpoint"] = args.continue_checkpoint
+    
     if hparams["continue_checkpoint"] != " ":
+        print("Filepath",hparams["continue_checkpoint"])
         print("Loading model details")
         model, _, _ = load_algorithm(hparams["continue_checkpoint"],hparams)
         
     
 
-    print('HParams:')
-    for k, v in sorted(hparams.items()):
-        print('\t{}: {}'.format(k, v))
+    
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -164,6 +179,12 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError
     
+    hparams["total_steps"] = dataset.N_STEPS
+
+    print('HParams:')
+    for k, v in sorted(hparams.items()):
+        print('\t{}: {}'.format(k, v))
+
     if hparams["continue_checkpoint"] == " ":
         algorithm_class = algorithms.get_algorithm_class(args.algorithm)
         algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
@@ -175,7 +196,7 @@ if __name__ == "__main__":
         print("Saved model loaded")
         algorithm = model
 
-
+    
     algorithm.to(device)
 
     ### DEBUGGING    
@@ -285,6 +306,7 @@ if __name__ == "__main__":
             else:
                 print("env ",i," : ",envs_d[i]," out ",len(out_splits[i-1][0]))
         else:
+            
             if i ==hparams['custom_train']:
                 print("env ",i," : ",envs_d[i]," in ",len(in_splits[i][0])," out ",len(out_splits[i][0]))
             else:
@@ -394,10 +416,12 @@ if __name__ == "__main__":
     best_val_acc = 0
     for step in range(start_step, n_steps):
 
+        #TODO - add a parameter to control this 
         # step wise increase the inconsistancy loss
-        if step % 2*int(hparams["checkpoint_step_start"]) ==0:           
-            hparams['invariant_loss']=True
-            hparams['consistency_loss_w']+=2
+        # if step % 40000 ==0:  
+        #     print("Increase consistency loss **********")         
+        #     hparams['invariant_loss']=True
+        #     hparams['consistency_loss_w']+=2
 
         step_start_time = time.time()
         minibatches_device = [(x.to(device), y.to(device))
@@ -407,7 +431,9 @@ if __name__ == "__main__":
                           for x, _ in next(uda_minibatches_iterator)]
         else:
             uda_device = None
+        
         step_vals = algorithm.update(minibatches_device, uda_device)
+        
         checkpoint_vals['step_time'].append(time.time() - step_start_time)
 
         for key, val in step_vals.items():
@@ -422,12 +448,25 @@ if __name__ == "__main__":
             for key, val in checkpoint_vals.items():
                 results[key] = np.mean(val)
 
+            Training = []
+            for m in algorithm.network.modules():
+                if isinstance(m, torch.nn.BatchNorm2d):
+                    Training.append(m.training)
+
+            check_True=all(element == True for element in Training)
+
+            if check_True:
+                print ("Batch Norm layers are training")
+            else:
+                print ("Batch Norm layers are NOT training")
+
+
             evals = zip(eval_loader_names, eval_loaders, eval_weights)
             temp_acc = 0
             temp_count = 0
             
             for name, loader, weights in evals:
-                acc,loss = misc.accuracy(algorithm, loader, weights, device,val_id=hparams['custom_val'],current_id=int(name[3]),randconv=True)
+                acc,loss = misc.accuracy(algorithm, loader, weights, device,val_id=hparams['custom_val'],current_id=int(name[3]),randconv=hparams['val_augmentation'])
                 if args.save_best_model:
                     #if int(name[3]) not in args.test_envs and "out" in name:
                     if hparams['custom_val'] == int(name[3]) and "out" in name:
@@ -435,6 +474,7 @@ if __name__ == "__main__":
                         temp_count += 1
                 results[name + '_acc'] = acc
                 results[name + '_loss'] = loss
+            
             # print("Validation done")    
             if args.save_best_model:
                 val_acc = temp_acc / (temp_count * 1.0)
@@ -464,10 +504,19 @@ if __name__ == "__main__":
             with open(epochs_path, 'a') as f:
                 f.write(json.dumps(results, sort_keys=True) + "\n")
 
+            writer.add_scalar("val_acc",results["env1_out_acc"],results["step"])
+            writer.add_scalar("val_loss",results["env1_out_loss"],results["step"])
+            
+            if "task_loss" in list(results.keys()):
+                writer.add_scalar("train_loss",results["task_loss"],results["step"])
+                writer.add_scalar("inv_loss",results["inv_loss"],results["step"])
+            else:
+                writer.add_scalar("train_loss",results["loss"],results["step"])
             algorithm_dict = algorithm.state_dict()
             start_step = step + 1
             checkpoint_vals = collections.defaultdict(lambda: [])
-
+            
+            
             # records = []
             # with open(epochs_path, 'r') as f:
             #     for line in f:
@@ -477,12 +526,14 @@ if __name__ == "__main__":
             # if scores[-1] == scores.argmax('val_acc'):
             #     save_checkpoint('IID_best.pkl')
             #     algorithm.to(device)
-
+            save_checkpoint(f'model_step_last.pkl')
+            algorithm.to(device)
             if args.save_model_every_checkpoint:
                 save_checkpoint(f'model_step{step}.pkl')
         # print("One iteration done")
 
     save_checkpoint('model.pkl')
+    writer.close()
     # if (args.save_best_model):
     #     save_checkpoint_best('IID_best.pkl', model_save)
     with open(os.path.join(args.output_dir, 'done'), 'w') as f:

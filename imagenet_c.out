@@ -1,178 +1,0 @@
-nohup: ignoring input
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet50d_224(pretrained=False, **kwargs):
-device: cuda:2
-Current cuda device  0
-ViTBase Network
-full_model_tuning_only
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  3.46it/s]2it [00:00,  3.01it/s]3it [00:01,  2.78it/s]4it [00:01,  2.65it/s]5it [00:01,  2.57it/s]6it [00:02,  2.54it/s]7it [00:02,  2.39it/s]8it [00:03,  2.44it/s]9it [00:03,  2.37it/s]10it [00:04,  2.31it/s]11it [00:04,  2.22it/s]12it [00:05,  2.11it/s]13it [00:05,  2.05it/s]14it [00:06,  2.06it/s]15it [00:06,  2.09it/s]16it [00:06,  2.20it/s]17it [00:07,  2.17it/s]18it [00:07,  2.13it/s]19it [00:08,  2.18it/s]20it [00:08,  2.13it/s]21it [00:09,  2.10it/s]22it [00:09,  2.03it/s]23it [00:10,  2.02it/s]24it [00:10,  1.93it/s]25it [00:11,  1.98it/s]26it [00:11,  2.01it/s]27it [00:12,  2.03it/s]28it [00:12,  1.93it/s]29it [00:13,  1.82it/s]30it [00:13,  1.91it/s]31it [00:14,  1.81it/s]32it [00:15,  1.82it/s]33it [00:15,  1.76it/s]34it [00:16,  1.87it/s]35it [00:16,  1.86it/s]36it [00:17,  1.91it/s]37it [00:17,  1.86it/s]38it [00:18,  1.77it/s]39it [00:18,  1.85it/s]40it [00:19,  1.73it/s]41it [00:20,  1.72it/s]42it [00:20,  1.74it/s]43it [00:21,  1.74it/s]44it [00:21,  1.76it/s]45it [00:22,  1.79it/s]46it [00:22,  1.78it/s]47it [00:23,  1.79it/s]48it [00:24,  1.58it/s]49it [00:24,  1.59it/s]50it [00:25,  1.56it/s]51it [00:26,  1.55it/s]52it [00:26,  1.62it/s]53it [00:27,  1.63it/s]54it [00:28,  1.58it/s]55it [00:28,  1.59it/s]56it [00:29,  1.53it/s]57it [00:30,  1.54it/s]58it [00:30,  1.48it/s]59it [00:31,  1.48it/s]60it [00:32,  1.47it/s]61it [00:32,  1.46it/s]62it [00:33,  1.46it/s]63it [00:34,  1.37it/s]64it [00:35,  1.31it/s]65it [00:35,  1.36it/s]66it [00:36,  1.35it/s]67it [00:37,  1.40it/s]68it [00:38,  1.38it/s]69it [00:39,  1.19it/s]70it [00:40,  1.17it/s]71it [00:41,  1.08it/s]72it [00:42,  1.02it/s]73it [00:43,  1.01it/s]74it [00:44,  1.03it/s]75it [00:44,  1.13it/s]75it [00:44,  1.67it/s]
-env_blur_defocus_blur_1_acc 0.7091
-env_blur_defocus_blur_2_acc 0.66048
-env_blur_defocus_blur_3_acc 0.54976
-env_blur_defocus_blur_4_acc 0.43798
-env_blur_defocus_blur_5_acc 0.33094
-env_blur_glass_blur_1_acc 0.73222
-env_blur_glass_blur_2_acc 0.66896
-env_blur_glass_blur_3_acc 0.47628
-env_blur_glass_blur_4_acc 0.41292
-env_blur_glass_blur_5_acc 0.30866
-env_blur_motion_blur_1_acc 0.75986
-env_blur_motion_blur_2_acc 0.71914
-env_blur_motion_blur_3_acc 0.6384
-env_blur_motion_blur_4_acc 0.51062
-env_blur_motion_blur_5_acc 0.4155
-env_blur_zoom_blur_1_acc 0.666
-env_blur_zoom_blur_2_acc 0.59286
-env_blur_zoom_blur_3_acc 0.5234
-env_blur_zoom_blur_4_acc 0.45936
-env_blur_zoom_blur_5_acc 0.37214
-env_digital_contrast_1_acc 0.74794
-env_digital_contrast_2_acc 0.71524
-env_digital_contrast_3_acc 0.64164
-env_digital_contrast_4_acc 0.40586
-env_digital_contrast_5_acc 0.11118
-env_digital_elastic_transform_1_acc 0.73568
-env_digital_elastic_transform_2_acc 0.53816
-env_digital_elastic_transform_3_acc 0.74306
-env_digital_elastic_transform_4_acc 0.68574
-env_digital_elastic_transform_5_acc 0.48082
-env_digital_jpeg_compression_1_acc 0.75586
-env_digital_jpeg_compression_2_acc 0.73324
-env_digital_jpeg_compression_3_acc 0.71498
-env_digital_jpeg_compression_4_acc 0.65798
-env_digital_jpeg_compression_5_acc 0.57066
-env_digital_pixelate_1_acc 0.79228
-env_digital_pixelate_2_acc 0.78502
-env_digital_pixelate_3_acc 0.75348
-env_digital_pixelate_4_acc 0.68026
-env_digital_pixelate_5_acc 0.54684
-env_noise_gaussian_noise_1_acc 0.76652
-env_noise_gaussian_noise_2_acc 0.7306
-env_noise_gaussian_noise_3_acc 0.6439
-env_noise_gaussian_noise_4_acc 0.47998
-env_noise_gaussian_noise_5_acc 0.22324
-env_noise_impulse_noise_1_acc 0.74434
-env_noise_impulse_noise_2_acc 0.69244
-env_noise_impulse_noise_3_acc 0.63462
-env_noise_impulse_noise_4_acc 0.4612
-env_noise_impulse_noise_5_acc 0.23034
-env_noise_shot_noise_1_acc 0.76442
-env_noise_shot_noise_2_acc 0.71522
-env_noise_shot_noise_3_acc 0.62826
-env_noise_shot_noise_4_acc 0.418
-env_noise_shot_noise_5_acc 0.24884
-env_weather_brightness_1_acc 0.79606
-env_weather_brightness_2_acc 0.78496
-env_weather_brightness_3_acc 0.76368
-env_weather_brightness_4_acc 0.7325
-env_weather_brightness_5_acc 0.68376
-env_weather_fog_1_acc 0.69796
-env_weather_fog_2_acc 0.64992
-env_weather_fog_3_acc 0.57774
-env_weather_fog_4_acc 0.52792
-env_weather_fog_5_acc 0.3706
-env_weather_frost_1_acc 0.7247
-env_weather_frost_2_acc 0.61068
-env_weather_frost_3_acc 0.51236
-env_weather_frost_4_acc 0.49378
-env_weather_frost_5_acc 0.42416
-env_weather_snow_1_acc 0.70174
-env_weather_snow_2_acc 0.55164
-env_weather_snow_3_acc 0.5659
-env_weather_snow_4_acc 0.45532
-env_weather_snow_5_acc 0.39066
-{'blur': [0.7091, 0.66048, 0.54976, 0.43798, 0.33094, 0.73222, 0.66896, 0.47628, 0.41292, 0.30866, 0.75986, 0.71914, 0.6384, 0.51062, 0.4155, 0.666, 0.59286, 0.5234, 0.45936, 0.37214], 'digital': [0.74794, 0.71524, 0.64164, 0.40586, 0.11118, 0.73568, 0.53816, 0.74306, 0.68574, 0.48082, 0.75586, 0.73324, 0.71498, 0.65798, 0.57066, 0.79228, 0.78502, 0.75348, 0.68026, 0.54684], 'noise': [0.76652, 0.7306, 0.6439, 0.47998, 0.22324, 0.74434, 0.69244, 0.63462, 0.4612, 0.23034, 0.76442, 0.71522, 0.62826, 0.418, 0.24884], 'weather': [0.79606, 0.78496, 0.76368, 0.7325, 0.68376, 0.69796, 0.64992, 0.57774, 0.52792, 0.3706, 0.7247, 0.61068, 0.51236, 0.49378, 0.42416, 0.70174, 0.55164, 0.5659, 0.45532, 0.39066]}

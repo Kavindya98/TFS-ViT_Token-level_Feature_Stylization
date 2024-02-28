@@ -1,106 +1,0 @@
-nohup: ignoring input
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:962: UserWarning: Overwriting vit_small_patch16_224 in registry with domainbed.visiontransformer.vit_small_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:975: UserWarning: Overwriting vit_base_patch16_224 in registry with domainbed.visiontransformer.vit_base_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:987: UserWarning: Overwriting vit_base_patch16_384 in registry with domainbed.visiontransformer.vit_base_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:998: UserWarning: Overwriting vit_base_patch32_384 in registry with domainbed.visiontransformer.vit_base_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1009: UserWarning: Overwriting vit_large_patch16_224 in registry with domainbed.visiontransformer.vit_large_patch16_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1020: UserWarning: Overwriting vit_large_patch16_384 in registry with domainbed.visiontransformer.vit_large_patch16_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch16_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1031: UserWarning: Overwriting vit_large_patch32_384 in registry with domainbed.visiontransformer.vit_large_patch32_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_large_patch32_384(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1057: UserWarning: Overwriting vit_small_resnet26d_224 in registry with domainbed.visiontransformer.vit_small_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_small_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1077: UserWarning: Overwriting vit_base_resnet26d_224 in registry with domainbed.visiontransformer.vit_base_resnet26d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet26d_224(pretrained=False, **kwargs):
-/media/SSD2/kavindya/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/visiontransformer.py:1087: UserWarning: Overwriting vit_base_resnet50d_224 in registry with domainbed.visiontransformer.vit_base_resnet50d_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
-  def vit_base_resnet50d_224(pretrained=False, **kwargs):
-device: cuda:0
-Current cuda device  0
-Saved Args:
-	data_dir: /media/SSD2/Dataset
-	dataset: ImageNet
-	algorithm: RandConv_CNN
-	task: domain_generalization
-	hparams: {"batch_size":64,"lr":0.0001,"resnet_dropout":0.0,"alpha_min":0.0,"alpha_max":1.0,"weight_decay":0.0,"custom_train_val":true,"custom_train":0,"custom_val":1,"resnet18":false,"fixed_featurizer":false}
-	hparams_seed: 0
-	trial_seed: 2
-	seed: 1637210862
-	steps: None
-	checkpoint_freq: None
-	test_envs: [1]
-	output_dir: ./Results/ImageNet/Fullset/Long_Epoch_Clipped/RandConv/t1_s2
-	holdout_fraction: 0.2
-	uda_holdout_fraction: 0
-	skip_model_save: False
-	save_model_every_checkpoint: False
-	save_best_model: True
-Saved HParams:
-	alpha_max: 1.0
-	alpha_min: 0.0
-	backbone: DeitSmall
-	batch_size: 64
-	class_balanced: False
-	consistency_loss_w: 10.0
-	custom_train: 0
-	custom_train_val: True
-	custom_val: 1
-	data_augmentation: False
-	digits: True
-	empty_fc: False
-	empty_head: False
-	eval: True
-	fixed_featurizer: False
-	identity_prob: 0.0
-	invariant_loss: True
-	lr: 0.0001
-	mixing: True
-	nonlinear_classifier: False
-	randomize_kernel: True
-	resnet18: False
-	resnet_dropout: 0.0
-	test_env: [1]
-	weight_decay: 0.0
-	weight_decay_d: 0.0
-taken the whole pretrained network
-/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
-  warnings.warn(
-/home/kavindya/anaconda3/envs/ViT_DGbed_2/lib/python3.8/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet50_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet50_Weights.DEFAULT` to get the most up-to-date weights.
-  warnings.warn(msg)
-full_model_tuning_only
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Eval transform
-Loading dataset
-0it [00:00, ?it/s]1it [00:00,  4.80it/s]2it [00:00,  3.99it/s]3it [00:00,  3.44it/s]4it [00:01,  3.10it/s]5it [00:01,  3.22it/s]6it [00:01,  2.94it/s]7it [00:02,  2.78it/s]8it [00:02,  2.88it/s]9it [00:02,  2.83it/s]10it [00:03,  2.80it/s]11it [00:03,  2.89it/s]12it [00:04,  2.78it/s]13it [00:04,  2.73it/s]14it [00:04,  2.40it/s]15it [00:05,  2.59it/s]15it [00:05,  2.84it/s]
-env_blur_defocus_blur_5_acc 0.0313
-env_blur_glass_blur_5_acc 0.02742
-env_blur_motion_blur_5_acc 0.0408
-env_blur_zoom_blur_5_acc 0.08158
-env_digital_contrast_5_acc 0.08424
-env_digital_elastic_transform_5_acc 0.05562
-env_digital_jpeg_compression_5_acc 0.28998
-env_digital_pixelate_5_acc 0.1965
-env_noise_gaussian_noise_5_acc 0.01162
-env_noise_impulse_noise_5_acc 0.01174
-env_noise_shot_noise_5_acc 0.01826
-env_weather_brightness_5_acc 0.5208
-env_weather_fog_5_acc 0.21376
-env_weather_frost_5_acc 0.1707
-env_weather_snow_5_acc 0.1927

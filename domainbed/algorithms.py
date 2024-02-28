@@ -12,6 +12,7 @@ import torchvision.transforms as transforms
 from domainbed.lib.cvt import tiny_cvt, small_cvt
 from domainbed.lib.t2t_vit import tfsvit_t2t_vit_t_14, atfsvit_t2t_vit_t_14
 from domainbed.lib.t2t_vit import t2t_vit_t_14
+from domainbed.lib import augmix_augmentations
 # from domainbed.lib.t2t_vit import *
 from domainbed.lib.t2t_utils import load_for_transfer_learning
 import random
@@ -79,6 +80,9 @@ ALGORITHMS = [
     'Testing',
     'RandConv_ViT',
     'RandConv_CNN',
+    'AugMix_CNN',
+    'AugMix_ViT'
+    
 ]
 
 
@@ -132,21 +136,71 @@ class ERM(Algorithm):
                 num_classes,
                 self.hparams['nonlinear_classifier'])
             self.network = nn.Sequential(self.featurizer, self.classifier)
+
+       
+
         if self.hparams['fixed_featurizer']:
             print("fine_tuning_only")
             self.featurizer.requires_grad_(requires_grad=False)
-            self.optimizer = torch.optim.Adam(
+            # self.optimizer = torch.optim.Adam(
+            #     self.classifier.parameters(),
+            #     lr=self.hparams["lr"],
+            #     weight_decay=self.hparams['weight_decay']
+            # )
+            self.optimizer = torch.optim.SGD(
                 self.classifier.parameters(),
                 lr=self.hparams["lr"],
-                weight_decay=self.hparams['weight_decay']
-            )
+                momentum=0.9,
+                weight_decay=self.hparams['weight_decay'],
+                nesterov=self.hparams['nesterov']
+            )           
+        elif self.hparams['unfreeze_train_bn']:
+            # Freeze all parameters
+            for param in self.network.parameters():
+                param.requires_grad = False
+
+            for m in self.network.modules():
+                if isinstance(m, nn.BatchNorm2d):
+                    m.train()
+                    m.weight.requires_grad = True
+                    m.bias.requires_grad = True
+            
+            batch_norm_params = filter(lambda p: p.requires_grad, self.network.parameters())
+            self.optimizer = torch.optim.SGD(batch_norm_params, lr=self.hparams["lr"], 
+                                        momentum=0.9, weight_decay=self.hparams['weight_decay'],
+                                        nesterov=self.hparams['nesterov'])
+
         else:
             print("full_model_tuning_only")
-            self.optimizer = torch.optim.Adam(
+            # self.optimizer = torch.optim.Adam(
+            #     self.network.parameters(),
+            #     lr=self.hparams["lr"],
+            #     weight_decay=self.hparams['weight_decay']
+            # )
+            self.optimizer = torch.optim.SGD(
                 self.network.parameters(),
                 lr=self.hparams["lr"],
-                weight_decay=self.hparams['weight_decay']
+                momentum=0.9,
+                weight_decay=self.hparams['weight_decay'],
+                nesterov=self.hparams['nesterov']
             )
+        
+        def get_lr(step, total_steps, lr_max, lr_min):
+            """Compute learning rate according to cosine annealing schedule."""
+            return lr_min + (lr_max - lr_min) * 0.5 * (1 +
+                                             np.cos(step / total_steps * np.pi))
+
+        
+        if self.hparams['scheduler']:
+            print("Scheduler Initialized")
+            self.scheduler = torch.optim.lr_scheduler.LambdaLR(
+                self.optimizer,
+                lr_lambda=lambda step: get_lr(  # pylint: disable=g-long-lambda
+                step,
+                self.hparams["total_steps"],
+                1,  # lr_lambda computes multiplicative factor
+                1e-6 / self.hparams["lr"]))
+
 
     def update(self, minibatches, unlabeled=None):
         all_x = torch.cat([x for x, y in minibatches])
@@ -685,12 +739,19 @@ class RandConv_CNN(ERM):
         self.ks = 1
         self.input_shape = input_shape
         self.identity_prob = self.hparams["identity_prob"]
+        self.data_mean = hparams["mean_std"][0]
+        self.data_std = hparams["mean_std"][1]
+        self.clip_max = (torch.ones(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        self.clip_min = (torch.zeros(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        
+
         if not self.hparams["eval"]:
             self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         
 
     def randomize_kernel(self):
-        k = torch.randint(0, 4, (1,)).item()
+        
+        k = torch.randint(int(self.hparams["kernel_size"]), int(self.hparams["kernel_size"])+4, (1,)).item()
         self.ks = 2*k +1
         self.rand_conv =  nn.Conv2d(in_channels=self.input_shape[0], out_channels=self.input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         #self.rand_conv.to('cuda')
@@ -726,12 +787,12 @@ class RandConv_CNN(ERM):
     def invariant_loss(self, all_x, out):
         self.randomize()
         img1=self.randConv_Op(all_x)
-        img1 = torch.clamp(img1,-1,1)
+        img1 = torch.clamp(img1, self.clip_min, self.clip_max)
         output1 = self.predict(img1)
         
         self.randomize()
         img2=self.randConv_Op(all_x)
-        img2 = torch.clamp(img2,-1,1)
+        img1 = torch.clamp(img2, self.clip_min, self.clip_max)
         output2 = self.predict(img2)
 
         p_clean, p_aug1, p_aug2 = F.softmax(
@@ -744,6 +805,8 @@ class RandConv_CNN(ERM):
                     F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
         #print("calculate inv_loss: ",inv_loss)
         return inv_loss
+    
+    
 
     def update(self, minibatches, unlabeled=None):
         all_x = torch.cat([x for x, y in minibatches])
@@ -751,12 +814,24 @@ class RandConv_CNN(ERM):
         
         if self.hparams["randomize_kernel"]:
             self.randomize_kernel()
+        
+        #Trying to add augmix consistency loss here
         self.randomize()
         self.rand_conv_module_cuda()
-        img = self.randConv_Op(all_x)
-        img = torch.clamp(img,-1,1)
-        #out = self.predict(self.randConv_Op(all_x))
-        out = self.predict(img)
+        #img = self.randConv_Op(all_x)
+
+        self.clip_max = self.clip_max.to('cuda')
+        self.clip_min = self.clip_min.to('cuda')
+        # img = torch.clamp(img, self.clip_min, self.clip_max)
+        # out = self.predict(img)
+
+        if self.hparams["loss_aug"]:
+            img = self.randConv_Op(all_x)
+            img = torch.clamp(img, self.clip_min, self.clip_max)
+            out = self.predict(img)
+        else:
+            out = self.predict(all_x)
+            
         loss = F.cross_entropy(out, all_y)
         task_loss=loss.item()
         if self.hparams["invariant_loss"]:
@@ -764,8 +839,6 @@ class RandConv_CNN(ERM):
             loss += inv_loss*self.hparams["consistency_loss_w"]
         else:
             inv_loss= torch.zeros(1)
-        
-        
           
         correct = (out.argmax(1).eq(all_y).float()).sum().item()  
         
@@ -784,12 +857,17 @@ class RandConv_ViT(ERM_ViT):
         self.ks = 3
         self.input_shape = input_shape
         self.identity_prob = self.hparams["identity_prob"]
+        self.data_mean = hparams["mean_std"][0]
+        self.data_std = hparams["mean_std"][1]
+        self.clip_max = (torch.ones(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        self.clip_min = (torch.zeros(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        
         if not self.hparams["eval"]:
             self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         
 
     def randomize_kernel(self):
-        k = torch.randint(0, 4, (1,)).item()
+        k = torch.randint(int(self.hparams["kernel_size"]), int(self.hparams["kernel_size"])+4, (1,)).item()
         self.ks = 2*k +1
         self.rand_conv =  nn.Conv2d(in_channels=self.input_shape[0], out_channels=self.input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
         #self.rand_conv.to('cuda')
@@ -803,7 +881,7 @@ class RandConv_ViT(ERM_ViT):
         # print("randomized weights")
 
     def mixing(self,all_x,all_x_out):
-        alpha= round(random.uniform(self.hparams["alpha_min"],self.hparams["alpha_max"]), 1)  
+        alpha= round(random.uniform(float(self.hparams["alpha_min"]),float(self.hparams["alpha_max"])), 1)  
         all_x_out = alpha*all_x_out + (1-alpha)*all_x
         # print("mixed with alpha: ",alpha)
         return all_x_out   
@@ -825,12 +903,12 @@ class RandConv_ViT(ERM_ViT):
     def invariant_loss(self, all_x, out):
         self.randomize()
         img1=self.randConv_Op(all_x)
-        img1 = torch.clamp(img1,-1,1)
+        img1 = torch.clamp(img1, self.clip_min, self.clip_max)
         output1 = self.predict(img1)
         
         self.randomize()
         img2=self.randConv_Op(all_x)
-        img2 = torch.clamp(img2,-1,1)
+        img2 = torch.clamp(img2, self.clip_min, self.clip_max)
         output2 = self.predict(img2)
 
         p_clean, p_aug1, p_aug2 = F.softmax(
@@ -850,28 +928,215 @@ class RandConv_ViT(ERM_ViT):
         
         if self.hparams["randomize_kernel"]:
             self.randomize_kernel()
+        
+        #Trying to add augmix consistency loss here
         self.randomize()
         self.rand_conv_module_cuda()
-        img = self.randConv_Op(all_x)
-        img = torch.clamp(img,-1,1)
-        #out = self.predict(self.randConv_Op(all_x))
-        out = self.predict(img)
-        loss = F.cross_entropy(out, all_y)
+        #img = self.randConv_Op(all_x)
 
+        self.clip_max = self.clip_max.to('cuda')
+        self.clip_min = self.clip_min.to('cuda')
+        # img = torch.clamp(img, self.clip_min, self.clip_max)
+        # out = self.predict(img)
+
+        if self.hparams["loss_aug"]:
+            img = self.randConv_Op(all_x)
+            img = torch.clamp(img, self.clip_min, self.clip_max)
+            out = self.predict(img)
+        else:
+            out = self.predict(all_x)
+            
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
         if self.hparams["invariant_loss"]:
             inv_loss = self.invariant_loss(all_x,out)
+            loss += inv_loss*float(self.hparams["consistency_loss_w"])
         else:
-            inv_loss=0
-
-        loss += inv_loss*self.hparams["consistency_loss_w"]    
-        correct = (out.argmax(1).eq(all_y).float()).sum().item()
+            inv_loss= torch.zeros(1)
+          
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
         
-        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
 
-        return {'loss': loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}
+class AugMix_CNN(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(AugMix_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.aug_preprocess = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])])
+        
+        self.org_preprocess = transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])
+        augmix_augmentations.IMAGE_SIZE = input_shape[1]
+
+    def aug(self, image):
+        """Perform AugMix augmentations and compute mixture.
+
+        Args:
+            image: PIL.Image input image
+            preprocess: Preprocessing function which should return a torch tensor.
+
+        Returns:
+            mixed: Augmented and mixed image.
+        """
+        aug_list = augmix_augmentations.augmentations
+        if self.hparams["all_ops"]:
+            aug_list = augmix_augmentations.augmentations_all
+
+        ws = np.float32(np.random.dirichlet([1] * self.hparams["mixture_width"]))
+        m = np.float32(np.random.beta(1, 1))
+
+        mix = torch.zeros_like(self.aug_preprocess(image))
+        for i in range(self.hparams["mixture_width"]):
+            image_aug = image.copy()
+            depth = self.hparams["mixture_depth"] if self.hparams["mixture_depth"] > 0 else np.random.randint(
+                1, 4)
+            for _ in range(depth):
+                op = np.random.choice(aug_list)
+                image_aug = op(image_aug, self.hparams["aug_severity"])
+            # Preprocessing commutes since all coefficients are convex
+            mix += ws[i] * self.aug_preprocess(image_aug)
+
+        mixed = (1 - m) * self.aug_preprocess(image) + m * mix
+        return mixed
+    
+    def divergence_loss(self, all_x, out):
+
+        aug_x_1, aug_x_2 = [], []
+        for img in torch.split(all_x,1,dim=0):
+            aug_x_1.append(self.aug(transforms.ToPILImage()(img.squeeze(0))))
+            aug_x_2.append(self.aug(transforms.ToPILImage()(img.squeeze(0))))
+
+        aug_x_1, aug_x_2 = torch.stack(aug_x_1,dim=0).to(torch.device('cuda')),torch.stack(aug_x_2,dim=0).to(torch.device('cuda'))
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+          out, dim=1), F.softmax(
+              self.predict(aug_x_1), dim=1), F.softmax(
+                  self.predict(aug_x_2), dim=1)
+        
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        
+        return inv_loss
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+    
+        out = self.predict(self.org_preprocess(all_x))
+        loss = F.cross_entropy(out, all_y)
+
+        inv_loss = self.divergence_loss(all_x,out)
+        
+        task_loss = loss.item()
+        loss += inv_loss*self.hparams["consistency_loss_w"]
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        if self.hparams['scheduler']:
+            self.scheduler.step()
+
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+
+class AugMix_ViT(ERM_ViT):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(AugMix_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.aug_preprocess = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])])
+        
+        self.org_preprocess = transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])
+        augmix_augmentations.IMAGE_SIZE = input_shape[1]
+
+    def aug(self, image):
+        """Perform AugMix augmentations and compute mixture.
+
+        Args:
+            image: PIL.Image input image
+            preprocess: Preprocessing function which should return a torch tensor.
+
+        Returns:
+            mixed: Augmented and mixed image.
+        """
+        aug_list = augmix_augmentations.augmentations
+        if self.hparams["all_ops"]:
+            aug_list = augmix_augmentations.augmentations_all
+
+        ws = np.float32(np.random.dirichlet([1] * self.hparams["mixture_width"]))
+        m = np.float32(np.random.beta(1, 1))
+
+        mix = torch.zeros_like(self.aug_preprocess(image))
+        for i in range(self.hparams["mixture_width"]):
+            image_aug = image.copy()
+            depth = self.hparams["mixture_depth"] if self.hparams["mixture_depth"] > 0 else np.random.randint(
+                1, 4)
+            for _ in range(depth):
+                op = np.random.choice(aug_list)
+                image_aug = op(image_aug, self.hparams["aug_severity"])
+            # Preprocessing commutes since all coefficients are convex
+            # print("+++++++ Size mix ",mix.size()," ws ",ws[i], " aug_preprocess(image_aug) ",self.aug_preprocess(image_aug).size())
+            mix += ws[i] * self.aug_preprocess(image_aug)
+
+        mixed = (1 - m) * self.aug_preprocess(image) + m * mix
+        return mixed
+    
+    def divergence_loss(self, all_x, out):
+
+        aug_x_1, aug_x_2 = [], []
+        for img in torch.split(all_x,1,dim=0):
+            aug_x_1.append(self.aug(transforms.ToPILImage()(img.squeeze(0))))
+            aug_x_2.append(self.aug(transforms.ToPILImage()(img.squeeze(0))))
+
+        aug_x_1, aug_x_2 = torch.stack(aug_x_1,dim=0).to(torch.device('cuda')),torch.stack(aug_x_2,dim=0).to(torch.device('cuda'))
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+          out, dim=1), F.softmax(
+              self.predict(aug_x_1), dim=1), F.softmax(
+                  self.predict(aug_x_2), dim=1)
+        
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        
+        return inv_loss
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+    
+        out = self.predict(self.org_preprocess(all_x))
+        loss = F.cross_entropy(out, all_y)
+
+        inv_loss = self.divergence_loss(all_x,out)
+        
+        task_loss = loss.item()
+        loss += inv_loss*self.hparams["consistency_loss_w"]
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        if self.hparams['scheduler']:
+            self.scheduler.step()
+
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+
 
 class Mixup(ERM):
     """
@@ -2425,14 +2690,15 @@ def return_atfsvit_backbone_network(network_name, num_classes, hparams):
 
 def return_backbone_network(network_name, num_classes, hparams):
     if network_name == "DeitSmall":
+        print("DeitSmall Network")
         network = torch.hub.load(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pretrained_models', 'DeiT_models'),
             'deit_small_patch16_224',
             pretrained=True, source='local')
         #network.head = Identity()
-
-        network.head = nn.Linear(384, num_classes)
-        
+        if hparams['empty_head']:
+            network.head = nn.Linear(384, num_classes)
+        return network 
     elif network_name == "DeiTBase":
         #network = torch.hub.load('facebookresearch/deit:main', 'deit_base_patch16_224', pretrained=True)
         
@@ -2441,7 +2707,7 @@ def return_backbone_network(network_name, num_classes, hparams):
             network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True,num_classes=0)
         else:
             network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True)
-
+        return network
     elif network_name == "ViTBase":
         # network = visiontransformer.vit_base_patch16_224(pretrained=True,)   
         # print("ViTBase Network")
@@ -2458,14 +2724,19 @@ def return_backbone_network(network_name, num_classes, hparams):
         else:
             network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
         
+        return network  
     elif network_name == "T2T14":
+        print("T2T14 Network")
         network = t2t_vit_t_14()
         # load the pretrained weights
         pretrained_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pretrained_models', 't2t',
                                        '81.7_T2T_ViTt_14.pth.tar')
         load_for_transfer_learning(network, pretrained_path, use_ema=True, strict=True, num_classes=1000)
-        #network.head = Identity()
-    return network
+        if hparams['empty_head']:
+            network.head = nn.Linear(384, num_classes)
+        return network
+    else:
+        print("Wrong Network Selection")
 
 class Identity(nn.Module):
     """An identity layer"""

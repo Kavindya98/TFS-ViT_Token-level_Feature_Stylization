@@ -173,16 +173,32 @@ def random_pairs_of_minibatches(minibatches):
     return pairs
 
 def average_accuracy(x,y,network,batch_weights,times=1):
+
     loss=[]
     acc=[]
     with torch.no_grad():
         for i in range(times):
-            network.randomize_kernel()
-            network.randomize()
-            network.rand_conv_module_cuda()
-            img = network.randConv_Op(x)
-            img = torch.clamp(img,-1,1)
-            p = network.predict(img)
+            if hasattr(network,'randConv_Op'):
+                network.randomize_kernel()
+                network.randomize()
+                network.rand_conv_module_cuda()
+                img = network.randConv_Op(x)
+                clip_min = network.clip_min.to('cuda')
+                clip_max = network.clip_max.to('cuda')
+                img = torch.clamp(img,clip_min,clip_max)
+                p = network.predict(img)
+            elif hasattr(network,'org_preprocess'):
+                p = network.predict(network.org_preprocess(x))
+            else:
+                p = network.predict(x)
+            # network.randomize_kernel()
+            # network.randomize()
+            # network.rand_conv_module_cuda()
+            # img = network.randConv_Op(x)
+            # clip_min = network.clip_min.to('cuda')
+            # clip_max = network.clip_max.to('cuda')
+            # img = torch.clamp(img,clip_min,clip_max)
+            # p = network.predict(img)
             loss.append(F.cross_entropy(p, y).item()/times)
             if len(p.shape)==1:
                 p = p.reshape(1,-1)
@@ -234,7 +250,7 @@ def accuracy(network, loader, weights, device,val_id,current_id,randconv=False,n
             #     # print('p hai ye', p.size(1))
             #     correct += (p.argmax(1).eq(y).float() * batch_weights).sum().item()
 
-            if val_id == current_id and randconv==True:
+            if val_id == current_id and randconv:
                 los, corr = average_accuracy(x,y,network,batch_weights,times=1)
                 loss.append(los)
                 correct+=corr

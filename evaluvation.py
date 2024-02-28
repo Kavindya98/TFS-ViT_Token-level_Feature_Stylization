@@ -25,6 +25,9 @@ from domainbed.lib.query import Q
 from timm.models import create_model
 from domainbed.networks import ResNet 
 import torchvision.models
+import torchvision.transforms as transforms
+import torchvision.datasets as data
+import torch.nn.functional as F
 
 from timm.models import create_model
 
@@ -39,10 +42,18 @@ def load_algorithm(file_path):
     for k in args:
         print('\t{}: {}'.format(k, args[k]))
 
+    
     hparams=d["model_hparams"]
     hparams["data_augmentation"] = False
-    hparams['empty_head']=False
     hparams["eval"]=True
+    # hparams['empty_head']=False
+    hparams['unfreeze_train_bn']=False
+    hparams['scheduler']=False
+    hparams['nesterov']=False
+    hparams["mean_std"] = [[0.485, 0.456, 0.406],[0.229, 0.224, 0.225]]
+    #d["args"]["algorithm"] ="AugMix_CNN"
+    
+
     print('Saved HParams:')
     for k, v in sorted(hparams.items()):
         print('\t{}: {}'.format(k, v))
@@ -67,7 +78,8 @@ def load_algorithm(file_path):
 
     return model, args, hparams, d
 
-def load_eval_dataset(dataset_name, data_dir, hparms):
+def load_eval_dataset(dataset_name, data_dir, hparams):
+    print(" Inside load_eval_dataset Normalization is set to ",hparams['normalization'])
 
     test_envs = list(range(datasets.num_environments(dataset_name)))
     if dataset_name in vars(datasets):
@@ -150,7 +162,13 @@ def get_algorithm(algorithm):
     hparams['fixed_featurizer']=False
     hparams["lr"]=0
     hparams['weight_decay']=0
-    hparams["eval"]=True
+    hparams["eval"]=False
+    hparams['unfreeze_train_bn']=False
+    hparams['scheduler']=False
+    hparams['nesterov']=False
+    hparams['normalization']=True
+    hparams['val_augmentation']=False
+
 
     algo = None
     if algorithm == "ResNet50":
@@ -161,6 +179,12 @@ def get_algorithm(algorithm):
         algo = algorithms.get_algorithm_class('ERM')
     elif algorithm == "DeiTBase":
         hparams['backbone'] = "DeiTBase"
+        algo = algorithms.get_algorithm_class('ERM_ViT')
+    elif algorithm == "DeitSmall":
+        hparams['backbone'] = "DeitSmall"
+        algo = algorithms.get_algorithm_class('ERM_ViT')
+    elif algorithm == "T2T14":
+        hparams['backbone'] = "T2T14"
         algo = algorithms.get_algorithm_class('ERM_ViT')
     elif algorithm == "ViTBase":
         hparams['backbone'] = "ViTBase"
@@ -177,7 +201,52 @@ def get_algorithm(algorithm):
 
     return model, hparams
 
-    
+CORRUPTIONS = [
+    'gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur',
+    'glass_blur', 'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog',
+    'brightness', 'contrast', 'elastic_transform', 'pixelate',
+    'jpeg_compression'
+]
+
+def test(net, test_loader):
+  """Evaluate network on given dataset."""
+  net.eval()
+  total_loss = 0.
+  total_correct = 0
+  with torch.no_grad():
+    for images, targets in test_loader:
+      images, targets = images.cuda(), targets.cuda()
+      logits = net.predict(images)
+      loss = F.cross_entropy(logits, targets)
+      pred = logits.data.max(1)[1]
+      total_loss += float(loss.data)
+      total_correct += pred.eq(targets.data).sum().item()
+
+  return total_loss / len(test_loader.dataset), total_correct / len(
+      test_loader.dataset)
+
+
+def test_c(net, test_data, base_path):
+  """Evaluate network on given corrupted dataset."""
+  corruption_accs = []
+  for corruption in CORRUPTIONS:
+    # Reference to original data is mutated
+    test_data.data = np.load(base_path + corruption + '.npy')
+    test_data.targets = torch.LongTensor(np.load(base_path + 'labels.npy'))
+
+    test_loader = torch.utils.data.DataLoader(
+        test_data,
+        batch_size=128,
+        shuffle=False,
+        num_workers=2,
+        pin_memory=True)
+
+    test_loss, test_acc = test(net, test_loader)
+    corruption_accs.append(test_acc)
+    print('{}\n\tTest Loss {:.3f} | Test Error {:.3f}'.format(
+        corruption, test_loss, 100 - 100. * test_acc))
+
+  return np.mean(corruption_accs) 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Domain generalization')
@@ -197,10 +266,10 @@ if __name__ == "__main__":
         device = "cpu"
 
     if not os.path.exists(args.output_dir):
-        os.mkdir(args.output_dir)
+        os.makedirs(args.output_dir, exist_ok=True)
 
-    print('device:', device)
-    print ('Current cuda device ', torch.cuda.current_device())
+    #print('device:', device)
+    #print ('Current cuda device ', torch.cuda.current_device())
 
     if args.saved_model_evaluvator:
         model, hparams = get_algorithm(args.algorithm)
@@ -233,12 +302,28 @@ if __name__ == "__main__":
         with open('cue_conflicts.json', 'r') as f:
             conversion_array.update(json.load(f))
     
+    # test_transform = transforms.Compose(
+    #   [transforms.ToTensor(),
+    #    transforms.Normalize([0.5] * 3, [0.5] * 3)])
 
+    # test_data = data.CIFAR10(
+    #     '/media/SSD2/Dataset/cifar', train=False, transform=test_transform, download=True)
+    # base_c_path = '/media/SSD2/Dataset/CIFAR-10-C/'
 
+    # test_c_acc = test_c(model, test_data, base_c_path)
+    # print('Mean Corruption Error: {:.3f}'.format(100 - 100. * test_c_acc))
+    error =[]
+    print("Algorithm ",args.algorithm)
+    print("Dataset ",args.dataset)
     for name, loader, weights in evals:
         acc = validation_accuracy(model, loader, weights, device, args.dataset, conversion_array)
-        print(name + '_acc',acc)
-        results[name + '_acc'] = acc
+        #print()
+        results[name + '_acc'] = round(acc,4)
+        results[name + '_error'] = round(1-acc,4)
+        error.append(round(1-acc,4))
+        print(name + '_acc',round(acc,4),"  ",name + '_error',(round(1-acc,4)))
+
+    print('Mean Corruption Error: {:.3f}'.format(100. * np.mean(error)))
     
     results_keys = sorted(results.keys())
 
