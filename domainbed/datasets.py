@@ -8,6 +8,7 @@ from torchvision import transforms
 import torchvision.datasets.folder
 from torch.utils.data import TensorDataset, Subset
 from torchvision.datasets import MNIST, ImageFolder,  USPS, SVHN, MNISTM, SYN
+from torchvision.datasets import PACSDataset as pacs
 from torchvision.datasets import CIFAR10 as cifar10
 from torchvision.transforms.functional import rotate
 import timm
@@ -47,6 +48,7 @@ DATASETS = [
     "WILDSCamelyon",
     "WILDSFMoW",
     "Cue_conflicts",
+    "PACS_Custom"
 ]
 
 def get_dataset_class(dataset_name):
@@ -84,9 +86,10 @@ class IdentityTransform():
 class MultipleDomainDataset:
     N_STEPS = 5001           # Default, subclasses may override
     CHECKPOINT_FREQ = 100    # Default, subclasses may override
-    N_WORKERS = 8            # Default, subclasses may override
+    N_WORKERS = 0            # Default, subclasses may override
     ENVIRONMENTS = None      # Subclasses should override
     INPUT_SHAPE = None       # Subclasses should override
+    STEPS_PER_EPOCH = None
     
 
     def __getitem__(self, index):
@@ -215,7 +218,7 @@ class RotatedMNIST(MultipleEnvironmentMNIST):
         return TensorDataset(x, y)
     
 class CIFAR10C(MultipleDomainDataset):
-    ENVIRONMENTS = sorted([line.rstrip('\n') for line in open("/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/lib/corruptions.txt")])
+    ENVIRONMENTS = sorted([line.rstrip('\n') for line in open("/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/domainbed/lib/corruptions_ME_ADA.txt")])
     N_STEPS = 5000           
     CHECKPOINT_FREQ = 300
     INPUT_SHAPE = (3, 32, 32)
@@ -244,7 +247,7 @@ class CIFAR10C(MultipleDomainDataset):
 
         test_transform = transforms.Compose(
                 [transforms.ToTensor(),
-                transforms.Normalize([0.5] * 3, [0.5] * 3)
+                 transforms.Normalize([0.5] * 3, [0.5] * 3)
                 ])
 
         for corruption in envs:
@@ -257,7 +260,7 @@ class CIFAR10C(MultipleDomainDataset):
         
 class CIFAR10(MultipleDomainDataset):
     ENVIRONMENTS = ["real_train","real_val"]
-    N_STEPS = 39100           
+    N_STEPS = 39882          
     CHECKPOINT_FREQ = 391
     INPUT_SHAPE = (3, 32, 32)
     def __init__(self, root, test_envs, hparams):
@@ -295,22 +298,37 @@ class DIGITS(MultipleDomainDataset):
     INPUT_SHAPE = (3, 32, 32)
     N_STEPS = 10000           
     CHECKPOINT_FREQ = 250
+    STEPS_PER_EPOCH = 250
     def __init__(self, root, test_envs, hparams):
         root = os.path.join(root, "digits/")
         super().__init__()
         self.datasets = []
 
-        transform = transforms.Compose([
-            transforms.Resize((32,32)),
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop((32,32), scale=(0.5, 1)),
             transforms.ToTensor(),
             GreyToColor(),
             transforms.Normalize(
-                mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) if hparams["normalization"] else transforms.Lambda(lambda x: x)
         ])
 
+
+        transform  = transforms.Compose([
+        transforms.Resize((32,32)),
+        transforms.CenterCrop((32,32)),
+        transforms.ToTensor(),
+        GreyToColor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        ])
+
+        hparams["mean_std"] = [[0.5, 0.5, 0.5],[0.5, 0.5, 0.5]]
+
         #loading MNIST DATASET
-        original_dataset_tr = MNIST(root, train=True, transform=transform, download=True)
+        original_dataset_tr = MNIST(root, train=True, transform=train_transform, download=True)
         original_dataset_te = MNIST(root, train=False, transform=transform, download=True)
+
+        original_dataset_tr.data = original_dataset_tr.data[:10000]
+        original_dataset_tr.targets = original_dataset_tr.targets[:10000]
 
         # original_dataset_tr.data = torch.cat((original_dataset_te.data,original_dataset_tr.data))
         # original_dataset_tr.targets = torch.cat((original_dataset_te.targets,original_dataset_tr.targets))
@@ -341,6 +359,94 @@ class DIGITS(MultipleDomainDataset):
         self.input_shape = self.INPUT_SHAPE
         self.num_classes = 10
 
+class PACS_Custom(MultipleDomainDataset):
+    CHECKPOINT_FREQ = 300
+    N_STEPS = 2500
+    ENVIRONMENTS = ['AAP', 'AR', 'C', 'S']
+    def __init__(self, root, test_envs, hparams):
+        super().__init__()
+        root = os.path.join(root, "PACS/Unsplit_data")
+        environments = self.ENVIRONMENTS
+        environments = sorted(environments) # list of all domains in the dataset, in sorted order
+        
+        if hparams["backbone"]=="ViTBase":
+            MEAN = [0.5, 0.5, 0.5]
+            STD = [0.5, 0.5, 0.5]
+        else:
+            MEAN = [0.485, 0.456, 0.406]
+            STD = [0.229, 0.224, 0.225]
+
+        hparams["mean_std"] = [MEAN,STD]
+
+        # train transform
+        transform = transforms.Compose([
+            transforms.RandomResizedCrop(size=224,
+                interpolation=InterpolationMode.BILINEAR,antialias=True),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.ToTensor(),
+            #transforms.ConvertImageDtype(torch.float),
+            transforms.Normalize(
+                mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+        ])
+
+        augment_transform = transforms.Compose([
+            # transforms.Resize((224,224)),
+            transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
+            transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(0.3, 0.3, 0.3, 0.3),
+            transforms.RandomGrayscale(),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
+        self.datasets = []
+        for i, environment in enumerate(environments):
+
+            if hparams['data_augmentation'] and (i not in test_envs):
+                print('[INFO] Doing Special Data Augmentation for Training')
+                env_transform = augment_transform
+            elif i not in test_envs:
+                print('[INFO] NOT Doing Special Data Augmentation for Training')
+                env_transform = transform
+            else:
+                
+                hparams["normalization"]=True
+                
+                if hparams["normalization"]==True: 
+                    print("++++++++ Using Normailztion for val/test data")
+                else:
+                    print("+++++++++++ Not Using Normailztion for val/test data")
+
+                print('[INFO] Doing ImageNet validation Augmentation')
+                if (hparams["backbone"]=="ViTBase") or (hparams["backbone"]=="DeiTBase"):
+                    env_transform = transforms.Compose([
+                        transforms.Resize(size=math.floor(224/0.9),
+                                          interpolation=InterpolationMode.BICUBIC),
+                        transforms.CenterCrop(224),
+                        transforms.ToTensor(),
+                        transforms.Normalize(
+                            mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+                    ])
+                else:
+                
+                    env_transform = transforms.Compose([
+                    transforms.Resize(size=256,
+                               interpolation=InterpolationMode.BILINEAR,antialias=True),
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=MEAN, std=STD) if hparams["normalization"] else transforms.Lambda(lambda x: x)
+                ])
+                
+                
+                
+            path = os.path.join(root, environment)
+            env_dataset = pacs(root=path, transform=env_transform)
+            self.datasets.append(env_dataset)
+            
+        self.input_shape = (3, 224, 224,)
+        self.num_classes = len(self.datasets[-1].classes)
         
 
 class MultipleEnvironmentImageFolder(MultipleDomainDataset):
@@ -481,6 +587,10 @@ class VLCS(MultipleEnvironmentImageFolder):
 class PACS(MultipleEnvironmentImageFolder):
     CHECKPOINT_FREQ = 300
     N_STEPS = 2500
+    STEPS_PER_EPOCH =125
+    # CHECKPOINT_FREQ = 200
+    # N_STEPS = 2000
+    # STEPS_PER_EPOCH =100
     ENVIRONMENTS = ['AAP', 'AR', 'C', 'S']
     def __init__(self, root, test_envs, hparams):
         self.dir = os.path.join(root, "PACS/Unsplit_data")
@@ -520,9 +630,9 @@ class Cue_conflicts(MultipleEnvironmentImageFolder):
 class ImageNet_C(MultipleEnvironmentImageFolder):
     N_STEPS = 10000
     CHECKPOINT_FREQ = 300
-    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/severity_5") if f.is_dir() ])               
+    ENVIRONMENTS = sorted([f.name for f in os.scandir("/media/SSD2/Dataset/Imagenet-C/corruption_severity") if f.is_dir() ])               
     def __init__(self, root, test_envs, hparams):
-        self.dir = os.path.join(root, "Imagenet-C/severity_5")
+        self.dir = os.path.join(root, "Imagenet-C/corruption_severity")
         
         super().__init__(self.dir, test_envs, hparams['data_augmentation'], hparams)
 

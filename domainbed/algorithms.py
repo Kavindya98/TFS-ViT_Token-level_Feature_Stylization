@@ -13,8 +13,12 @@ from domainbed.lib.cvt import tiny_cvt, small_cvt
 from domainbed.lib.t2t_vit import tfsvit_t2t_vit_t_14, atfsvit_t2t_vit_t_14
 from domainbed.lib.t2t_vit import t2t_vit_t_14
 from domainbed.lib import augmix_augmentations
+from torch.optim import lr_scheduler
 # from domainbed.lib.t2t_vit import *
 from domainbed.lib.t2t_utils import load_for_transfer_learning
+from domainbed.lib.ABA.multi_bnn import Multi_BNN
+from domainbed.lib.trans_net import TransNet
+from domainbed.lib.losses import TVLoss
 import random
 import timm
 from transformers import  ViTForImageClassification
@@ -80,8 +84,18 @@ ALGORITHMS = [
     'Testing',
     'RandConv_ViT',
     'RandConv_CNN',
+    'New_RandConv_CNN',
     'AugMix_CNN',
-    'AugMix_ViT'
+    'AugMix_ViT',
+    'ME_ADA_CNN',
+    'ME_ADA_ViT'
+    'ADA_CNN',
+    'ADA_ViT',
+    'ABA_CNN',
+    'ALT_CNN',
+    'ABA_ViT',
+    'ALT_ViT',
+    'New_CNN'
     
 ]
 
@@ -155,7 +169,7 @@ class ERM(Algorithm):
                 nesterov=self.hparams['nesterov']
             )           
         elif self.hparams['unfreeze_train_bn']:
-            # Freeze all parameters
+            # Freeze all parameters and train only batch norm layers
             for param in self.network.parameters():
                 param.requires_grad = False
 
@@ -172,18 +186,28 @@ class ERM(Algorithm):
 
         else:
             print("full_model_tuning_only")
+            
             # self.optimizer = torch.optim.Adam(
             #     self.network.parameters(),
             #     lr=self.hparams["lr"],
             #     weight_decay=self.hparams['weight_decay']
             # )
-            self.optimizer = torch.optim.SGD(
+            if self.hparams['optim'] == "SGD":
+                print("SGD Optimizer Initialized")
+                self.optimizer = torch.optim.SGD(
+                    self.network.parameters(),
+                    lr=self.hparams["lr"],
+                    momentum=0.9,
+                    weight_decay=self.hparams['weight_decay'],
+                    nesterov=self.hparams['nesterov']
+                )
+            else:
+                print("Adam Optimizer Initialized")
+                self.optimizer = torch.optim.Adam(
                 self.network.parameters(),
-                lr=self.hparams["lr"],
-                momentum=0.9,
-                weight_decay=self.hparams['weight_decay'],
-                nesterov=self.hparams['nesterov']
-            )
+                lr=self.hparams["lr"]
+                )
+
         
         def get_lr(step, total_steps, lr_max, lr_min):
             """Compute learning rate according to cosine annealing schedule."""
@@ -193,13 +217,14 @@ class ERM(Algorithm):
         
         if self.hparams['scheduler']:
             print("Scheduler Initialized")
-            self.scheduler = torch.optim.lr_scheduler.LambdaLR(
-                self.optimizer,
-                lr_lambda=lambda step: get_lr(  # pylint: disable=g-long-lambda
-                step,
-                self.hparams["total_steps"],
-                1,  # lr_lambda computes multiplicative factor
-                1e-6 / self.hparams["lr"]))
+            # self.scheduler = torch.optim.lr_scheduler.LambdaLR(
+            #     self.optimizer,
+            #     lr_lambda=lambda step: get_lr(  # pylint: disable=g-long-lambda
+            #     step,
+            #     self.hparams["total_steps"],
+            #     1,  # lr_lambda computes multiplicative factor
+            #     1e-6 / self.hparams["lr"]))
+            self.scheduler = lr_scheduler.CosineAnnealingLR(self.optimizer,self.hparams["total_steps"])
 
 
     def update(self, minibatches, unlabeled=None):
@@ -210,6 +235,9 @@ class ERM(Algorithm):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        if self.hparams['scheduler']:
+            self.scheduler.step()
 
         return {'loss': loss.item()}
 
@@ -746,7 +774,7 @@ class RandConv_CNN(ERM):
         
 
         if not self.hparams["eval"]:
-            self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False)
+            self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False,groups=input_shape[0])
         
 
     def randomize_kernel(self):
@@ -836,6 +864,194 @@ class RandConv_CNN(ERM):
         task_loss=loss.item()
         if self.hparams["invariant_loss"]:
             inv_loss = self.invariant_loss(all_x,out)
+            loss += inv_loss*self.hparams["consistency_loss_w"]
+        else:
+            inv_loss= torch.zeros(1)
+          
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+class New_RandConv_CNN(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(New_RandConv_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.ks = 1
+        self.input_shape = input_shape
+        self.identity_prob = self.hparams["identity_prob"]
+        self.data_mean = hparams["mean_std"][0]
+        self.data_std = hparams["mean_std"][1]
+        self.clip_max = (torch.ones(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        self.clip_min = (torch.zeros(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        
+
+        if not self.hparams["eval"]:
+            self.rand_conv =  nn.Conv2d(in_channels=input_shape[0], out_channels=input_shape[0], kernel_size=self.ks,stride=1,padding=self.ks//2,bias=False,groups=input_shape[0])
+        
+
+    def randomize_kernel(self):
+        
+        k = torch.randint(int(self.hparams["kernel_size"]), int(self.hparams["kernel_size"])+4, (1,)).item()
+        self.ks = 2*k +1
+        self.dilation = np.random.choice([2, 3, 4])
+        padding = ((self.ks - 1) * self.dilation) // 2
+        self.rand_conv =  nn.Conv2d(in_channels=self.input_shape[0], out_channels=self.input_shape[0], kernel_size=self.ks,stride=1,padding=padding,bias=False,dilation=self.dilation)
+        #self.rand_conv.to('cuda')
+        #print("randomized kernel with size: ",self.ks)    
+
+    def randomize(self):
+        new_weight = torch.zeros_like(self.rand_conv.weight)
+        with torch.no_grad():
+            nn.init.kaiming_normal_(new_weight, nonlinearity='conv2d')
+        self.rand_conv.weight = nn.Parameter(new_weight.detach())
+        # print("randomized weights")
+
+    def mixing(self,all_x,all_x_out):
+        alpha= round(random.uniform(self.hparams["alpha_min"],self.hparams["alpha_max"]), 1)  
+        all_x_out = alpha*all_x_out + (1-alpha)*all_x
+        # print("mixed with alpha: ",alpha)
+        return all_x_out   
+    
+    def randConv_Op(self, all_x):
+        if not (self.identity_prob > 0 and torch.rand(1) < self.identity_prob):
+            output = self.rand_conv(all_x)
+            output = nn.LeakyReLU(negative_slope=0.2)(output)
+            # print("applied random conv")
+            if self.hparams["mixing"]:
+                output = self.mixing(all_x,output)
+
+        else:
+            output=all_x
+        return output 
+
+    def rand_conv_module_cuda(self):
+        self.rand_conv.to('cuda')
+
+    def predict_with_embedding(self,x):
+        if not self.hparams['empty_fc']:
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+            rest_of_the_network = [list(self.network.network.children())[-1],self.network.dropout]
+            out = nn.Sequential(*rest_of_the_network)(embeddings)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+            out = nn.Sequential(*list(self.network.children())[-1:])(embeddings)
+        return out, embeddings
+    
+    def Entropy(self,input_):
+        epsilon = 1e-10
+        entropy = -input_ * torch.log(input_ + epsilon)
+        entropy = torch.sum(entropy, dim=1)
+        return entropy 
+
+    def Demix_Loss(self,feat1, feat2, lam):
+        epsilon = 1e-10
+        nume = feat1 - feat2 * lam
+        denomi = 1 - lam
+
+        if denomi < epsilon:
+            denomi += epsilon
+        if 1 - denomi < epsilon:
+            denomi -= epsilon 
+
+        feat_desc = nume/denomi
+        
+        #output_desc = netC(feat_desc.view(feat_desc.size(0), -1))
+        output_desc =list(self.network.children())[-1](feat_desc)
+        #output_desc=output_desc[:, torch.randperm(output_desc.size(1))]
+        #y=output_desc.argmax(dim=1, keepdim=True).item()
+        #print(output_desc.size())
+        softmax_desc = nn.Softmax(dim=1)(output_desc)
+        #print(softmax_desc)
+        entropy_desc = torch.mean(self.Entropy(softmax_desc))
+        return entropy_desc 
+    
+    def get_annealing_down_params(self,warm_up_factor,current_epoch, end_epoch):
+        gamma=10
+        power=0.75
+        decay = (1 + gamma * current_epoch / end_epoch) ** (-power)
+        param_factor = warm_up_factor * decay
+        return param_factor
+     
+
+    def invariant_loss(self, all_x, out):
+        self.randomize()
+        img1=self.randConv_Op(all_x)
+        img1 = torch.clamp(img1, self.clip_min, self.clip_max)
+        output1 = self.predict(img1)
+        
+        self.randomize()
+        img2=self.randConv_Op(all_x)
+        img1 = torch.clamp(img2, self.clip_min, self.clip_max)
+        output2 = self.predict(img2)
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+                                out, dim=1), F.softmax(
+                                output1, dim=1), F.softmax(
+                                output2, dim=1)
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        #print("calculate inv_loss: ",inv_loss)
+        return inv_loss
+    
+    def invariant_loss_1(self, all_x, feat):
+        self.randomize()
+        img1=self.randConv_Op(all_x)
+        img1 = torch.clamp(img1, self.clip_min, self.clip_max)
+        output1, feat1 = self.predict_with_embedding(img1)
+        
+        self.randomize()
+        img2=self.randConv_Op(all_x)
+        img2=torch.clamp(img2, self.clip_min, self.clip_max)
+        output2, feat2 = self.predict_with_embedding(img2)
+
+        max_epoch = int(self.hparams["total_steps"]/self.hparams['batch_size'])
+        lam = self.get_annealing_down_params(self.hparams['lam'],self.hparams["epoch"],max_epoch)
+        inv_loss = -(self.Demix_Loss(feat1,feat,lam)+self.Demix_Loss(feat2,feat,lam))/2.
+        return inv_loss
+    
+    
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+        
+        if self.hparams["randomize_kernel"]:
+            self.randomize_kernel()
+        
+        #Trying to add augmix consistency loss here
+        self.randomize()
+        self.rand_conv_module_cuda()
+        #img = self.randConv_Op(all_x)
+
+        self.clip_max = self.clip_max.to('cuda')
+        self.clip_min = self.clip_min.to('cuda')
+        # img = torch.clamp(img, self.clip_min, self.clip_max)
+        # out = self.predict(img)
+
+        if self.hparams["loss_aug"]:
+            img = self.randConv_Op(all_x)
+            img = torch.clamp(img, self.clip_min, self.clip_max)
+            #out = self.predict(img)
+            out, feat = self.predict_with_embedding(img)
+        else:
+            #out = self.predict(all_x)
+            out, feat = self.predict_with_embedding(img)
+            
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
+        if self.hparams["invariant_loss"]:
+            inv_loss = self.invariant_loss(all_x,out)
+            loss += inv_loss*self.hparams["consistency_loss_w"]
+        elif self.hparams["invariant_loss_1"]:
+            inv_loss = self.invariant_loss_1(all_x,feat)
             loss += inv_loss*self.hparams["consistency_loss_w"]
         else:
             inv_loss= torch.zeros(1)
@@ -1137,6 +1353,743 @@ class AugMix_ViT(ERM_ViT):
 
         return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
 
+class ME_ADA_CNN(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ME_ADA_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        self.dist_fn = torch.nn.MSELoss()
+
+    def entropy_loss(self,x):
+        out = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
+        out = -1.0 * out.sum(dim=1)
+        return out.mean()    
+
+    def extract_embeddings(self,x):
+        if not self.hparams['empty_fc']:
+            # This only works for resnet
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+        return embeddings
+    
+    def predict_with_embedding(self,x):
+        if not self.hparams['empty_fc']:
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+            rest_of_the_network = [list(self.network.network.children())[-1],self.network.dropout]
+            out = nn.Sequential(*rest_of_the_network)(embeddings)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+            out = nn.Sequential(*list(self.network.children())[-1:])(embeddings)
+        return out, embeddings
+    
+    def maximize(self,inputs,targets):
+        
+        inputs_embedding = self.extract_embeddings(inputs).detach().clone()
+        inputs_embedding.requires_grad_(False)
+        
+        inputs_max = inputs.detach().clone()
+        inputs_max.requires_grad_(True)
+        optimizer = torch.optim.SGD(params=[inputs_max], lr=self.hparams["lr_max"], momentum=0.0, weight_decay=0.0)
+
+        for ite_max in range(self.hparams["loops_adv"]):
+            tuples = self.predict_with_embedding(inputs_max)
+
+            # ME_ADA loss
+            loss = F.cross_entropy(tuples[0], targets) + self.hparams["eta"] * self.entropy_loss(tuples[0]) - self.hparams["gamma"] * self.dist_fn(tuples[-1], inputs_embedding)
+
+            # init the grad to zeros first
+            self.network.zero_grad()
+            optimizer.zero_grad()
+
+            # backward your network
+            (-loss).backward()
+
+            # optimize the parameters
+            optimizer.step()
+
+        return inputs_max, targets
+    
+class ME_ADA_ViT(ERM_ViT):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ME_ADA_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        self.dist_fn = torch.nn.MSELoss()
+
+    def entropy_loss(self,x):
+        out = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
+        out = -1.0 * out.sum(dim=1)
+        return out.mean()    
+
+    def extract_embeddings(self,x):
+        if self.hparams["backbone"] == "DeitSmall" or self.hparams["backbone"] == "T2T14" or self.hparams["backbone"] == "ViTBase":
+            embeddings = self.network(x,True)[-1][-1]
+        elif self.hparams["backbone"] =="DeiTBase":
+            embeddings = self.network.forward_features(x)
+        return embeddings
+    
+    def predict_with_embedding(self,x):
+        if self.hparams["backbone"] == "DeitSmall" or self.hparams["backbone"] == "T2T14" or self.hparams["backbone"] == "ViTBase":
+            pred = self.network(x,True)
+            out=pred[0][-1]
+            embeddings = pred[-1][-1]
+        elif self.hparams["backbone"] =="DeiTBase":
+            embeddings = self.network.forward_features(x)
+            out = self.network.forward_head(embeddings)
+        
+        return out, embeddings
+    
+    def maximize(self,inputs,targets):
+        
+        inputs_embedding = self.extract_embeddings(inputs).detach().clone()
+        inputs_embedding.requires_grad_(False)
+        
+        inputs_max = inputs.detach().clone()
+        inputs_max.requires_grad_(True)
+        optimizer = torch.optim.SGD(params=[inputs_max], lr=self.hparams["lr_max"], momentum=0.0, weight_decay=0.0)
+
+        for ite_max in range(self.hparams["loops_adv"]):
+            tuples = self.predict_with_embedding(inputs_max)
+
+            # ME_ADA loss
+            loss = F.cross_entropy(tuples[0], targets) + self.hparams["eta"] * self.entropy_loss(tuples[0]) - self.hparams["gamma"] * self.dist_fn(tuples[-1], inputs_embedding)
+
+            # init the grad to zeros first
+            self.network.zero_grad()
+            optimizer.zero_grad()
+
+            # backward your network
+            (-loss).backward()
+
+            # optimize the parameters
+            optimizer.step()
+
+        return inputs_max, targets
+
+class ADA_CNN(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ADA_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        self.dist_fn = torch.nn.MSELoss()
+
+    def extract_embeddings(self,x):
+        if not self.hparams['empty_fc']:
+            # This only works for resnet
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+        return embeddings
+    
+    def predict_with_embedding(self,x):
+        if not self.hparams['empty_fc']:
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+            rest_of_the_network = [list(self.network.network.children())[-1],self.network.dropout]
+            out = nn.Sequential(*rest_of_the_network)(embeddings)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+            out = nn.Sequential(*list(self.network.children())[-1:])(embeddings)
+        return out, embeddings
+    
+    def maximize(self,inputs,targets):
+        
+        inputs_embedding = self.extract_embeddings(inputs).detach().clone()
+        inputs_embedding.requires_grad_(False)
+        
+        inputs_max = inputs.detach().clone()
+        inputs_max.requires_grad_(True)
+        optimizer = torch.optim.SGD(params=[inputs_max], lr=self.hparams["lr_max"], momentum=0.0, weight_decay=0.0)
+
+        for ite_max in range(self.hparams["loops_adv"]):
+            tuples = self.predict_with_embedding(inputs_max)
+
+            # ADA loss
+            loss = F.cross_entropy(tuples[0], targets)  - self.hparams["gamma"] * self.dist_fn(tuples[-1], inputs_embedding)
+
+            # init the grad to zeros first
+            self.network.zero_grad()
+            optimizer.zero_grad()
+
+            # backward your network
+            (-loss).backward()
+
+            # optimize the parameters
+            optimizer.step()
+
+        return inputs_max, targets
+
+class ADA_ViT(ERM_ViT):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ADA_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        self.dist_fn = torch.nn.MSELoss()
+
+    def entropy_loss(self,x):
+        out = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
+        out = -1.0 * out.sum(dim=1)
+        return out.mean()    
+
+    def extract_embeddings(self,x):
+        if self.hparams["backbone"] == "DeitSmall" or self.hparams["backbone"] == "T2T14" or self.hparams["backbone"] == "ViTBase":
+            embeddings = self.network(x,True)[-1][-1]
+        elif self.hparams["backbone"] =="DeiTBase":
+            embeddings = self.network.forward_features(x)
+        return embeddings
+    
+    def predict_with_embedding(self,x):
+        if self.hparams["backbone"] == "DeitSmall" or self.hparams["backbone"] == "T2T14" or self.hparams["backbone"] == "ViTBase":
+            pred = self.network(x,True)
+            out=pred[0][-1]
+            embeddings = pred[-1][-1]
+        elif self.hparams["backbone"] =="DeiTBase":
+            embeddings = self.network.forward_features(x)
+            out = self.network.forward_head(embeddings)
+        
+        return out, embeddings
+    
+    def maximize(self,inputs,targets):
+        
+        inputs_embedding = self.extract_embeddings(inputs).detach().clone()
+        inputs_embedding.requires_grad_(False)
+        
+        inputs_max = inputs.detach().clone()
+        inputs_max.requires_grad_(True)
+        optimizer = torch.optim.SGD(params=[inputs_max], lr=self.hparams["lr_max"], momentum=0.0, weight_decay=0.0)
+
+        for ite_max in range(self.hparams["loops_adv"]):
+            tuples = self.predict_with_embedding(inputs_max)
+
+            # ADA loss
+            loss = F.cross_entropy(tuples[0], targets)  - self.hparams["gamma"] * self.dist_fn(tuples[-1], inputs_embedding)
+
+            # init the grad to zeros first
+            self.network.zero_grad()
+            optimizer.zero_grad()
+
+            # backward your network
+            (-loss).backward()
+
+            # optimize the parameters
+            optimizer.step()
+
+        return inputs_max, targets
+
+class ABA_CNN(ERM):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ABA_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.bcnn_module = Multi_BNN(out_channels=3,kernel_size=self.hparams['kernel_size'],
+                            mixing=self.hparams["mixing"], clamp=self.hparams['clamp'], num_blocks=self.hparams['num_blocks'],
+                            data_mean=self.hparams["mean_std"][0], data_std=self.hparams["mean_std"][1])
+    
+        #self.aug_optimizer = torch.optim.SGD(self.bcnn_module.parameters(),self.hparams["lr_adv"])
+        self.aug_optimizer = torch.optim.Adam(self.bcnn_module.parameters(),self.hparams["lr_adv"])
+        
+    
+    def bcnn_module_cuda(self):
+        self.bcnn_module.to('cuda')
+
+    def augmentation_process(self,all_x,all_y,out):
+        self.network.eval()
+        self.bcnn_module.randomize()
+        #self.bcnn_module_cuda()
+        self.bcnn_module.train()
+        for n in range(self.hparams["adv_steps"]):
+            self.network.zero_grad()
+            self.aug_optimizer.zero_grad()
+            self.bcnn_module.zero_grad()
+
+            x_g, bnn_kl = self.bcnn_module(all_x)
+            y_g = self.predict(x_g)
+
+            loss_aug = -F.cross_entropy(y_g, all_y) - self.hparams["elbo_beta"] * bnn_kl
+            loss_aug.backward()
+            self.aug_optimizer.step()
+        
+        x_r,_ = self.bcnn_module(all_x)
+        x_g,_ = self.bcnn_module(all_x)
+
+        #### consistency loss
+        outs_r = self.predict(x_r) 
+        outs_g = self.predict(x_g)
+
+        p_clean = F.softmax(out, dim=1)
+        p_aug1 = F.softmax(outs_r, dim=1)
+        p_aug2 = F.softmax(outs_g, dim=1)
+
+        eps = 1e-8
+
+        p_mixture = (p_clean+ p_aug1+ p_aug2)/3
+        p_mixture = torch.clamp(p_mixture, 1e-4, 1).log() 
+        loss_cl = (F.kl_div(p_mixture, p_clean+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2+eps, reduction='batchmean')) / 3.
+
+        
+        return loss_cl
+
+
+    def update(self, minibatches, unlabeled=None):
+        self.bcnn_module.eval()
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+
+        out = self.predict(all_x)    
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
+
+        if self.hparams["epoch"] >= self.hparams["pre_epoch"]:
+        
+            inv_loss = self.augmentation_process(all_x,all_y,out)
+            loss = (1-self.hparams["clw"])*loss + self.hparams["clw"]*inv_loss
+
+            self.bcnn_module.eval()
+            self.network.train()
+        else:
+            inv_loss= torch.zeros(1)
+       
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
+        self.optimizer.zero_grad()
+        self.network.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+
+class ABA_ViT(ERM_ViT):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ABA_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.bcnn_module = Multi_BNN(out_channels=3,kernel_size=self.hparams['kernel_size'],
+                            mixing=self.hparams["mixing"], clamp=self.hparams['clamp'], num_blocks=self.hparams['num_blocks'],
+                            data_mean=self.hparams["mean_std"][0], data_std=self.hparams["mean_std"][1])
+    
+        #self.aug_optimizer = torch.optim.SGD(self.bcnn_module.parameters(),self.hparams["lr_adv"])
+        self.aug_optimizer = torch.optim.Adam(self.bcnn_module.parameters(),self.hparams["lr_adv"])
+        
+    
+    def bcnn_module_cuda(self):
+        self.bcnn_module.to('cuda')
+
+    def augmentation_process(self,all_x,all_y,out):
+        self.network.eval()
+        self.bcnn_module.randomize()
+        #self.bcnn_module_cuda()
+        self.bcnn_module.train()
+        for n in range(self.hparams["adv_steps"]):
+            self.network.zero_grad()
+            self.aug_optimizer.zero_grad()
+            self.bcnn_module.zero_grad()
+
+            x_g, bnn_kl = self.bcnn_module(all_x)
+            y_g = self.predict(x_g)
+
+            loss_aug = -F.cross_entropy(y_g, all_y) - self.hparams["elbo_beta"] * bnn_kl
+            loss_aug.backward()
+            self.aug_optimizer.step()
+        
+        x_r,_ = self.bcnn_module(all_x)
+        x_g,_ = self.bcnn_module(all_x)
+
+        #### consistency loss
+        outs_r = self.predict(x_r) 
+        outs_g = self.predict(x_g)
+
+        p_clean = F.softmax(out, dim=1)
+        p_aug1 = F.softmax(outs_r, dim=1)
+        p_aug2 = F.softmax(outs_g, dim=1)
+
+        eps = 1e-8
+
+        p_mixture = (p_clean+ p_aug1+ p_aug2)/3
+        p_mixture = torch.clamp(p_mixture, 1e-4, 1).log() 
+        loss_cl = (F.kl_div(p_mixture, p_clean+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2+eps, reduction='batchmean')) / 3.
+
+        
+        return loss_cl
+
+
+    def update(self, minibatches, unlabeled=None):
+        self.bcnn_module.eval()
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+
+        out = self.predict(all_x)    
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
+
+        if self.hparams["epoch"] >= self.hparams["pre_epoch"]:
+        
+            inv_loss = self.augmentation_process(all_x,all_y,out)
+            loss = (1-self.hparams["clw"])*loss + self.hparams["clw"]*inv_loss
+
+            self.bcnn_module.eval()
+            self.network.train()
+        else:
+            inv_loss= torch.zeros(1)
+       
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
+        self.optimizer.zero_grad()
+        self.network.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}  
+
+class ALT_CNN(ERM):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ALT_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.trans_module = TransNet(
+                mixing=hparams["mixing"], affine=hparams["affine"], 
+                act=hparams["activation"], num_blocks=hparams["num_blocks"], 
+                a=hparams["alpha_init"]
+                )
+        self.aug_optimizer = torch.optim.Adam(self.trans_module.parameters(),self.hparams["lr_adv"])
+        self.tv_loss = TVLoss()
+        
+    def init_weights(self, m):
+        if type(m) == nn.Conv2d:
+            nn.init.kaiming_normal_(m.weight.data)
+
+    def augmentation_process(self,all_x,all_y,out):
+        self.network.eval()
+        self.trans_module.train()
+        self.trans_module.apply(self.init_weights)
+        
+        for n in range(self.hparams["adv_steps"]):
+            self.network.zero_grad()
+            self.aug_optimizer.zero_grad()
+            self.trans_module.zero_grad()
+
+            x_g = self.trans_module(all_x)
+            y_g = self.predict(x_g)
+
+            loss_aug = -F.cross_entropy(y_g, all_y) + self.tv_loss(x_g)
+            loss_aug.backward()
+            self.aug_optimizer.step()
+        
+        x_r = self.trans_module(all_x)
+        x_g = self.trans_module(all_x)
+
+        #### consistency loss
+        outs_r = self.predict(x_r) 
+        outs_g = self.predict(x_g)
+
+        p_clean = F.softmax(out, dim=1)
+        p_aug1 = F.softmax(outs_r, dim=1)
+        p_aug2 = F.softmax(outs_g, dim=1)
+
+        eps = 1e-8
+
+        p_mixture = (p_clean+ p_aug1+ p_aug2)/3
+        p_mixture = torch.clamp(p_mixture, 1e-4, 1).log() 
+        loss_cl = (F.kl_div(p_mixture, p_clean+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2+eps, reduction='batchmean')) / 3.
+
+        
+        return loss_cl
+    
+    def update(self, minibatches, unlabeled=None):
+        self.trans_module.eval()
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+
+        out = self.predict(all_x)    
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
+
+        if self.hparams["epoch"] >= self.hparams["pre_epoch"]:
+        
+            inv_loss = self.augmentation_process(all_x,all_y,out)
+            loss = (1-self.hparams["clw"])*loss + self.hparams["clw"]*inv_loss
+
+            self.trans_module.eval()
+            self.network.train()
+        else:
+            inv_loss= torch.zeros(1)
+       
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+
+class ALT_ViT(ERM_ViT):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(ALT_ViT, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.trans_module = TransNet(
+                mixing=hparams["mixing"], affine=hparams["affine"], 
+                act=hparams["activation"], num_blocks=hparams["num_blocks"], 
+                a=hparams["alpha_init"]
+                )
+        self.aug_optimizer = torch.optim.Adam(self.trans_module.parameters(),self.hparams["lr_adv"])
+        self.tv_loss = TVLoss()
+        
+    def init_weights(self, m):
+        if type(m) == nn.Conv2d:
+            nn.init.kaiming_normal_(m.weight.data)
+
+    def augmentation_process(self,all_x,all_y,out):
+        self.network.eval()
+        self.trans_module.train()
+        self.trans_module.apply(self.init_weights)
+        
+        for n in range(self.hparams["adv_steps"]):
+            self.network.zero_grad()
+            self.aug_optimizer.zero_grad()
+            self.trans_module.zero_grad()
+
+            x_g = self.trans_module(all_x)
+            y_g = self.predict(x_g)
+
+            loss_aug = -F.cross_entropy(y_g, all_y) + self.tv_loss(x_g)
+            loss_aug.backward()
+            self.aug_optimizer.step()
+        
+        x_r = self.trans_module(all_x)
+        x_g = self.trans_module(all_x)
+
+        #### consistency loss
+        outs_r = self.predict(x_r) 
+        outs_g = self.predict(x_g)
+
+        p_clean = F.softmax(out, dim=1)
+        p_aug1 = F.softmax(outs_r, dim=1)
+        p_aug2 = F.softmax(outs_g, dim=1)
+
+        eps = 1e-8
+
+        p_mixture = (p_clean+ p_aug1+ p_aug2)/3
+        p_mixture = torch.clamp(p_mixture, 1e-4, 1).log() 
+        loss_cl = (F.kl_div(p_mixture, p_clean+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1+eps, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2+eps, reduction='batchmean')) / 3.
+
+        
+        return loss_cl
+    
+    def update(self, minibatches, unlabeled=None):
+        self.trans_module.eval()
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+
+        out = self.predict(all_x)    
+        loss = F.cross_entropy(out, all_y)
+        task_loss=loss.item()
+
+        if self.hparams["epoch"] >= self.hparams["pre_epoch"]:
+        
+            inv_loss = self.augmentation_process(all_x,all_y,out)
+            loss = (1-self.hparams["clw"])*loss + self.hparams["clw"]*inv_loss
+
+            self.trans_module.eval()
+            self.network.train()
+        else:
+            inv_loss= torch.zeros(1)
+       
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()  
+        
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}    
+
+
+class New_CNN(ERM):
+
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(New_CNN, self).__init__(input_shape, num_classes, num_domains,
+                                    hparams)
+        
+        self.aug_preprocess = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])])
+        
+        self.org_preprocess = transforms.Normalize(hparams["mean_std"][0],hparams["mean_std"][1])
+        augmix_augmentations.IMAGE_SIZE = input_shape[1]
+        self.data_mean = hparams["mean_std"][0]
+        self.data_std = hparams["mean_std"][1]
+        self.clip_max = (torch.ones(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        self.clip_min = (torch.zeros(3).reshape(1, 3, 1, 1) - torch.tensor(self.data_mean).reshape(1, 3, 1, 1)) / torch.tensor(self.data_std).reshape(1, 3, 1, 1)
+        
+    
+    def predict_with_embedding(self,x):
+        if not self.hparams['empty_fc']:
+            embeddings = nn.Sequential(*list(self.network.network.children())[:-1])(x)
+            embeddings = torch.flatten(embeddings, start_dim=1)
+            rest_of_the_network = [list(self.network.network.children())[-1],self.network.dropout]
+            out = nn.Sequential(*rest_of_the_network)(embeddings)
+        else:
+            embeddings = nn.Sequential(*list(self.network.children())[:-1])(x)
+            out = nn.Sequential(*list(self.network.children())[-1:])(embeddings)
+        return out, embeddings
+    
+    def Entropy(self,input_):
+        epsilon = 1e-10
+        entropy = -input_ * torch.log(input_ + epsilon)
+        entropy = torch.sum(entropy, dim=1)
+        return entropy 
+
+    def Demix_Loss(self,feat1, feat2, netC, lam):
+        epsilon = 1e-10
+        nume = feat1 - feat2 * lam
+        denomi = 1 - lam
+
+        if denomi < epsilon:
+            denomi += epsilon
+        if 1 - denomi < epsilon:
+            denomi -= epsilon 
+
+        feat_desc = nume/denomi
+        
+        #output_desc = netC(feat_desc.view(feat_desc.size(0), -1))
+        output_desc =list(netC.children())[-1](feat_desc)
+        #output_desc=output_desc[:, torch.randperm(output_desc.size(1))]
+        #y=output_desc.argmax(dim=1, keepdim=True).item()
+        #print(output_desc.size())
+        softmax_desc = nn.Softmax(dim=1)(output_desc)
+        #print(softmax_desc)
+        entropy_desc = torch.mean(self.Entropy(softmax_desc))
+        return entropy_desc 
+    
+    def new_augmentation(self,x_clean, x_aug, y, model, hparams, lam_random=False):
+        if lam_random:
+            lam = random.random()
+        else:
+            lam = hparams["lam"]
+        model.eval()
+        x_aug_max = x_aug.detach().clone()
+        x_aug_max.requires_grad_(True)
+        aug_optimizer = torch.optim.Adam(params = [x_aug_max],lr=hparams["lr_adv"])
+        x_clean=x_clean.detach()
+        y=y.detach()
+
+        for iter in range(hparams["adv_steps"]):
+            y_aug, x_aug_max_feat  = self.predict_with_embedding(x_aug_max)
+            #y_aug.detach_()
+            #x_aug_max_feat.detach_()
+            demix_loss = self.Demix_Loss(x_aug_max_feat,x_clean,model,lam)
+            loss =  demix_loss - 10*F.cross_entropy(y_aug,y) 
+            #print(loss)
+            model.zero_grad()
+            aug_optimizer.zero_grad()
+
+            loss.backward()
+            aug_optimizer.step()
+        if hparams["clamp"]:
+            x_aug_max = torch.clamp(x_aug_max,self.clip_min,self.clip_max)
+        return x_aug_max
+  
+    def aug(self, image):
+        """Perform AugMix augmentations and compute mixture.
+
+        Args:
+            image: PIL.Image input image
+            preprocess: Preprocessing function which should return a torch tensor.
+
+        Returns:
+            mixed: Augmented and mixed image.
+        """
+        aug_list = augmix_augmentations.augmentations
+        if self.hparams["all_ops"]:
+            aug_list = augmix_augmentations.augmentations_all
+
+        ws = np.float32(np.random.dirichlet([1] * self.hparams["mixture_width"]))
+        m = np.float32(np.random.beta(1, 1))
+
+        mix = torch.zeros_like(self.aug_preprocess(image))
+        for i in range(self.hparams["mixture_width"]):
+            image_aug = image.copy()
+            depth = self.hparams["mixture_depth"] if self.hparams["mixture_depth"] > 0 else np.random.randint(
+                1, 4)
+            for _ in range(depth):
+                op = np.random.choice(aug_list)
+                image_aug = op(image_aug, self.hparams["aug_severity"])
+            # Preprocessing commutes since all coefficients are convex
+            mix += ws[i] * self.aug_preprocess(image_aug)
+
+        mixed = (1 - m) * self.aug_preprocess(image) + m * mix
+        return mixed
+    
+    def divergence_loss(self, all_x, out, emb_clean, all_y, device):
+
+        self.clip_max =self.clip_max.to(device)
+        self.clip_min =self.clip_min.to(device)
+
+        if self.hparams["with_AugMix"]:
+            aug_x_1 = []
+            for img in torch.split(all_x,1,dim=0):
+                aug_x_1.append(self.aug(transforms.ToPILImage()(img.squeeze(0))))
+
+            aug_x_1 = torch.stack(aug_x_1,dim=0).to(device)
+        else:
+            aug_x_1 = self.new_augmentation(x_clean=emb_clean, x_aug=self.org_preprocess(all_x),y=all_y,model=self.network,hparams=self.hparams,lam_random=True)
+
+
+        aug_x_2 = self.new_augmentation(x_clean=emb_clean, x_aug=self.org_preprocess(all_x),y=all_y,model=self.network,hparams=self.hparams,lam_random=True)
+
+
+        p_clean, p_aug1, p_aug2 = F.softmax(
+          out, dim=1), F.softmax(
+              self.predict(aug_x_1), dim=1), F.softmax(
+                  self.predict(aug_x_2), dim=1)
+        
+        p_mixture = torch.clamp((p_clean + p_aug1 + p_aug2) / 3., 1e-7, 1).log()
+        inv_loss = (F.kl_div(p_mixture, p_clean, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug1, reduction='batchmean') +
+                    F.kl_div(p_mixture, p_aug2, reduction='batchmean')) / 3.
+        
+        return inv_loss
+
+    def update(self, minibatches, unlabeled=None):
+        all_x = torch.cat([x for x, y in minibatches])
+        all_y = torch.cat([y for x, y in minibatches])
+    
+        out, emb_clean = self.predict_with_embedding(self.org_preprocess(all_x))
+        loss = F.cross_entropy(out, all_y)
+        task_loss = loss.item()
+        if self.hparams["epoch"] >= self.hparams["pre_epoch"]:
+            y_opt = out.argmin(dim=1)
+            inv_loss = self.divergence_loss(all_x,out, emb_clean,all_y,unlabeled)
+            #loss = loss*(1-self.hparams["consistency_loss_w"]) + inv_loss*self.hparams["consistency_loss_w"]
+            loss = inv_loss*self.hparams["consistency_loss_w"]
+            self.network.train()
+
+        else:
+            inv_loss= torch.zeros(1) 
+
+        
+        
+        correct = (out.argmax(1).eq(all_y).float()).sum().item()
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        if self.hparams['scheduler']:
+            self.scheduler.step()
+
+        return {'loss': loss.item(),'task_loss': task_loss, 'inv_loss':inv_loss.item(), 'train_acc':correct/torch.ones(len(all_x)).sum().item()}
 
 class Mixup(ERM):
     """
@@ -2704,7 +3657,7 @@ def return_backbone_network(network_name, num_classes, hparams):
         
         print("DeiTBase Network")
         if hparams['empty_head']:
-            network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True,num_classes=0)
+            network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True,num_classes=num_classes)
         else:
             network = timm.create_model("deit_base_patch16_224.fb_in1k",pretrained=True)
         return network
@@ -2720,7 +3673,7 @@ def return_backbone_network(network_name, num_classes, hparams):
         #network = timm.create_model("hf_hub:timm/vit_base_patch16_224.orig_in21k_ft_in1k", pretrained=True)
         print("ViTBase Network")
         if hparams['empty_head']:
-            network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True,num_classes=0)
+            network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True,num_classes=num_classes)
         else:
             network = timm.create_model("vit_base_patch16_224.orig_in21k_ft_in1k",pretrained=True)
         

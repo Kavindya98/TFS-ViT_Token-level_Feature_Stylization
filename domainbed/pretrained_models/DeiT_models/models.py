@@ -91,6 +91,7 @@ class TokenLevelFeatureStylizationViT(VisionTransformer):
         features = list_out
         x = [self.head(x) for x in list_out]
         if return_feat:
+            
             return x, features
         else:
             return x

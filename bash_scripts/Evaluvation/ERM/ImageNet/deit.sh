@@ -1,7 +1,7 @@
-for algo in ViTBase
+for algo in DeitSmall
 do
     python -u evaluvation.py --data_dir /media/SSD2/Dataset --dataset ImageNet_val \
-    --output_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ViT_ResNet_Data_aug/${algo} --algorithm ${algo} --saved_model_evaluvator
+    --output_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ERM/${algo} --algorithm ${algo} --saved_model_evaluvator
 
     #python -u imagnet_c_eval.py --input_dir /home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/ImageNet-C/Fullset_ImageNet/ERM_Normalized_0.5/${algo} 
 done
@@ -13,4 +13,4 @@ done
 
 # ResNet50 DeiTBase
 
-# nohup bash bash_scripts/Evaluvation/ERM/ImageNet/deit.sh > ViT_ResNet_Data_aug.out 2>&1 &
+# nohup bash bash_scripts/Evaluvation/ERM/ImageNet/deit.sh > DeitSmall.out 2>&1 &

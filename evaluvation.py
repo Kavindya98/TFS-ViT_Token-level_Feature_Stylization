@@ -313,6 +313,7 @@ if __name__ == "__main__":
     # test_c_acc = test_c(model, test_data, base_c_path)
     # print('Mean Corruption Error: {:.3f}'.format(100 - 100. * test_c_acc))
     error =[]
+    Acc =[]
     print("Algorithm ",args.algorithm)
     print("Dataset ",args.dataset)
     for name, loader, weights in evals:
@@ -321,9 +322,11 @@ if __name__ == "__main__":
         results[name + '_acc'] = round(acc,4)
         results[name + '_error'] = round(1-acc,4)
         error.append(round(1-acc,4))
+        Acc.append(round(acc,4))
         print(name + '_acc',round(acc,4),"  ",name + '_error',(round(1-acc,4)))
 
     print('Mean Corruption Error: {:.3f}'.format(100. * np.mean(error)))
+    print('Mean Corruption Accuracy: {:.3f}'.format(100. * np.mean(Acc)))
     
     results_keys = sorted(results.keys())
 

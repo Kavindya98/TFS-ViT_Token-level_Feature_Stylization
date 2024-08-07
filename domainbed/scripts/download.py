@@ -209,7 +209,7 @@ def download_terra_incognita(data_dir):
     full_path = stage_path(data_dir, "terra_incognita")
 
     download_and_extract(
-        "https://lilablobssc.blob.core.windows.net/caltechcameratraps/eccv_18_all_images_sm.tar.gz",
+        "https://storage.googleapis.com/public-datasets-lila/caltechcameratraps/eccv_18_all_images_sm.tar.gz",
         os.path.join(full_path, "terra_incognita_images.tar.gz"))
 
     download_and_extract(
@@ -302,13 +302,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # download_mnist(args.data_dir)
-    download_imagenet_9(args.data_dir)
+    # download_imagenet_9(args.data_dir)
     # download_office_home(args.data_dir)
     #
     # download_domain_net(args.data_dir)
     #download_imagenet_C(args.data_dir)
     # download_vlcs(args.data_dir)
-    # download_terra_incognita(args.data_dir)
+    download_terra_incognita(args.data_dir)
     # download_sviro(args.data_dir)
     # Camelyon17Dataset(root_dir=args.data_dir, download=True)
     # FMoWDataset(root_dir=args.data_dir, download=True)

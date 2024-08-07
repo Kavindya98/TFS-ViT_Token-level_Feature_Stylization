@@ -245,8 +245,8 @@ class LeNet(nn.Module):
 
     def forward(self, x):
         x = self.le_net(x)
-        x = self.classifier_half(x.view(x.size(0), -1))
-        return x    
+        x1 = self.classifier_half(x.view(x.size(0), -1))
+        return x1    
 
 def Featurizer(input_shape, hparams):
     """Auto-select an appropriate featurizer for the given input shape."""

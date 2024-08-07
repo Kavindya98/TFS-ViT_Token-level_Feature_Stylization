@@ -14,12 +14,14 @@ from numbers import Number
 import torchvision
 import operator
 import seaborn as sns
+import copy
 import torch.nn.functional as F
 import matplotlib.pyplot as pl
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import plot_confusion_matrix
 import numpy as np
+from torchvision import transforms
 import torch
 import tqdm
 from collections import Counter
@@ -40,6 +42,29 @@ def l2_between_dicts(dict_1, dict_2):
             torch.cat(tuple([t.view(-1) for t in dict_2_values]))
     ).pow(2).mean()
 
+class Denormalise(transforms.Normalize):
+    """
+    Undoes the normalization and returns the reconstructed images in the input domain.
+    """
+
+    def __init__(self, mean, std):
+        mean = torch.as_tensor(mean)
+        std = torch.as_tensor(std)
+        std_inv = 1 / (std + 1e-12)
+        mean_inv = -mean * std_inv
+        super(Denormalise, self).__init__(mean=mean_inv, std=std_inv)
+
+    def __call__(self, tensor):
+        return super(Denormalise, self).__call__(tensor.clone())
+
+class Clamp(object):
+    """Clamp the pixel values of an image between a minimum and maximum value."""
+    def __init__(self, min_val=0, max_val=1):
+        self.min_val = min_val
+        self.max_val = max_val
+    
+    def __call__(self, image):
+        return torch.clamp(image, min=self.min_val, max=self.max_val)
 
 class MovingAverage:
 
@@ -141,6 +166,26 @@ class _SplitDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.keys)
 
+
+def split_dataset_PACS_Custom(dataset, n, seed=0):
+    """
+    Return a pair of datasets corresponding to a random split of the given
+    dataset, with n datapoints in the first dataset and the rest in the last,
+    using the given random seed
+    """
+    assert (n <= len(dataset))
+    keys = list(range(len(dataset)))
+    np.random.RandomState(seed).shuffle(keys)
+    keys_1 = keys[:n]
+    keys_2 = keys[n:]
+    subset_dataset_1 = copy.deepcopy(dataset)
+    subset_dataset_2 = copy.deepcopy(dataset)
+    subset_dataset_1.data = [subset_dataset_1.data[k1] for k1 in keys_1]
+    subset_dataset_1.targets = [subset_dataset_1.targets[k1] for k1 in keys_1]
+    subset_dataset_2.data = [subset_dataset_2.data[k1] for k1 in keys_2]
+    subset_dataset_2.targets = [subset_dataset_2.targets[k1] for k1 in keys_2]
+    
+    return subset_dataset_1, subset_dataset_2
 
 def split_dataset(dataset, n, seed=0):
     """

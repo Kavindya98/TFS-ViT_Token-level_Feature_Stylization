@@ -28,6 +28,7 @@ def _hparams(algorithm, dataset, random_seed):
     # Unconditional hparam definitions.
 
     _hparam('data_augmentation', False, lambda r: False)
+    _hparam('epoch', 0.0, lambda r: r.choice([3.0, 5.0]))
     _hparam('empty_fc', False, lambda r: False)
     _hparam('empty_head', False, lambda r: False)
     _hparam('eval', False, lambda r: False)
@@ -44,6 +45,7 @@ def _hparams(algorithm, dataset, random_seed):
     _hparam('resnet_dropout', 0., lambda r: r.choice([0., 0.1, 0.5]))
     _hparam('class_balanced', False, lambda r: False)
     _hparam('backbone',"ResNet",lambda r:"DeitSmall")
+    _hparam('optim',"SGD",lambda r:"Adam")
     _hparam('continue_checkpoint'," ",lambda r:" ")
     _hparam('total_steps', 0, lambda r: r.choice([0]))
     _hparam('checkpoint_step_start', 0, lambda r: r.choice([0]))
@@ -122,8 +124,42 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('lambda', 1000., lambda r: 10 ** r.uniform(1., 4.))
         _hparam('penalty_anneal_iters', 1500, lambda r: int(r.uniform(0., 5000.)))
         _hparam('ema', 0.95, lambda r: r.uniform(0.90, 0.99))
+    
+    elif algorithm == "ME_ADA_CNN" or  algorithm == "ADA_CNN" or algorithm=="ME_ADA_ViT" or algorithm=="ADA_ViT":
+        _hparam('loops_adv', 15, lambda r: r.choice([15, 10]))
+        _hparam('eta', 10.0, lambda r: r.choice([1.0, 0.0]))
+        _hparam('gamma', 1.0, lambda r: r.choice([1.0, 0.0]))
+        _hparam('epochs_min', 10.0, lambda r: r.choice([10.0, 0.0]))
+        _hparam('lr_max', 20.0, lambda r: r.choice([10.0, 0.0]))
+        _hparam('k', 2.0, lambda r: r.choice([2.0, 3.0]))
+        _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
+    
+    elif algorithm == 'ABA_CNN' or algorithm == 'ABA_ViT':
+         _hparam('kernel_size', [1,3,5,7], lambda r: [[1,3], [5,7]])
+         _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
+         _hparam('clamp', True, lambda r:  bool(r.choice([True, False])))
+         _hparam('num_blocks', 0, lambda r: r.choice([2, 3]))
+         _hparam('lr_adv', 5e-5, lambda r: r.choice([5e-6, 5e-5]))
+         _hparam('adv_steps', 10, lambda r: r.choice([5, 8]))
+         _hparam('elbo_beta', 1.0, lambda r: r.choice([0.2, 0.3]))
+         _hparam('clw', 0.75, lambda r: r.choice([0.2, 0.3]))
+         _hparam('pre_epoch', 5.0, lambda r: r.choice([3.0, 5.0]))
+         _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
 
-    elif algorithm == 'RandConv_CNN' or algorithm == 'RandConv_ViT':
+    elif algorithm == 'ALT_CNN' or algorithm == 'ALT_ViT':
+         _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
+         _hparam('affine', False, lambda r:  bool(r.choice([True, False])))
+         _hparam('num_blocks', 0, lambda r: r.choice([2, 3]))
+         _hparam('lr_adv', 5e-5, lambda r: r.choice([5e-6, 5e-5]))
+         _hparam('adv_steps', 10, lambda r: r.choice([5, 8]))
+         _hparam('activation', "lrelu", lambda r:"lrelu" )
+         _hparam('alpha_init', 0.5, lambda r: r.choice([0.2, 0.3]))
+         _hparam('clw', 0.75, lambda r: r.choice([0.2, 0.3]))
+         _hparam('pre_epoch', 5.0, lambda r: r.choice([3.0, 5.0]))
+         _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
+
+
+    elif algorithm == 'RandConv_CNN' or algorithm == 'RandConv_ViT' or algorithm == 'New_RandConv_CNN':
         _hparam('identity_prob', 0.0, lambda r: r.choice([0.0, 0.5]))
         _hparam('alpha_min', 0.0, lambda r: r.choice([0.0, 0.5]))
         _hparam('alpha_max', 1.0, lambda r: r.choice([0.0, 0.5]))
@@ -132,11 +168,27 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('loss_aug', True, lambda r: True)
         _hparam('mixing', True, lambda r:  bool(r.choice([True, False])))
         _hparam('invariant_loss', True, lambda r: True)
+        _hparam('invariant_loss_1', False, lambda r: True)
+        _hparam('lam', 0.5, lambda r: r.choice([0.3, 0.2]))
         _hparam('consistency_loss_w', 10.0, lambda r: r.choice([10.0, 5.0]))
         _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
         
 
     elif algorithm == 'AugMix_CNN' or algorithm == 'AugMix_ViT':
+         _hparam('consistency_loss_w', 12.0, lambda r: r.choice([10.0, 5.0]))
+         _hparam('all_ops', False, lambda r:  bool(r.choice([True, False])))
+         _hparam('mixture_width', 3, lambda r: r.choice([1, 5]))
+         _hparam('mixture_depth', -1, lambda r: r.choice([1, -1]))
+         _hparam('aug_severity', 3.0, lambda r: r.choice([1.0, 5.0]))
+         _hparam('mean_std', [[0.5] * 3, [0.5] * 3], lambda r: [[0.1] * 3, [0.5] * 3])
+
+    elif algorithm == 'New_CNN' :
+         _hparam('lr_adv', 0.2, lambda r: r.choice([0.3, 0.2]))
+         _hparam('pre_epoch', 0.0, lambda r: r.choice([3.0, 5.0]))
+         _hparam('lam', 0.2, lambda r: r.choice([0.3, 0.2]))
+         _hparam('clamp', True, lambda r:  bool(r.choice([True, False])))
+         _hparam('with_AugMix', True, lambda r:  bool(r.choice([True, False])))
+         _hparam('adv_steps', 5, lambda r: r.choice([5, 8]))
          _hparam('consistency_loss_w', 12.0, lambda r: r.choice([10.0, 5.0]))
          _hparam('all_ops', False, lambda r:  bool(r.choice([True, False])))
          _hparam('mixture_width', 3, lambda r: r.choice([1, 5]))

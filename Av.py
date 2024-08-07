@@ -29,6 +29,29 @@ def average_values(file_paths):
 
     return average_values
 
+def compute_variance(numbers):
+    # Step 1: Calculate the Mean
+    mean = sum(numbers) / len(numbers)
+    
+    # Step 2: Compute the Squared Differences
+    squared_diffs = [(x - mean) ** 2 for x in numbers]
+    
+    # Step 3: Calculate the Variance
+    variance = sum(squared_diffs) / len(numbers)
+    
+    return round(mean,5), round(variance,5)
+
+def varinace(file_paths):
+
+    ood_avg = []
+    for file_path in file_paths:
+        values = read_best_model_values(file_path)
+        ood_avg.append((values[4]+values[6]+values[8])/3)
+
+    ood_avg = [l*100 for l in ood_avg]
+
+    return compute_variance(ood_avg)
+
 def read_file_and_parse(filename):
     data = []
 
@@ -45,7 +68,7 @@ def save_to_excel(filename, data):
     ws.append(data)
     wb.save(filename)
 
-filename = '/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/PACS/ERM/ResNet18_64_PACS_unsplit_W_BN/data.txt'
+filename = '/home/kavindya/data/Model/TFS-ViT_Token-level_Feature_Stylization/Results/PACS/ALT_ViT/T2T14_64_PACS_ALT_original_block_0_5e5/data.txt'
 result = read_file_and_parse(filename)
 
 for row in result:
@@ -54,7 +77,8 @@ for row in result:
     result_100 = [i * 100 for i in result_old]
     result = [ round(elem, 2) for elem in result_100 ]
     OOD = round((result[4]+result[6]+result[8])/3,2)
-    Average = [result[2], OOD, round(result[2]-OOD,2), result[4], result[6], result[8]]
+    OOD_avg, OOD_variance = varinace(row)
+    Average = [result[2], OOD, OOD_avg, OOD_variance, round(result[2]-OOD,2), result[4], result[6], result[8]]
     print("Average values:", Average)
 
     # filename = ""

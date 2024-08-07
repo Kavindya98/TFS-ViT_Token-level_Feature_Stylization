@@ -27,6 +27,7 @@ from domainbed.lib import misc
 from domainbed.lib.fast_data_loader import InfiniteDataLoader, FastDataLoader
 from domainbed import model_selection
 from domainbed.lib.query import Q
+from torchvision import transforms
 
 import os
 
@@ -76,6 +77,85 @@ def load_algorithm(file_path,hparams):
     model.train()
 
     return model, args, hparams
+
+def ME_ADA_AUGMENT(in_splits, algorithm, device, N_WORKERS, hparams, args):
+
+    if len(in_splits) != 1:
+        raise ValueError("The list must contain exactly one element.")
+    
+    # if not hparams["custom_train_val"]:
+    #     train_data = in_splits[0][0].underlying_dataset
+    # else:
+    train_data = in_splits[0][0]
+
+    default_transform = train_data.transform
+
+    test_transform = transforms.Compose(
+                [transforms.Resize(224,antialias=True),
+                transforms.ToTensor(),
+                transforms.Normalize(hparams['mean_std'][0],hparams['mean_std'][1])])
+
+    train_data.transform = test_transform
+    
+    train_loader = torch.utils.data.DataLoader(
+            train_data,
+            batch_size=hparams['batch_size'],
+            shuffle=False,
+            num_workers=N_WORKERS)
+    images, labels = [], []
+    recover_transform = transforms.Compose([
+                        misc.Denormalise(hparams['mean_std'][0],hparams['mean_std'][1]),
+                        misc.Clamp(min_val=0, max_val=1)])
+    
+    image_transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize(227,antialias=True)
+    ])
+    
+    algorithm.eval()
+    print("Creating Augmented Images >>>>>>>")
+    for images_train, labels_train in train_loader:
+        
+        # wrap the inputs and labels in Variable
+        images_train, labels_train = images_train.to(device), labels_train.to(device)
+        inputs1, targets1 = algorithm.maximize(images_train, labels_train)
+        images += [image_transform(x) for x in torch.unbind(recover_transform(inputs1), dim=0)]
+        labels += [x.item() for x in torch.unbind(targets1,dim=0)]
+    
+    images = np.stack(images)
+
+    # if not hparams["custom_train_val"]:
+    #     in_splits[0][0].underlying_dataset.data = np.concatenate([in_splits[0][0].underlying_dataset.data,images])
+    #     in_splits[0][0].underlying_dataset.targets.extend(labels)
+    #     print("New dataset size ",len(in_splits[0][0].underlying_dataset.data))
+    #     in_splits[0][0].underlying_dataset.transform = default_transform
+    # else:
+    in_splits[0][0].data = np.concatenate([in_splits[0][0].data,images])
+    in_splits[0][0].targets.extend(labels)
+    print("New dataset size ",len(in_splits[0][0].data))
+    in_splits[0][0].transform = default_transform
+
+    train_loaders = [InfiniteDataLoader(
+        dataset=env,
+        weights=env_weights,
+        batch_size=hparams['batch_size'],
+        num_workers=N_WORKERS)
+        for i, (env, env_weights) in enumerate(in_splits)
+        if i not in args.test_envs]
+    
+    train_minibatches_iterator = zip(*train_loaders)
+    algorithm.train() 
+
+    return in_splits, train_minibatches_iterator
+
+def ME_ADA_STEP(in_splits, epoch, final_epoch, batch_size, step):
+
+    unfinished_epochs = final_epoch-(epoch+1)
+    if unfinished_epochs != 0:
+        steps_per_epoch = round(min([len(env) / batch_size for env, _ in in_splits]))
+        n_steps = unfinished_epochs*steps_per_epoch+step
+    return n_steps, steps_per_epoch
+
 
 
 if __name__ == "__main__":
@@ -223,6 +303,7 @@ if __name__ == "__main__":
         uda = []
         in_ = []
         out = []
+    
         if hparams['custom_train_val'] and not (hparams['custom_val'] == env_i or hparams['custom_train'] == env_i):
             # out, in_ = misc.split_dataset(env,
             #                           int(len(env) * args.holdout_fraction),
@@ -245,9 +326,17 @@ if __name__ == "__main__":
             if env_i in args.test_envs:
                 out = env
             else:
-                out, in_ = misc.split_dataset(env,
-                                      int(len(env) * args.holdout_fraction),
-                                      misc.seed_hash(args.trial_seed, env_i))
+                if args.dataset == "PACS_Custom":
+                    out, in_ = misc.split_dataset_PACS_Custom(env,
+                                        int(len(env) * args.holdout_fraction),
+                                        misc.seed_hash(args.trial_seed, env_i))
+                # elif args.dataset == "DIGITS":
+                #     in_ = env
+                else:
+                    out, in_ = misc.split_dataset(env,
+                                        int(len(env) * args.holdout_fraction),
+                                        misc.seed_hash(args.trial_seed, env_i))
+                    
             
         
 
@@ -275,10 +364,10 @@ if __name__ == "__main__":
         #                               int(len(env) * args.holdout_fraction),
         #                               misc.seed_hash(args.trial_seed, env_i))
         # print("came out ",env_i)
-        if env_i in args.test_envs:
-            uda, in_ = misc.split_dataset(in_,
-                                          int(len(in_) * args.uda_holdout_fraction),
-                                          misc.seed_hash(args.trial_seed, env_i))
+        # if env_i in args.test_envs:
+        #     uda, in_ = misc.split_dataset(in_,
+        #                                   int(len(in_) * args.uda_holdout_fraction),
+        #                                   misc.seed_hash(args.trial_seed, env_i))
 
         if hparams['class_balanced']:
             in_weights = misc.make_weights_for_balanced_classes(in_)
@@ -371,7 +460,11 @@ if __name__ == "__main__":
     uda_minibatches_iterator = zip(*uda_loaders)
     checkpoint_vals = collections.defaultdict(lambda: [])
 
-    steps_per_epoch = min([len(env) / hparams['batch_size'] for env, _ in in_splits])
+    if args.dataset == "DIGITS" or args.dataset == "PACS":
+        print("steps_per_epoch ",dataset.STEPS_PER_EPOCH)
+        steps_per_epoch = dataset.STEPS_PER_EPOCH
+    else:   
+        steps_per_epoch = round(min([len(env) / hparams['batch_size'] for env, _ in in_splits]))
 
     if hparams["continue_checkpoint"] == " ":
         start_step = 0
@@ -414,7 +507,14 @@ if __name__ == "__main__":
 
     last_results_keys = None
     best_val_acc = 0
-    for step in range(start_step, n_steps):
+    step = start_step
+    epoch = 0
+    final_epoch = round(n_steps/steps_per_epoch)
+    ME_ADA_k = 0
+
+    adverserial_algorithms = ["ME_ADA_ViT","ME_ADA_CNN","ADA_CNN","ADA_ViT"]
+    
+    while(step!=n_steps):
 
         #TODO - add a parameter to control this 
         # step wise increase the inconsistancy loss
@@ -422,6 +522,26 @@ if __name__ == "__main__":
         #     print("Increase consistency loss **********")         
         #     hparams['invariant_loss']=True
         #     hparams['consistency_loss_w']+=2
+        
+        if (step!=0) and (step%steps_per_epoch==0):
+            epoch+=1
+            hparams["epoch"] = epoch
+
+            # if args.algorithm == "ALT_CNN":
+            #     algorithm.network.train()
+            #     algorithm.trans_module.eval()
+
+
+            if (args.algorithm in adverserial_algorithms) and ((epoch+1)%hparams["epochs_min"]==0) and (ME_ADA_k<hparams["k"]):
+                print("Augmenting the Dataset >>>>>>>>>>")
+                in_splits, train_minibatches_iterator = ME_ADA_AUGMENT(in_splits, algorithm,device, dataset.N_WORKERS, hparams, args)
+                n_steps, steps_per_epoch = ME_ADA_STEP(in_splits, epoch, final_epoch, hparams['batch_size'], step)
+                print("Total steps ",n_steps," Steps per Epoch ",steps_per_epoch)
+                ME_ADA_k+=1
+                checkpoint_freq = checkpoint_freq*2
+                hparams["total_steps"] = n_steps
+                if hparams['scheduler']:
+                    algorithm.scheduler.T_max = hparams["total_steps"]
 
         step_start_time = time.time()
         minibatches_device = [(x.to(device), y.to(device))
@@ -430,7 +550,7 @@ if __name__ == "__main__":
             uda_device = [x.to(device)
                           for x, _ in next(uda_minibatches_iterator)]
         else:
-            uda_device = None
+            uda_device = device
         
         step_vals = algorithm.update(minibatches_device, uda_device)
         
@@ -442,7 +562,7 @@ if __name__ == "__main__":
         if (step % checkpoint_freq == 0) or (step == n_steps - 1):
             results = {
                 'step': step,
-                'epoch': step / steps_per_epoch,
+                'epoch': epoch,
             }
 
             for key, val in checkpoint_vals.items():
@@ -530,6 +650,8 @@ if __name__ == "__main__":
             algorithm.to(device)
             if args.save_model_every_checkpoint:
                 save_checkpoint(f'model_step{step}.pkl')
+
+        step+=1
         # print("One iteration done")
 
     save_checkpoint('model.pkl')

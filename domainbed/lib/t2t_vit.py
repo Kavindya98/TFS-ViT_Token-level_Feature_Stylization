@@ -182,10 +182,14 @@ class T2T_ViT(nn.Module):
         layer_wise_tokens = [self.norm(x) for x in layer_wise_tokens]
         return [(x[:, 0]) for x in layer_wise_tokens]
 
-    def forward(self, x):
+    def forward(self, x,return_feature=False):
         list_out = self.forward_features(x)
         x = [self.head(x) for x in list_out]
-        return x
+        
+        if return_feature:
+            return x, list_out
+        else:
+            return x
 
 
 class TokenLevelFeatureStylization_T2T_VIT(T2T_ViT):
